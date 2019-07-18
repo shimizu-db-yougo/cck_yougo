@@ -86,8 +86,41 @@
 		<script src="{{ asset('bundles/cckcommon/js/docs.min.js') }}"></script>
 		<script src="{{ asset('bundles/cckcommon/js/common.js') }}?{{ 'now'|date('U') }}"></script>
 		<script>
-		$(function(){
-		});
+			function generateOptions(response){
+				var options = [];
+				$.each(response, function(key, list){
+					var option = $('<option></option>');
+					option.append(list.name);
+					option.attr('value', list.id);
+					options.push(option);
+				});
+
+				return options;
+			}
+
+			function injectOption(target, options){
+				$('.' + target).empty().append(options);
+			}
+
+			$(function(){
+				$('.js-cur').bind('change', function(){
+					var selected = $(this).val();
+					var data = {
+							'cur': selected
+					};
+					$.ajax({
+						url: "{{ path('client.yougo.curriculum.ajax') }}",
+						data: data,
+						method: 'POST',
+						success: function(response){
+							var options = generateOptions(response);
+							injectOption('js-han', options);
+						},
+						error: function(response){
+						}
+					});
+				});
+			});
 		</script>
 
 		{% endblock %}

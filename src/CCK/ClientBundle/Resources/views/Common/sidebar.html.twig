@@ -1,5 +1,16 @@
 <ul class="nav nav-sidebar">
-	<li>{{ master_list }}</li>
+	<select class="form-control js-cur" name="cur">
+		<option value="0">--------------</option>
+		{% for cur in cur_list %}
+			<option value="{{ cur.id }}">{{ cur.name }}</option>
+		{% endfor %}
+	</select>
+	<select class="form-control js-han" name="ver">
+		<option value="0">--------------</option>
+		{% for ver in ver_list %}
+			<option value="{{ ver.id }}">{{ ver.name }}</option>
+		{% endfor %}
+	</select>
 	<li><a href="{{ path('client.yougo.list') }}">{{ 'text.yougo.title'|trans }}</a></li>
 	<li><a href="{#{ path('client.master.index') }#}">{{ 'text.master.title'|trans }}</a></li>
 	<li><a href="{#{ path('client.csv.export', {'status': 'default'}) }#}">{{ 'text.csv.export.title'|trans|raw }}</a></li>
