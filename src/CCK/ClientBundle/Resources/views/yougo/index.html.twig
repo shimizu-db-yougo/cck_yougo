@@ -1,0 +1,173 @@
+{% extends "CCKClientBundle::layout.html.twig" %}
+
+{% block contents %}
+<div class="row">
+<blockquote class="blockquote-bottom pdr-0">
+	<p>{{ 'text.yougo.title'|trans }}</p>
+</blockquote>
+</div>
+
+<!-- yougo search area -->
+<form action="{{ path('client.yougo.index') }}" class="form-horizontal" method="GET" autocomplete="off">
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-primary">
+			<div class="panel-heading">{{ 'text.search.conditions'|trans }}</div>
+			<div class="panel-body">
+				<div class="row">
+					<div class="form-horizontal">
+						<div class="form-group">
+							<div class="col-lg-12">
+								<label class="col-sm-2 field_title">{{ 'text.yougo.han'|trans }}</label>
+								<div class="col-sm-2">
+									<select class="form-control" name="han">
+										<option value="0">--------------</option>
+										<!-- {#% for han in han_list %#}
+											<option value="{#{ han.ryakusho }#}" {#{ han.ryakusho == search_han ? " selected " : '' }#}" >{#{ han.name }#}</option>
+										{#% endfor %#} -->
+									</select>
+								</div>
+								<label class="col-sm-1 field_title">{{ 'text.yougo.go'|trans }}</label>
+								<div class="col-sm-2">
+									<select class="form-control" name="go">
+										<option value="0">--------------</option>
+										<!-- {#% for go in go_list %#}
+											<option value="{#{ go.year }#}" {#{ go.year == search_go ? " selected " : '' }#}" >{#{ go.year }#}</option>
+										{#% endfor %#} -->
+									</select>
+								</div>
+								<label class="col-sm-1 field_title">{{ 'text.yougo.charge.order'|trans }}</label>
+								<div class="col-sm-4">
+									<input type="text" class="form-control" name="charge_order" value="{#{ charge_order }#}">
+								</div>
+							</div>
+						</div>
+						<hr>
+						<div class="form-group">
+							<div class="col-lg-12 text-center">
+								<button class="btn btn-primary button_text_align" type="submit">{{ 'btn.search'|trans }}</button>
+								<button class="btn btn-default button_text_align" type="button" OnClick="search_clear();">{{ 'btn.clear'|trans }}</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+
+<hr>
+
+
+<!-- yougo list area -->
+
+<div class="row">
+	<div class="col-lg-12 text-center">
+		{#{ knp_pagination_render(pagination) }#}
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+		<table class="table table-responsive table-striped">
+			<thead>
+				<tr>
+					<th width="120px" class="text-left">{{ 'text.yougo.han'|trans }}</th>
+					<th width="50px" class="text-left">{{ 'text.yougo.go'|trans }}</th>
+					<th width="80px" class="text-left">{{ 'text.yougo.yougoid'|trans }}</th>
+					<th width="60px" class="text-left">{{ 'text.yougo.hid'|trans }}</th>
+					<th width="240px" class="text-left">{{ 'text.yougo.clinic_name'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.kikaku'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.charge.order'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.charge.collect'|trans }}</th>
+					<th width="60px" class="text-left">{{ 'text.yougo.shinko_shurui'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.kihon'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.honmon'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.pdf'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.shinko'|trans }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for yougo in pagination %}
+				<tr class="text-center">
+					<td class="text-left">{{ yougo.han_name }}</td>
+					<td class="text-left">{{ yougo.volume_year }}</td>
+					<td class="text-left">{{ yougo.yougo_id }}</td>
+					<td class="text-left">{{ yougo.hid }}</td>
+					<td class="text-left">{{ yougo.clinic_name }}</td>
+					<td class="text-left">{{ yougo.kikaku }}</td>
+					<td class="text-left">{{ yougo.charge_order }}</td>
+					<td class="text-left">{{ yougo.charge_collect }}</td>
+					<td class="text-left">{{ yougo.shinko_shurui }}</td>
+
+					<td>
+						<div class="form-inline">
+							<div class="form-group">
+								<a href="{{ path('client.yougo.kihon.init', {'id': yougo.id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.kihon'|trans }}</button></a>
+							</div>
+						</div>
+					</td>
+					<td>
+						<div class="form-inline">
+							<div class="form-group">
+								<a href="{{ path('client.yougo.honmon', {'id': yougo.id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.honmon'|trans }}</button></a>
+							</div>
+						</div>
+					</td>
+					<td>
+						<div class="form-inline">
+							<div class="form-group">
+								<a href="{{ path('client.yougo.pdf', {'id': yougo.id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.pdf'|trans }}</button></a>
+							</div>
+						</div>
+					</td>
+					<td>
+						<div class="form-inline">
+							<div class="form-group">
+								<a href="{{ path('client.progress.table', {'yougoId': yougo.yougo_id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.shinko'|trans }}</button></a>
+							</div>
+						</div>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12 text-right">
+		{{ cur_page }}
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12 text-center">
+		{#{ knp_pagination_render(pagination) }#}
+	</div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+
+		function search_clear(){
+			$('[name="han"]').val('0');
+			$('[name="go"]').val('0');
+			$('input[name="charge_order"]').val('');
+			$('input[name="contents"]').val('');
+			$('[name="status"]').val('0');
+			$('input[name="hid"]').val('');
+			$('[name="kikaku"]').val('0');
+			$('input[name="yougo_id"]').val('');
+			$('[name="kikaku_shousai"]').val('0');
+			$('input[name="charge_collect"]').val('');
+		}
+
+		$(function(){
+		});
+	</script>
+{% endblock %}

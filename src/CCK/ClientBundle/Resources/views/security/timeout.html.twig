@@ -1,0 +1,20 @@
+{% extends "CCKClientBundle::base.html.twig" %}
+
+{% block header %}
+{% endblock %}
+
+{% block container %}
+<div class="row">
+	<div class="col-lg-6 col-lg-offset-3 text-center">
+		<h2>タイムアウトが発生しました。</h2>
+		<h2>再度ログインしてください。</h2>
+	</div>
+	<div class="col-lg-6 col-lg-offset-3 well well-sm">
+			<div class="outer">
+				<div class="inner">
+					<a href="{{ path('client.logout') }}"><button class="btn btn-default btn-primary">{{ 'btn.ok'|trans }}</button></a>
+				</div>
+			</div>
+	</div>
+</div>
+{% endblock %}

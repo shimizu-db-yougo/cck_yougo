@@ -1,0 +1,36 @@
+{% extends "CCKClientBundle::base.html.twig" %}
+
+{% block header %}
+{% endblock %}
+
+{% block container %}
+<div class="row">
+	<div class="col-lg-6 col-lg-offset-3 text-center">
+		<h2>{{ 'text.login.title'|trans }}</h2>
+	</div>
+	<div class="col-lg-6 col-lg-offset-3 well well-sm">
+		{% if error %}
+		<div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'validators') }}</div>
+		{% endif %}
+
+		<form action="{{ path('client.login_check') }}" method="post" role="form" autocomplete="off">
+			<div class="form-group">
+				<label for="username">{{ 'text.id'|trans }}</label>
+				<input type="text" id="username" class="form-control" name="_username" value="{{ last_username }}" />
+			</div>
+			<div class="form-group">
+				<label for="password">{{ 'text.password'|trans }}</label>
+				<input type="password" class="form-control" id="password" name="_password" />
+			</div>
+			<div class="form-group">
+				<a href="{{ path('client.reset.password') }}">{{ 'text.reset.password.title'|trans }}</a>
+			</div>
+			<div class="outer">
+				<div class="inner">
+					<button type="submit" class="btn btn-default btn-primary">{{ 'btn.login'|trans }}</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

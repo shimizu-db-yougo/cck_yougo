@@ -1,0 +1,23 @@
+@CHARSET "UTF-8";
+
+html,body,header,footer,div,span,input,textarea,p {
+	font-family: "メイリオ", Meiryo, 'Lucida Grande',
+		'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', sans-serif;
+}
+
+body {
+	-webkit-text-size-adjust: 100%;
+	-moz-text-size-adjust: 100%;
+	-ms-text-size-adjust: 100%;
+	-o-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	padding-top: 50px;
+	font-size: 12px;
+}
+
+#footer {
+	margin-top: 30px;
+	border-top: 1px solid #e2e2e2;
+	background-color: #f8f8f8;
+	height: 60px;
+}

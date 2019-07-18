@@ -1,0 +1,169 @@
+# ボタン種類
+btn:
+    login: ログイン
+    search: 検索
+    back: 戻る
+    clear: クリア
+    confirm: 確認
+    cancel: キャンセル
+    save: 保存
+    send: 送信
+    edit: 編集
+    delete: 削除
+    posting: 投稿
+    new:
+        genko: 原稿を追加する
+        default: 新規登録
+        go_han: 追加
+        filler: 編集ページの登録
+    show:
+        comment: 現在のコメントを見る
+    close: 閉じる
+    no: いいえ
+    yes: はい
+    csv: CSVダウンロード
+    execute: 実行
+    bulk:
+        delete: 一括削除
+    image: イメージ選択
+    ok: OK
+    submit: 登録
+    download: ダウンロード
+    kihon: 基本
+    honmon: 本文
+    pdf: PDF
+    upload: アップロード
+    update: 更新
+    tempsave: 一時保存
+    deliver: 納品
+    import: 取込み
+    nextflow: 次のフロー
+    nextstatus: 次のフロー設定
+    importcsv: CSV取込
+    preview: プレビュー
+
+# ソーティング
+sort:
+    regist: 登録順
+    asc: 昇順
+    desc: 降順
+
+text:
+    type: 種類
+    displayed: 表示済
+    displaying: 表示中
+    check: チェック
+    editndelete: 編集/削除
+    delete: 削除
+    delete.title: 削除
+    delete.description: 削除しますか？
+    hour: 時
+    minute: 分
+    selectbox: 選択してください。
+    change:
+        status: ステータスを変更しますか？
+    email:
+        default: メールアドレス
+    first: 最初
+    previous: 前へ
+    next: 次へ
+    last: 最後
+    required: "<i class='fa fa-asterisk wine-red'></i>は必須項目です。"
+    welcome: ようこそ%username%様
+    repw: パスワード再発行は<a href="%url%">こちら</a>
+    id: ID
+    password.current: 現在のパスワード
+    password: パスワード
+    password.retype: パスワード(確認用)
+    password.new: 新パスワード
+    password.new.retype: 新パスワード(確認用)
+    reset:
+        password:
+            title: パスワード再発行
+    update:
+        password:
+            title: パスワード変更
+    help:
+        title: 使い方ガイド
+    login: ログイン
+    login.title: 清水書院様　用語集管理システム
+    logout: ログアウト
+    checkbox:
+        0: なし
+        1: あり
+    search:
+        conditions: 検索条件
+        genko:
+            name: コンテンツを検索
+        all: 全て
+    new:
+        title: 新規登録
+    user:
+        title: ユーザー管理
+        description: ユーザー一覧
+        show:
+            title: ユーザー情報確認
+            description: ユーザーの情報を確認
+        new:
+            title: ユーザー新規登録
+        edit:
+            title: ユーザー情報編集
+        confirm:
+            title: ユーザー情報確認
+        id: ID
+        name: 氏名
+        createDate: 作成日付
+        modifyDate: 編集日付
+        roles: 権限
+        delete.description: ユーザーを本当に削除して宜しいでしょうか
+        user_id: ユーザID
+        login_id: ログインID
+        group: グループ名
+    image:
+        appli: (2MBまで)
+        magazine: (8MBまで)
+    master:
+        title: マスタ管理
+        user: ユーザマスタ
+    csv.export:
+        title: CSV<br/>ダウンロード
+    csv.import:
+        map: MAPデータ登録
+    optional: (任意)
+    mail:
+        alert:
+            type:
+                notice: 通知
+                previous: 前日警告
+                warning: 警告
+                overdue: 超過警告
+            time.immediately: 即時
+            footer.notice: ※なお、このメールはシステムより自動配信されています。返信は受付できませんので、ご了承ください。
+    han:
+        name: 版名
+        year: 年
+
+icon:
+    ari: 有
+    nashi: 無
+
+csv:
+    genko:
+        format: フォーマット区分
+
+error:
+    information: 入力した情報をもう一度確認してください。
+    failed: 失敗しました。
+    fail:
+        comment: コメント登録に失敗しました。
+        user:
+            regist: ユーザー登録に失敗しました。
+            update: ユーザー情報更新に失敗しました。
+    exists:
+        nickname: 既に存在しているニックネームです。
+        bookmark: 既にブックマーク登録済みです。
+        password: パスワードが既に設定されています。
+    notexist:
+        parameter: \%parameter%のパラメーターが存在しません。
+        temp: tempファイルが存在しません。
+        usercd: ユーザコードがありません。

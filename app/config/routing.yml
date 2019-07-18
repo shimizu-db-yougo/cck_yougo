@@ -1,0 +1,14 @@
+cck_client:
+    resource: "@CCKClientBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+cck_common:
+    resource: "@CCKCommonBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+app:
+    resource: '@AppBundle/Controller/'
+    type: annotation
+

@@ -1,0 +1,17 @@
+{
+	"sProcessing":   "処理中...",
+	"sLengthMenu":   "_MENU_ 件表示",
+	"sZeroRecords":  "データはありません。",
+	"sInfo":         " _TOTAL_ 件",
+	"sInfoEmpty":    " 0 件",
+	"sInfoFiltered": "（全 _MAX_ 件）",
+	"sInfoPostFix":  "<button class=\"btn btn-default\" id=\"btnTblReset\">初期表示に戻す</button>",
+	"sSearch":       "検索:",
+	"sUrl":          "",
+	"oPaginate": {
+		"sFirst":    "先頭",
+		"sPrevious": "前",
+		"sNext":     "次",
+		"sLast":     "最終"
+	}
+}

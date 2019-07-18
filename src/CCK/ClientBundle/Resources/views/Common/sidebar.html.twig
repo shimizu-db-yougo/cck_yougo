@@ -1,0 +1,6 @@
+<ul class="nav nav-sidebar">
+	<li>{{ master_list }}</li>
+	<li><a href="{{ path('client.yougo.list') }}">{{ 'text.yougo.title'|trans }}</a></li>
+	<li><a href="{#{ path('client.master.index') }#}">{{ 'text.master.title'|trans }}</a></li>
+	<li><a href="{#{ path('client.csv.export', {'status': 'default'}) }#}">{{ 'text.csv.export.title'|trans|raw }}</a></li>
+</ul>

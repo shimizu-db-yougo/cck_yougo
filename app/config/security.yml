@@ -1,0 +1,53 @@
+# To get started with security, check out the documentation:
+# https://symfony.com/doc/current/security.html
+security:
+
+    encoders:
+        CCK\CommonBundle\Entity\User:
+            algorithm: sha512
+            encode_as_base64: false
+            iterations: 1
+
+    # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
+    providers:
+        #in_memory:
+        #    memory: ~
+        users:
+            entity: { class: CCKCommonBundle:User, property: user_id }
+
+    firewalls:
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        #dev:
+        #    pattern: ^/(_(profiler|wdt)|css|images|js)/
+        #    security: false
+        client_area:
+            pattern: ^/
+            anonymous: ~
+            form_login:
+                check_path: /login_check
+                login_path: /login
+                default_target_path: /
+            logout:
+                path: /logout
+                target: /
+            guard:
+                authenticators:
+                    - app.settings_authenticator
+
+        #main:
+        #    anonymous: ~
+            # activate different ways to authenticate
+
+            # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
+            #http_basic: ~
+
+            # https://symfony.com/doc/current/security/form_login_setup.html
+            #form_login: ~
+
+    access_control:
+        # client area
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/reset_password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/update_password, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/timeout, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/, roles: ROLE_USER }

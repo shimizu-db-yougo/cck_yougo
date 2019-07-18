@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>広研印刷用語集管理システム</title>
+
+		<!-- Just for debugging purposes. Don't actually copy this line! -->
+		<!--[if lt IE 9]><script src="{{ asset('bundles/cckcommon/js/ie8-responsive-file-warning.js') }}"></script><![endif]-->
+		<script src="{{ asset('bundles/cckcommon/js/ie-emulation-modes-warning.js') }}"></script>
+
+		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+		{% block stylesheets %}
+		<link href="{{ asset('bundles/cckcommon/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+		<link href="{{ asset('bundles/cckcommon/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
+		<link href="{{ asset('bundles/cckcommon/css/bootstrap-overwrite.css') }}" rel="stylesheet">
+		<link href="{{ asset('bundles/cckcommon/css/reset.css') }}" rel="stylesheet">
+		<link href="{{ asset('bundles/cckcommon/css/common.css') }}" rel="stylesheet">
+		<link href="{{ asset('bundles/cckcommon/css/_styles.css') }}?{{ 'now'|date('U') }}" rel="stylesheet">
+		{% endblock %}
+
+	</head>
+
+	<body>
+		{% block header %}
+		<nav class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="/" style="padding: 5px 15px;">
+					<picture>
+					<source srcset="{{ asset('./logo.png') }}" media="(min-width: 92px)">
+					<img src="{{ asset('./logo.png') }}" width="92px" alt="原稿制作システム">
+					</picture>
+					</a>
+				</div>
+				<div id="navbar" class="navbar-collapse collapse">
+					{% if app.environment == 'dev' %}
+					{% endif %}
+					<ul class="nav navbar-nav navbar-right">
+						{% if currentUser is defined %}
+						<li class="navbar-text">[{{ currentUser.user_id }}] {{ currentUser.name }}</li>
+						{% endif %}
+						<li><a href="{{ asset('./uploads/help/junbi.pdf') }}" target="_blank">{{ 'text.help.title'|trans }}</a></li>
+						{% if is_granted('ROLE_USER') %}
+							<li><a href="{{ path('client.logout') }}">{{ 'text.logout'|trans }}</a></li>
+						{% else %}
+						<li><a href="{#{ path('client.login') }#}"><i class="fa fa-lock fa-fw"></i>{{ 'text.login'|trans }}</a></li>
+						{% endif %}
+					</ul>
+				</div>
+			</div>
+		</nav>
+		{% endblock %}
+
+		{% block container %}
+		{% endblock %}
+
+		{% block footer %}
+		<div id="footer">
+			<div class="outer">
+				<div class="inner">
+					<p class="text-muted text-center">© 2004-{{ 'now'|date('Y') }} cck Co.,Ltd. All Rights Reserved.</p>
+				</div>
+			</div>
+		</div>
+		{% endblock	%}
+
+		{% block javascripts %}
+		<script src="{{ asset('bundles/cckcommon/js/jquery-1.11.3.min.js') }}"></script>
+		<script src="{{ asset('bundles/cckcommon/bootstrap/js/bootstrap.min.js') }}"></script>
+		<script src="{{ asset('bundles/cckcommon/js/docs.min.js') }}"></script>
+		<script src="{{ asset('bundles/cckcommon/js/common.js') }}?{{ 'now'|date('U') }}"></script>
+		<script>
+		$(function(){
+		});
+		</script>
+
+		{% endblock %}
+	</body>
+</html>

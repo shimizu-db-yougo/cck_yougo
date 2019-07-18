@@ -1,0 +1,238 @@
+@charset "UTF-8";
+
+body {
+  padding-top: 60px;
+}
+
+.main {
+  transition: 0.5s;
+}
+
+.toggle-sidebar {
+  position: fixed;
+  left: 0;
+  top: 35%;
+  z-index: 1001;
+  width: 18px;
+  text-align: center;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  background: #6cbee1;
+  color: #f9f9f9;
+  cursor: pointer;
+  float: left;
+  padding: 24px 0px 16px;
+  transition: 0.5s;
+}
+.toggle-sidebar span {
+  font-size: 12px;
+  font-weight: bold;
+  display: block;
+  /* padding: 10px 4px 6px; */
+  line-height: 1.1;
+  -webkit-writing-mode: vertical-rl;
+  -ms-writing-mode: tb-rl;
+  writing-mode: vertical-rl;
+}
+.toggle-sidebar.show {
+  left: calc(50vw * 0.16);
+  transition: 0.5s;
+}
+.sidebar {
+  margin-left: calc(100vw * -0.16);
+  transition: 0.5s;
+}
+.sidebar.show {
+	margin-left: 0;
+  transition: 0.5s;
+}
+
+/* コンテンツタイトル */
+.pagetitle {
+  border-bottom: 5px solid #eee;
+  border-left: 5px solid #eee;
+  padding: .5em;
+  margin: 0 -1em 1em;
+}
+.pagetitle h2 {
+  font-size: 1.5em;
+  color: #333;
+  margin: 0;
+}
+.pagetitle .notice {
+  float: right;
+  display: inline-block;
+  margin-top: -1.5em;
+}
+.pagetitle .small {
+  display: block;
+  font-size: 80%;
+  line-height: 1.42857143;
+  color: #666;
+  margin: 1.0em 0 0;
+}
+.pagetitle .small:before {
+  content: '\2014 \00A0';
+}
+
+/* テーブル内複数 .row ブロック行間 */
+td>div.row:not(:last-of-type) {
+  padding-bottom: 8px;
+}
+
+/* テーブル内区切り線
+  usage: <tr class="divider"><th></th><td></td></tr>
+*/
+tr.divider {
+  height: 3px;
+  width: 100%;
+  background: #333;
+}
+tr.divider>th, tr.divider>td {
+  padding: 0 !important;
+}
+
+/* フォーム内インラインチェックボックス */
+.form-inline .checkbox:not(:first-child) {
+  margin-left: 1em;
+}
+.form-inline .checkbox label {
+  display: flex;
+  align-items: center;
+}
+.form-inline .checkbox label input[type=checkbox] {
+  margin: 0 .1em .1em 0;
+}
+
+/* フォーム内折り返し抑制 for 診療時間曜日（雑） */
+.form-flex {
+  display: flex;
+}
+.form-inline.form-flex select {
+  width: 100%;
+  min-width: 4em;
+  padding: 6px;
+}
+
+/* PSDプレビュー対応 */
+.imgpreview>img {
+  height: auto;
+  /*border: 3px solid blue;*/
+  display: none;
+}
+.imgpreview>img:last-of-type {
+  /*border: 3px solid red;*/
+  display: block;
+}
+.imgpreview.loading>img {
+  display: none;
+}
+.loading,
+.loading:after {
+  border-radius: 50%;
+  width: 5em;
+  height: 5em;
+}
+.loading {
+  background-color: #666;
+  margin: 1em auto;
+  font-size: 10px;
+  position: relative;
+  text-indent: -9999em;
+  border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-left: 1.1em solid #ffffff;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation: spinner 1.1s infinite linear;
+  animation: spinner 1.1s infinite linear;
+}
+@-webkit-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+/* フォーム注釈／記入例等コメント暫定 */
+.notice {
+  background-color: #ff0;
+  color: #000;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin: 0;
+  /*position: absolute;*/
+}
+th .notice {
+  position: relative;
+  font-weight: normal;
+  font-size: 92%;
+}
+.row>.rows>div:not(:last-of-type) {
+  padding-bottom: 8px;
+}
+.w-1em { width: 1em; max-width: 1em; }
+
+/* 必須項目 */
+label.required:not(:empty):after,
+th.required:not(:empty):after {
+  display: inline-block;
+  content: "\f069";
+  color: rgb(231, 76, 60);
+  /*color: blue;/* 表示確認用 */
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* 文字入力周り諸々 */
+.no-resize { resize: none; }
+
+textarea.invalid, input[type=text].invalid {
+  background-color: #fcc;
+}
+
+nav.navbar {
+  z-index: 1024;
+}
+
+.strlen {
+  padding: 6px 0 6px 6px;
+}
+.strlen>span {
+  display: block;
+  text-align: right;
+  white-space: nowrap;
+  line-height: 1.42857143;
+  padding: 1px;
+}
+.strlen>span:after {
+  display: inline-block;
+  content: "文字";
+  padding-left: .2em;
+}
+.strlen>span.invalid {
+  background-color: #fcc;
+}
