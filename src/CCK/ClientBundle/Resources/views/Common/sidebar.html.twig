@@ -1,17 +1,20 @@
 <ul class="nav nav-sidebar">
-	<select class="form-control js-cur" name="cur">
-		<option value="0">--------------</option>
+	<li><select class="form-control js-cur" name="cur">
+		<option value="0">{{ 'text.curriculum.all'|trans }}</option>
 		{% for cur in cur_list %}
 			<option value="{{ cur.id }}">{{ cur.name }}</option>
 		{% endfor %}
-	</select>
-	<select class="form-control js-han" name="ver">
+	</select></li>
+	<li>&nbsp;</li>
+	<li><select class="form-control js-han" name="ver">
 		<option value="0">--------------</option>
 		{% for ver in ver_list %}
 			<option value="{{ ver.id }}">{{ ver.name }}</option>
 		{% endfor %}
-	</select>
-	<li><a href="{{ path('client.yougo.list') }}">{{ 'text.yougo.title'|trans }}</a></li>
-	<li><a href="{#{ path('client.master.index') }#}">{{ 'text.master.title'|trans }}</a></li>
+	</select></li>
+	<li><hr></li>
 	<li><a href="{#{ path('client.csv.export', {'status': 'default'}) }#}">{{ 'text.csv.export.title'|trans|raw }}</a></li>
+	<li><a href="{#{ path('client.csv.import', {'status': 'default'}) }#}">{{ 'text.csv.import.title'|trans|raw }}</a></li>
+	<li><hr></li>
+	<li><a href="{#{ path('client.master.index') }#}">{{ 'text.master.title'|trans }}</a></li>
 </ul>

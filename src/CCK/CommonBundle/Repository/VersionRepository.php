@@ -13,16 +13,27 @@ use Doctrine\ORM\EntityRepository;
 class VersionRepository extends EntityRepository
 {
 	public function getVersions($cur = null){
-		$qb = $this->createQueryBuilder('c')
-		->select('c.name')
-		->addSelect('c.id')
-		->where('c.deleteFlag = :deleteFlag')
-		->andWhere('c.curriculumId = :curriculum_id')
-		->addOrderBy('c.id')
-		->setParameters(array(
-				'deleteFlag' => false,
-				'curriculum_id' => $cur
-		));
+		if($cur != '0'){
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.curriculumId = :curriculum_id')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'curriculum_id' => $cur
+			));
+		}else{
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.id')
+			->where('c.deleteFlag = :deleteFlag')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false
+			));
+		}
 
 		return $qb->getQuery()->getResult();
 	}
