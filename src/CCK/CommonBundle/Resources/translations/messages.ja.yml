@@ -126,7 +126,9 @@ text:
         title: マスタ管理
         user: ユーザマスタ
     csv.export:
-        title: CSV<br/>ダウンロード
+        title: CSV出力
+    csv.import:
+        title: データ取り込み
     csv.import:
         map: MAPデータ登録
     optional: (任意)
@@ -142,7 +144,23 @@ text:
     han:
         name: 版名
         year: 年
-
+    curriculum:
+        all: 全教科
+    yougo:
+        list.title: 用語一覧
+        curriculum: 教科
+        version: 版
+        head.hen: 編見出し
+        head.sho: 章見出し
+        head.dai: 大見出し
+        head.chu: 中見出し
+        head.ko: 小見出し
+        nombre: ノンブル
+        freq.text: 教科書頻度
+        freq.center: センター頻度
+        news.exam: 検定出題
+        term: 用語
+        
 icon:
     ari: 有
     nashi: 無

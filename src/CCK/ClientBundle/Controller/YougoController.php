@@ -86,6 +86,15 @@ class YougoController extends BaseController {
 		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
 				'deleteFlag' => FALSE
 		));
+		$hen_list=array();
+		$sho_list=array();
+		$dai_list=array();
+		$chu_list=array();
+		$ko_list=array();
+		$nombre='';
+		$center='';
+		$news_exam='';
+		$term='';
 
 		return array(
 				'pagination' => $pagination,
@@ -93,6 +102,15 @@ class YougoController extends BaseController {
 				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
+				'hen_list' => $hen_list,
+				'sho_list' => $sho_list,
+				'dai_list' => $dai_list,
+				'chu_list' => $chu_list,
+				'ko_list' => $ko_list,
+				'nombre' => $nombre,
+				'center' => $center,
+				'news_exam' => $news_exam,
+				'term' => $term,
 		);
 	}
 
@@ -100,16 +118,10 @@ class YougoController extends BaseController {
 	 * @Route("/yougo/curriculum/ajax", name="client.yougo.curriculum.ajax")
 	 */
 	public function getCurriculumAjaxAction(Request $request){
-		$this->get('logger')->error('***getCurriculumAjaxAction start***');
-		$this->get('logger')->error(serialize($request));
-
 		if($request->request->has('cur')){
 			$cur = $request->request->get('cur');
-			$this->get('logger')->error('***getCurriculumAjaxAction getCur***'.$cur);
 			$ver = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->getVersions($cur);
-			$this->get('logger')->error('***getCurriculumAjaxAction getVer***'.serialize($ver));
 			$response = new JsonResponse($ver);
-			$this->get('logger')->error('***getCurriculumAjaxAction JsonResponse***'.serialize($response));
 		}else{
 			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
 		}
