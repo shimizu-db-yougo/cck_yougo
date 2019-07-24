@@ -21,7 +21,7 @@ btn:
     close: 閉じる
     no: いいえ
     yes: はい
-    csv: CSVダウンロード
+    csv: CSV
     execute: 実行
     bulk:
         delete: 一括削除
@@ -160,6 +160,19 @@ text:
         freq.center: センター頻度
         news.exam: 検定出題
         term: 用語
+        term_id: 用語ID
+        kana: 主用語読み
+        index_kana: 索引用語読み
+        sub_term: サブ用語
+        sub_kana: サブ用語読み
+        sub_index_kana: サブ用語索引読み
+        refer_term: 指矢印用語
+        index_original: 原典資料索引
+        index_original_kana: 原典資料索引読み
+        index_abbreviation: 欧文略語索引
+        handover: 申し送り
+        update_user: 更新者
+        modify_date: 最終編集日時
         
 icon:
     ari: 有

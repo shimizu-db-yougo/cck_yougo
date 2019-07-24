@@ -31,10 +31,18 @@ class YougoController extends BaseController {
 	 */
 	const SES_REQUEST_GENKO_PARAMS = "ses_request_genko_params_key";
 
-	/**
-	 * @var session genko id key
-	 */
-	const SES_GENKO_ID_KEY = "ses_genko_id_key";
+	const SES_SEARCH_CURRICULUM_KEY = "ses_search_curriculum_key";
+	const SES_SEARCH_VERSION_KEY = "ses_search_version_key";
+	const SES_SEARCH_HEN_KEY = "ses_search_hen_key";
+	const SES_SEARCH_SHO_KEY = "ses_search_sho_key";
+	const SES_SEARCH_DAI_KEY = "ses_search_dai_key";
+	const SES_SEARCH_CHU_KEY = "ses_search_chu_key";
+	const SES_SEARCH_KO_KEY = "ses_search_ko_key";
+	const SES_SEARCH_NOMBRE_KEY = "ses_search_nombre_key";
+	const SES_SEARCH_TEXT_FREQ_KEY = "ses_search_text_freq_key";
+	const SES_SEARCH_CENTER_FREQ_KEY = "ses_search_center_freq_key";
+	const SES_SEARCH_NEWS_EXAM_KEY = "ses_search_news_exam_key";
+	const SES_SEARCH_TERM_KEY = "ses_search_term_key";
 
 	/**
 	 * genko page session key
@@ -61,17 +69,94 @@ class YougoController extends BaseController {
 		// get user information
 		$user = $this->getUser();
 
-		// 版名
-		/*if($request->query->has('han')){
-			$han = $request->query->get('han');
+		// 教科
+		if($request->query->has('curriculum')){
+			$curriculum = $request->query->get('curriculum');
 		}else{
-			$han = $session->get(self::SES_SEARCH_HAN_KEY);
-		}*/
+			$curriculum = $session->get(self::SES_SEARCH_CURRICULUM_KEY);
+		}
+
+		// 版
+		if($request->query->has('version')){
+			$version = $request->query->get('version');
+		}else{
+			$version = $session->get(self::SES_SEARCH_VERSION_KEY);
+		}
+
+		// 編見出し
+		if($request->query->has('hen')){
+			$hen = $request->query->get('hen');
+		}else{
+			$hen = $session->get(self::SES_SEARCH_HEN_KEY);
+		}
+
+		// 章見出し
+		if($request->query->has('sho')){
+			$sho = $request->query->get('sho');
+		}else{
+			$sho = $session->get(self::SES_SEARCH_SHO_KEY);
+		}
+
+		// 大見出し
+		if($request->query->has('dai')){
+			$dai = $request->query->get('dai');
+		}else{
+			$dai = $session->get(self::SES_SEARCH_DAI_KEY);
+		}
+
+		// 中見出し
+		if($request->query->has('chu')){
+			$chu = $request->query->get('chu');
+		}else{
+			$chu = $session->get(self::SES_SEARCH_CHU_KEY);
+		}
+
+		// 小見出し
+		if($request->query->has('ko')){
+			$ko = $request->query->get('ko');
+		}else{
+			$ko = $session->get(self::SES_SEARCH_KO_KEY);
+		}
+
+		// ノンブル
+		if($request->query->has('nombre')){
+			$nombre = $request->query->get('nombre');
+		}else{
+			$nombre = $session->get(self::SES_SEARCH_NOMBRE_KEY);
+		}
+
+		// 教科書頻度
+		if($request->query->has('text_freq')){
+			$text_freq = $request->query->get('text_freq');
+		}else{
+			$text_freq = $session->get(self::SES_SEARCH_TEXT_FREQ_KEY);
+		}
+
+		// センター頻度
+		if($request->query->has('center_freq')){
+			$center_freq = $request->query->get('center_freq');
+		}else{
+			$center_freq = $session->get(self::SES_SEARCH_CENTER_FREQ_KEY);
+		}
+
+		// ニュース検定
+		if($request->query->has('news_exam')){
+			$news_exam = $request->query->get('news_exam');
+		}else{
+			$news_exam = $session->get(self::SES_SEARCH_NEWS_EXAM_KEY);
+		}
+
+		// 用語
+		if($request->query->has('term')){
+			$term = $request->query->get('term');
+		}else{
+			$term = $session->get(self::SES_SEARCH_TERM_KEY);
+		}
 
 		$page = ($request->query->has('page') && $request->query->get('page') != '') ? $request->query->get('page') : 1; //pageのGETパラメータを直接設定(デフォルト1)
 
 		$entities = array();
-		//$entities = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoList($hid, $genko_id, $han, $charge_order, $go, $contents, $kikaku, $kikaku_shousai, null, $charge_writer, $charge_collect, null, $status, $deliveried, null, $charge_interview, $charge_order_with_collect,$user->getGroupId(),$charge_collect_id);
+		$entities = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoList($curriculum, $version, $hen, $sho, $dai, $chu, $ko, $nombre, $text_freq, $center_freq, $news_exam, $term);
 
 		$per_page = 20;
 		// pagination
@@ -86,11 +171,26 @@ class YougoController extends BaseController {
 		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
 				'deleteFlag' => FALSE
 		));
-		$hen_list=array();
-		$sho_list=array();
-		$dai_list=array();
-		$chu_list=array();
-		$ko_list=array();
+		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '1',
+				'deleteFlag' => FALSE
+		));
+		$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '2',
+				'deleteFlag' => FALSE
+		));
+		$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '3',
+				'deleteFlag' => FALSE
+		));
+		$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '4',
+				'deleteFlag' => FALSE
+		));
+		$ko_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '5',
+				'deleteFlag' => FALSE
+		));
 		$nombre='';
 		$center='';
 		$news_exam='';

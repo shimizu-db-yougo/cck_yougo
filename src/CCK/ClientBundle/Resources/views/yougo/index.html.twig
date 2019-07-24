@@ -45,7 +45,7 @@
 									<select class="form-control" name="hen">
 										<option value="0">--------------</option>
 										{% for hen in hen_list %}
-											<option value="{{ hen.id }}">{{ hen.name }}</option>
+											<option value="{{ hen.hen }}">{{ hen.name }}</option>
 										{% endfor %}
 									</select>
 								</div>
@@ -54,7 +54,7 @@
 									<select class="form-control" name="sho">
 										<option value="0">--------------</option>
 										{% for sho in sho_list %}
-											<option value="{{ sho.id }}">{{ sho.name }}</option>
+											<option value="{{ sho.sho }}">{{ sho.name }}</option>
 										{% endfor %}
 									</select>
 								</div>
@@ -67,7 +67,7 @@
 									<select class="form-control" name="dai">
 										<option value="0">--------------</option>
 										{% for dai in dai_list %}
-											<option value="{{ dai.id }}">{{ dai.name }}</option>
+											<option value="{{ dai.dai }}">{{ dai.name }}</option>
 										{% endfor %}
 									</select>
 								</div>
@@ -76,7 +76,7 @@
 									<select class="form-control" name="chu">
 										<option value="0">--------------</option>
 										{% for chu in chu_list %}
-											<option value="{{ chu.id }}">{{ chu.name }}</option>
+											<option value="{{ chu.chu }}">{{ chu.name }}</option>
 										{% endfor %}
 									</select>
 								</div>
@@ -89,7 +89,7 @@
 									<select class="form-control" name="ko">
 										<option value="0">--------------</option>
 										{% for ko in ko_list %}
-											<option value="{{ ko.id }}">{{ ko.name }}</option>
+											<option value="{{ ko.ko }}">{{ ko.name }}</option>
 										{% endfor %}
 									</select>
 								</div>
@@ -103,7 +103,7 @@
 							<div class="col-lg-12">
 								<label class="col-sm-2 field_title">{{ 'text.yougo.freq.text'|trans }}</label>
 								<div class="col-sm-2">
-									<select class="form-control" name="freq_text">
+									<select class="form-control" name="text_freq">
 										<option value="0">--------------</option>
 										<option value="1">A</option>
 										<option value="2">B</option>
@@ -112,7 +112,7 @@
 								</div>
 								<label class="col-sm-2 field_title">{{ 'text.yougo.freq.center'|trans }}</label>
 								<div class="col-sm-2">
-									<input type="text" class="form-control" name="center" value="{{ center }}">
+									<input type="text" class="form-control" name="center_freq" value="{{ center }}">
 								</div>
 								<label class="col-sm-2 field_title">{{ 'text.yougo.news.exam'|trans }}</label>
 								<div class="col-sm-2">
@@ -159,59 +159,69 @@
 		<table class="table table-responsive table-striped">
 			<thead>
 				<tr>
-					<th width="120px" class="text-left">{{ 'text.yougo.han'|trans }}</th>
-					<th width="50px" class="text-left">{{ 'text.yougo.go'|trans }}</th>
-					<th width="80px" class="text-left">{{ 'text.yougo.yougoid'|trans }}</th>
-					<th width="60px" class="text-left">{{ 'text.yougo.hid'|trans }}</th>
-					<th width="240px" class="text-left">{{ 'text.yougo.clinic_name'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.kikaku'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.charge.order'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.charge.collect'|trans }}</th>
-					<th width="60px" class="text-left">{{ 'text.yougo.shinko_shurui'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.kihon'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.honmon'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.pdf'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.shinko'|trans }}</th>
+					<th width="120px" class="text-left">{{ 'text.yougo.term_id'|trans }}</th>
+					<th width="50px" class="text-left">{{ 'text.yougo.term'|trans }}</th>
+					<th width="80px" class="text-left">{{ 'text.yougo.kana'|trans }}</th>
+					<th width="60px" class="text-left">{{ 'text.yougo.index_kana'|trans }}</th>
+					<th width="240px" class="text-left">{{ 'text.yougo.sub_term'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.sub_kana'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.sub_index_kana'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.refer_term'|trans }}</th>
+					<th width="60px" class="text-left">{{ 'text.yougo.index_original'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.index_original_kana'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.index_abbreviation'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.handover'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.update_user'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.yougo.modify_date'|trans }}</th>
+					<th width="70px" class="text-left"></th>
+					<th width="70px" class="text-left"></th>
+					<th width="70px" class="text-left"></th>
+					<th width="70px" class="text-left"></th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for yougo in pagination %}
 				<tr class="text-center">
-					<td class="text-left">{{ yougo.han_name }}</td>
-					<td class="text-left">{{ yougo.volume_year }}</td>
-					<td class="text-left">{{ yougo.yougo_id }}</td>
-					<td class="text-left">{{ yougo.hid }}</td>
-					<td class="text-left">{{ yougo.clinic_name }}</td>
-					<td class="text-left">{{ yougo.kikaku }}</td>
-					<td class="text-left">{{ yougo.charge_order }}</td>
-					<td class="text-left">{{ yougo.charge_collect }}</td>
-					<td class="text-left">{{ yougo.shinko_shurui }}</td>
+					<td class="text-left">{{ yougo.term_id }}</td>
+					<td class="text-left">{{ yougo.main_term }}</td>
+					<td class="text-left">{{ yougo.kana }}</td>
+					<td class="text-left">{{ yougo.index_kana }}</td>
+					<td class="text-left">{{ yougo.sub_term }}</td>
+					<td class="text-left">{{ yougo.sub_kana }}</td>
+					<td class="text-left">{{ yougo.sub_index_kana }}</td>
+					<td class="text-left">{{ yougo.refer_term }}</td>
+					<td class="text-left">{{ yougo.index_original }}</td>
+					<td class="text-left">{{ yougo.index_original_kana }}</td>
+					<td class="text-left">{{ yougo.index_abbreviation }}</td>
+					<td class="text-left">{{ yougo.handover }}</td>
+					<td class="text-left">{{ yougo.name }}</td>
+					<td class="text-left">{{ yougo.modify_date }}</td>
 
 					<td>
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{{ path('client.yougo.kihon.init', {'id': yougo.id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.kihon'|trans }}</button></a>
+								<a href="{#{ path('client.yougo.edit', {'id': yougo.id}) }#}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.edit'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
 					<td>
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{{ path('client.yougo.honmon', {'id': yougo.id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.honmon'|trans }}</button></a>
+								<a href="{#{ path('client.yougo.preview', {'id': yougo.id}) }#}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.preview'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
 					<td>
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{{ path('client.yougo.pdf', {'id': yougo.id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.pdf'|trans }}</button></a>
+								<a href="{#{ path('client.yougo.delete', {'id': yougo.id}) }#}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.delete'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
 					<td>
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{{ path('client.progress.table', {'yougoId': yougo.yougo_id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.shinko'|trans }}</button></a>
+								<a href="{#{ path('client.yougo.csv', {'id': yougo.id}) }#}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.csv'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
