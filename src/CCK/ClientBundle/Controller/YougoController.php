@@ -43,6 +43,7 @@ class YougoController extends BaseController {
 	const SES_SEARCH_CENTER_FREQ_KEY = "ses_search_center_freq_key";
 	const SES_SEARCH_NEWS_EXAM_KEY = "ses_search_news_exam_key";
 	const SES_SEARCH_TERM_KEY = "ses_search_term_key";
+	const SES_SEARCH_LIST_COUNT_KEY = "ses_search_list_count_key";
 
 	/**
 	 * genko page session key
@@ -153,17 +154,38 @@ class YougoController extends BaseController {
 			$term = $session->get(self::SES_SEARCH_TERM_KEY);
 		}
 
+		// 一覧表示件数
+		if($request->query->has('list_count')){
+			$list_count = $request->query->get('list_count');
+		}else{
+			$list_count = $session->get(self::SES_SEARCH_LIST_COUNT_KEY);
+		}
+		if(($list_count == '')||(!isset($list_count))){
+			$list_count = 20;
+		}
+
 		$page = ($request->query->has('page') && $request->query->get('page') != '') ? $request->query->get('page') : 1; //pageのGETパラメータを直接設定(デフォルト1)
 
 		$entities = array();
 		$entities = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoList($curriculum, $version, $hen, $sho, $dai, $chu, $ko, $nombre, $text_freq, $center_freq, $news_exam, $term);
 
-		$per_page = 20;
 		// pagination
-		$pagination = $this->createPagination($request, $entities, $per_page, $page);
+		$pagination = $this->createPagination($request, $entities, $list_count, $page);
 
 		// session key
-		//$session->set(self::SES_SEARCH_HAN_KEY, $han);
+		$session->set(self::SES_SEARCH_CURRICULUM_KEY, $curriculum);
+		$session->set(self::SES_SEARCH_VERSION_KEY, $version);
+		$session->set(self::SES_SEARCH_HEN_KEY, $hen);
+		$session->set(self::SES_SEARCH_SHO_KEY, $sho);
+		$session->set(self::SES_SEARCH_DAI_KEY, $dai);
+		$session->set(self::SES_SEARCH_CHU_KEY, $chu);
+		$session->set(self::SES_SEARCH_KO_KEY, $ko);
+		$session->set(self::SES_SEARCH_NOMBRE_KEY, $nombre);
+		$session->set(self::SES_SEARCH_TEXT_FREQ_KEY, $text_freq);
+		$session->set(self::SES_SEARCH_CENTER_FREQ_KEY, $center_freq);
+		$session->set(self::SES_SEARCH_NEWS_EXAM_KEY, $news_exam);
+		$session->set(self::SES_SEARCH_TERM_KEY, $term);
+		$session->set(self::SES_SEARCH_LIST_COUNT_KEY, $list_count);
 
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE
@@ -191,10 +213,6 @@ class YougoController extends BaseController {
 				'headerId' => '5',
 				'deleteFlag' => FALSE
 		));
-		$nombre='';
-		$center='';
-		$news_exam='';
-		$term='';
 
 		return array(
 				'pagination' => $pagination,
@@ -207,10 +225,19 @@ class YougoController extends BaseController {
 				'dai_list' => $dai_list,
 				'chu_list' => $chu_list,
 				'ko_list' => $ko_list,
+				'curriculum' => $curriculum,
+				'version' => $version,
+				'search_hen' => $hen,
+				'search_sho' => $sho,
+				'search_dai' => $dai,
+				'search_chu' => $chu,
+				'search_ko' => $ko,
 				'nombre' => $nombre,
-				'center' => $center,
-				'news_exam' => $news_exam,
+				'text_freq' => $text_freq,
+				'center_freq' => $center_freq,
+				'news_exam' => ($news_exam) ? true : false,
 				'term' => $term,
+				'list_count' => $list_count
 		);
 	}
 
@@ -230,10 +257,109 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/yougo/hen/ajax", name="client.yougo.hen.ajax")
+	 */
+	public function getHenAjaxAction(Request $request){
+		if($request->request->has('version')){
+			$ver = $request->request->get('version');
+			$hen = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getHenMidashi($ver);
+			$response = new JsonResponse($hen);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/yougo/sho/ajax", name="client.yougo.sho.ajax")
+	 */
+	public function getShoAjaxAction(Request $request){
+		if($request->request->has('hen')){
+			$ver = $request->request->get('version');
+			$hen = $request->request->get('hen');
+			$sho = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getShoMidashi($ver, $hen);
+			$response = new JsonResponse($sho);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/yougo/dai/ajax", name="client.yougo.dai.ajax")
+	 */
+	public function getDaiAjaxAction(Request $request){
+		if($request->request->has('sho')){
+			$ver = $request->request->get('version');
+			$hen = $request->request->get('hen');
+			$sho = $request->request->get('sho');
+			$dai = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getDaiMidashi($ver, $hen, $sho);
+			$response = new JsonResponse($dai);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/yougo/chu/ajax", name="client.yougo.chu.ajax")
+	 */
+	public function getChuAjaxAction(Request $request){
+		if($request->request->has('dai')){
+			$ver = $request->request->get('version');
+			$hen = $request->request->get('hen');
+			$sho = $request->request->get('sho');
+			$dai = $request->request->get('dai');
+			$chu = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getChuMidashi($ver, $hen, $sho, $dai);
+			$response = new JsonResponse($chu);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/yougo/ko/ajax", name="client.yougo.ko.ajax")
+	 */
+	public function getKoAjaxAction(Request $request){
+		if($request->request->has('chu')){
+			$ver = $request->request->get('version');
+			$hen = $request->request->get('hen');
+			$sho = $request->request->get('sho');
+			$dai = $request->request->get('dai');
+			$chu = $request->request->get('chu');
+			$ko = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getKoMidashi($ver, $hen, $sho, $dai, $chu);
+			$response = new JsonResponse($ko);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * session data remove
 	 */
 	private function sessionRemove($request){
 		$session = $request->getSession();
 		$session->remove(self::SES_REQUEST_GENKO_PARAMS);
+		$session->remove(self::SES_SEARCH_CURRICULUM_KEY);
+		$session->remove(self::SES_SEARCH_VERSION_KEY);
+		$session->remove(self::SES_SEARCH_HEN_KEY);
+		$session->remove(self::SES_SEARCH_SHO_KEY);
+		$session->remove(self::SES_SEARCH_DAI_KEY);
+		$session->remove(self::SES_SEARCH_CHU_KEY);
+		$session->remove(self::SES_SEARCH_KO_KEY);
+		$session->remove(self::SES_SEARCH_NOMBRE_KEY);
+		$session->remove(self::SES_SEARCH_TEXT_FREQ_KEY);
+		$session->remove(self::SES_SEARCH_CENTER_FREQ_KEY);
+		$session->remove(self::SES_SEARCH_NEWS_EXAM_KEY);
+		$session->remove(self::SES_SEARCH_TERM_KEY);
+		$session->remove(self::SES_SEARCH_LIST_COUNT_KEY);
+
 	}
 }

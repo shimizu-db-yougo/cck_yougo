@@ -12,5 +12,193 @@ use Doctrine\ORM\EntityRepository;
  */
 class HeaderRepository extends EntityRepository
 {
+	public function getHenMidashi($ver = null){
+		if($ver != '0'){
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.hen id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->andWhere('c.headerId = :header_id')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver,
+					'header_id' => '1'
+			));
+		}else{
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.hen id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.headerId = :header_id')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'header_id' => '1'
+			));
+		}
 
+		return $qb->getQuery()->getResult();
+	}
+
+	public function getShoMidashi($ver, $hen = null){
+		if($hen != '0'){
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.sho id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->andWhere('c.headerId = :header_id')
+			->andWhere('c.hen = :hen')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver,
+					'hen' => $hen,
+					'header_id' => '2'
+			));
+		}else{
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.sho id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->andWhere('c.headerId = :header_id')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver,
+					'header_id' => '2'
+			));
+		}
+
+		return $qb->getQuery()->getResult();
+	}
+
+	public function getDaiMidashi($ver, $hen, $sho = null){
+		if($sho != '0'){
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.dai id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->andWhere('c.headerId = :header_id')
+			->andWhere('c.hen = :hen')
+			->andWhere('c.sho = :sho')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver,
+					'hen' => $hen,
+					'sho' => $sho,
+					'header_id' => '3'
+			));
+		}else{
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.dai id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->andWhere('c.headerId = :header_id')
+			->andWhere('c.hen = :hen')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver,
+					'hen' => $hen,
+					'header_id' => '3'
+			));
+		}
+
+		return $qb->getQuery()->getResult();
+	}
+
+	public function getChuMidashi($ver, $hen, $sho, $dai = null){
+		if($dai != '0'){
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.chu id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->andWhere('c.headerId = :header_id')
+			->andWhere('c.hen = :hen')
+			->andWhere('c.sho = :sho')
+			->andWhere('c.dai = :dai')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver,
+					'hen' => $hen,
+					'sho' => $sho,
+					'dai' => $dai,
+					'header_id' => '4'
+			));
+		}else{
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.chu id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->andWhere('c.headerId = :header_id')
+			->andWhere('c.hen = :hen')
+			->andWhere('c.sho = :sho')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver,
+					'hen' => $hen,
+					'sho' => $sho,
+					'header_id' => '4'
+			));
+		}
+
+		return $qb->getQuery()->getResult();
+	}
+
+	public function getKoMidashi($ver, $hen, $sho, $dai, $chu = null){
+		if($chu != '0'){
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.ko id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->andWhere('c.headerId = :header_id')
+			->andWhere('c.hen = :hen')
+			->andWhere('c.sho = :sho')
+			->andWhere('c.dai = :dai')
+			->andWhere('c.chu = :chu')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver,
+					'hen' => $hen,
+					'sho' => $sho,
+					'dai' => $dai,
+					'chu' => $chu,
+					'header_id' => '5'
+			));
+		}else{
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.ko id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->andWhere('c.headerId = :header_id')
+			->andWhere('c.hen = :hen')
+			->andWhere('c.sho = :sho')
+			->andWhere('c.dai = :dai')
+			->addOrderBy('c.id')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver,
+					'hen' => $hen,
+					'sho' => $sho,
+					'dai' => $dai,
+					'header_id' => '5'
+			));
+		}
+
+		return $qb->getQuery()->getResult();
+	}
 }

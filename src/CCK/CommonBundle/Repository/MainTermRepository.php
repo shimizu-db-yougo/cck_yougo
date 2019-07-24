@@ -104,7 +104,16 @@ class MainTermRepository extends EntityRepository
 		}
 
 		if($text_freq){
-			$sql .= " AND MainTerm.text_frequency = '" . str_replace("'", "''", $text_freq) . "'";
+			if($text_freq == '1'){
+				// A
+				$sql .= " AND MainTerm.text_frequency >= 6";
+			}elseif($text_freq == '2'){
+				// B
+				$sql .= " AND (MainTerm.text_frequency >= 3 AND MainTerm.text_frequency <= 5)";
+			}else{
+				// C
+				$sql .= " AND MainTerm.text_frequency <= 2";
+			}
 		}
 
 		if($center_freq){
@@ -112,11 +121,11 @@ class MainTermRepository extends EntityRepository
 		}
 
 		if($news_exam){
-			$sql .= " AND MainTerm.news_exam = '" . str_replace("'", "''", $news_exam) . "'";
+			$sql .= " AND MainTerm.news_exam = true";
 		}
 
 		if($term){
-			$sql .= " AND MainTerm.main_term = '" . str_replace("'", "''", $term) . "'";
+			$sql .= " AND MainTerm.main_term LIKE '%" . str_replace("'", "''", $term) . "%'";
 		}
 
 		$sql .= " ORDER BY MainTerm.print_order ";
@@ -129,6 +138,7 @@ class MainTermRepository extends EntityRepository
 		$wk_sub_index_kana = array();
 		$wk_refer_term = array();
 		$wk_result = array();
+		$wk_result_record = array('id' => '','term_id' => '','main_term' => '','kana' => '','index_kana' => '','sub_term' => '','sub_kana' => '','sub_index_kana' => '','refer_term' => '','index_original' => '','index_original_kana' => '','index_abbreviation' => '','handover' => '','name' => '','modify_date' => '');
 		foreach($result as $result_record){
 			if(($key_term_id != '')&&($result_record['term_id'] != $key_term_id)){
 				// (*1)でまとめたサブ用語・指矢印用語を主用語単位にレコード生成する
