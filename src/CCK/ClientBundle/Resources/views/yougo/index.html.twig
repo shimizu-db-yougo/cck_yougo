@@ -1,17 +1,62 @@
 {% extends "CCKClientBundle::layout.html.twig" %}
 
+{% block stylesheets %}
+	{{ parent() }}
+	<style>
+.site-header{
+    z-index: 30;
+    background: #F8F7F2;
+    position: fixed;
+	width: 1800px;
+    justify-content: space-between;
+}
+.content{
+    line-height: 1.6;
+    margin: 0 auto;
+    padding-top: 420px;
+}
+.panel-search {
+	width: 1200px;
+}
+.panel-search field_title {
+	height: 8px;
+}
+.table-yougo {
+	overflow-x: scroll;
+    overflow-y: hidden;
+	width: 1800px;
+}
+thead, tbody {
+  display: block;
+}
+tbody {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  height: 400px;
+}
+.sort-button {
+    width: auto;
+    padding:0;
+    margin:0;
+    background:none;
+    border:0;
+    font-size:0;
+    line-height:0;
+    overflow:visible;
+    cursor:pointer;
+}
+
+	</style>
+{% endblock %}
+
 {% block contents %}
-<div class="row">
-<blockquote class="blockquote-bottom pdr-0">
-	<p>{{ 'text.yougo.list.title'|trans }}</p>
-</blockquote>
-</div>
+<header class="site-header">
 
 <!-- yougo search area -->
 <form action="{{ path('client.yougo.index') }}" class="form-horizontal" method="GET" autocomplete="off">
 <div class="row">
 	<div class="col-lg-12">
-		<div class="panel panel-primary">
+		<div class="panel panel-primary panel-search">
 			<div class="panel-heading">{{ 'text.search.conditions'|trans }}</div>
 			<div class="panel-body">
 				<div class="row">
@@ -29,7 +74,7 @@
 								</div>
 								<label class="col-sm-2 field_title">{{ 'text.yougo.version'|trans }}</label>
 								<div class="col-sm-2">
-									<select class="form-control js-han" name="version">
+									<select class="form-control js-han" name="version" disabled>
 										<option value="0">--------------</option>
 										{% for ver in ver_list %}
 											<option value="{{ ver.id }}" {{ ver.id == version ? " selected " : '' }}">{{ ver.name }}</option>
@@ -51,7 +96,7 @@
 								</div>
 								<label class="col-sm-2 field_title">{{ 'text.yougo.head.sho'|trans }}</label>
 								<div class="col-sm-2">
-									<select class="form-control js-sho" name="sho">
+									<select class="form-control js-sho" name="sho" disabled>
 										<option value="0">--------------</option>
 										{% for sho in sho_list %}
 											<option value="{{ sho.sho }}" {{ sho.sho == search_sho ? " selected " : '' }}">{{ sho.name }}</option>
@@ -64,7 +109,7 @@
 							<div class="col-lg-12">
 								<label class="col-sm-2 field_title">{{ 'text.yougo.head.dai'|trans }}</label>
 								<div class="col-sm-2">
-									<select class="form-control js-dai" name="dai">
+									<select class="form-control js-dai" name="dai" disabled>
 										<option value="0">--------------</option>
 										{% for dai in dai_list %}
 											<option value="{{ dai.dai }}" {{ dai.dai == search_dai ? " selected " : '' }}">{{ dai.name }}</option>
@@ -73,7 +118,7 @@
 								</div>
 								<label class="col-sm-2 field_title">{{ 'text.yougo.head.chu'|trans }}</label>
 								<div class="col-sm-2">
-									<select class="form-control js-chu" name="chu">
+									<select class="form-control js-chu" name="chu" disabled>
 										<option value="0">--------------</option>
 										{% for chu in chu_list %}
 											<option value="{{ chu.chu }}" {{ chu.chu == search_chu ? " selected " : '' }}">{{ chu.name }}</option>
@@ -86,7 +131,7 @@
 							<div class="col-lg-12">
 								<label class="col-sm-2 field_title">{{ 'text.yougo.head.ko'|trans }}</label>
 								<div class="col-sm-2">
-									<select class="form-control js-ko" name="ko">
+									<select class="form-control js-ko" name="ko" disabled>
 										<option value="0">--------------</option>
 										{% for ko in ko_list %}
 											<option value="{{ ko.ko }}" {{ ko.ko == search_ko ? " selected " : '' }}">{{ ko.name }}</option>
@@ -145,17 +190,13 @@
 
 <hr>
 
+</header>
 
 <!-- yougo list area -->
-
+<div class="content">
 <div class="row">
-	<div class="col-lg-12 text-center">
+	<div class="col-lg-10 text-center">
 		{{ knp_pagination_render(pagination) }}
-	</div>
-</div>
-
-<div class="row">
-	<div class="col-lg-10">
 	</div>
 	<div class="col-lg-2 text-right">
 	<form action="{{ path('client.yougo.index') }}" class="form-horizontal" method="GET">
@@ -172,69 +213,69 @@
 
 <div class="row">
 	<div class="col-lg-12">
-		<table class="table table-responsive table-striped">
+		<table class="table table-yougo table-striped">
 			<thead>
-				<tr>
-					<th width="120px" class="text-left">{{ 'text.yougo.term_id'|trans }}</th>
-					<th width="50px" class="text-left">{{ 'text.yougo.term'|trans }}</th>
-					<th width="80px" class="text-left">{{ 'text.yougo.kana'|trans }}</th>
-					<th width="60px" class="text-left">{{ 'text.yougo.index_kana'|trans }}</th>
-					<th width="240px" class="text-left">{{ 'text.yougo.sub_term'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.sub_kana'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.sub_index_kana'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.refer_term'|trans }}</th>
-					<th width="60px" class="text-left">{{ 'text.yougo.index_original'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.index_original_kana'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.index_abbreviation'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.handover'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.update_user'|trans }}</th>
-					<th width="70px" class="text-left">{{ 'text.yougo.modify_date'|trans }}</th>
-					<th width="70px" class="text-left"></th>
-					<th width="70px" class="text-left"></th>
-					<th width="70px" class="text-left"></th>
-					<th width="70px" class="text-left"></th>
+				<tr class="text-center">
+					<th width="60px" class="text-left">{{ 'text.yougo.term_id'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.term_id"><button type="submit" class="sort-button" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.term_id"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="100px" class="text-left">{{ 'text.yougo.term'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.main_term"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.main_term"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="120px" class="text-left">{{ 'text.yougo.kana'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.kana"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.kana"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="120px" class="text-left">{{ 'text.yougo.index_kana'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.index_kana"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.index_kana"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="100px" class="text-left">{{ 'text.yougo.sub_term'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="SubTerm.sub_term"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="SubTerm.sub_term"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="120px" class="text-left">{{ 'text.yougo.sub_kana'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="SubTerm.kana"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="SubTerm.kana"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="120px" class="text-left">{{ 'text.yougo.sub_index_kana'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="SubTerm.index_kana"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="SubTerm.index_kana"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="100px" class="text-left">{{ 'text.yougo.refer_term'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="Refer_term.refer_term"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="Refer_term.refer_term"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="100px" class="text-left">{{ 'text.yougo.index_original'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.index_original"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.index_original"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="120px" class="text-left">{{ 'text.yougo.index_original_kana'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.index_original_kana"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.index_original_kana"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="60px" class="text-left">{{ 'text.yougo.index_abbreviation'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.index_abbreviation"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.index_abbreviation"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="60px" class="text-left">{{ 'text.yougo.handover'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.handover"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.handover"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="80px" class="text-left">{{ 'text.yougo.update_user'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="User.name"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="User.name"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="100px" class="text-left">{{ 'text.yougo.modify_date'|trans }}<form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.modify_date"><button type="submit" name="sort_up">▲</button></form><form action="{{ path('client.yougo.index') }}" method="POST"><input type="hidden" name="field" value="MainTerm.modify_date"><button type="submit" name="sort_down">▼</button></form></th>
+					<th width="60px" class="text-left"></th>
+					<th width="60px" class="text-left"></th>
+					<th width="60px" class="text-left"></th>
+					<th width="60px" class="text-left"></th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for yougo in pagination %}
 				<tr class="text-center">
-					<td class="text-left">{{ yougo.term_id }}</td>
-					<td class="text-left">{{ yougo.main_term }}</td>
-					<td class="text-left">{{ yougo.kana }}</td>
-					<td class="text-left">{{ yougo.index_kana }}</td>
-					<td class="text-left">{{ yougo.sub_term }}</td>
-					<td class="text-left">{{ yougo.sub_kana }}</td>
-					<td class="text-left">{{ yougo.sub_index_kana }}</td>
-					<td class="text-left">{{ yougo.refer_term }}</td>
-					<td class="text-left">{{ yougo.index_original }}</td>
-					<td class="text-left">{{ yougo.index_original_kana }}</td>
-					<td class="text-left">{{ yougo.index_abbreviation }}</td>
-					<td class="text-left">{{ yougo.handover }}</td>
-					<td class="text-left">{{ yougo.name }}</td>
-					<td class="text-left">{{ yougo.modify_date }}</td>
+					<td width="60px" class="text-left">{{ yougo.term_id }}</td>
+					<td width="100px" class="text-left">{{ yougo.main_term }}</td>
+					<td width="120px" class="text-left">{{ yougo.kana }}</td>
+					<td width="120px" class="text-left">{{ yougo.index_kana }}</td>
+					<td width="100px" class="text-left">{{ yougo.sub_term }}</td>
+					<td width="120px" class="text-left">{{ yougo.sub_kana }}</td>
+					<td width="120px" class="text-left">{{ yougo.sub_index_kana }}</td>
+					<td width="100px" class="text-left">{{ yougo.refer_term }}</td>
+					<td width="100px" class="text-left">{{ yougo.index_original }}</td>
+					<td width="120px" class="text-left">{{ yougo.index_original_kana }}</td>
+					<td width="60px" class="text-left">{{ yougo.index_abbreviation }}</td>
+					<td width="60px" class="text-left">{{ yougo.handover|length > 5 ? yougo.handover[:5]~'…' : yougo.handover }}</td>
+					<td width="80px" class="text-left">{{ yougo.name }}</td>
+					<td width="100px" class="text-left">{{ yougo.modify_date|date('Y/m/d H:i') }}</td>
 
-					<td>
+					<td width="60px">
 						<div class="form-inline">
 							<div class="form-group">
 								<a href="{#{ path('client.yougo.edit', {'id': yougo.id}) }#}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.edit'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
-					<td>
+					<td width="60px">
 						<div class="form-inline">
 							<div class="form-group">
 								<a href="{#{ path('client.yougo.preview', {'id': yougo.id}) }#}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.preview'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
-					<td>
+					<td width="60px">
 						<div class="form-inline">
 							<div class="form-group">
 								<a href="{#{ path('client.yougo.delete', {'id': yougo.id}) }#}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.delete'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
-					<td>
+					<td width="60px">
 						<div class="form-inline">
 							<div class="form-group">
 								<a href="{#{ path('client.yougo.csv', {'id': yougo.id}) }#}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.csv'|trans }}</button></a>
@@ -260,6 +301,8 @@
 	</div>
 </div>
 
+</div>
+
 {% endblock %}
 
 {% block javascripts %}
@@ -267,19 +310,37 @@
 	<script>
 
 		function search_clear(){
-			$('[name="han"]').val('0');
-			$('[name="go"]').val('0');
-			$('input[name="charge_order"]').val('');
-			$('input[name="contents"]').val('');
-			$('[name="status"]').val('0');
-			$('input[name="hid"]').val('');
-			$('[name="kikaku"]').val('0');
-			$('input[name="yougo_id"]').val('');
-			$('[name="kikaku_shousai"]').val('0');
-			$('input[name="charge_collect"]').val('');
+			$('[name="curriculum"]').val('0');
+			$('[name="version"]').val('0');
+			$('[name="hen"]').val('0');
+			$('[name="sho"]').val('0');
+			$('[name="dai"]').val('0');
+			$('[name="chu"]').val('0');
+			$('[name="ko"]').val('0');
+			$('input[name="nombre"]').val('');
+			$('[name="text_freq"]').val('0');
+			$('input[name="center_freq"]').val('');
+			$('input[name="news_exam[]"]').prop("checked",false);
+			$('input[name="term"]').val('');
+
+			$('.js-han').attr("disabled", true);
+			$('.js-sho').attr("disabled", true);
+			$('.js-dai').attr("disabled", true);
+			$('.js-chu').attr("disabled", true);
+			$('.js-ko').attr("disabled", true);
 		}
 
 		$(function(){
+			$('.js-cur').bind('change', function(){
+				var selected_ver = $(this).val();
+				if(selected_ver == '0'){
+					$('[name="version"]').val('0');
+					$('.js-han').attr("disabled", true);
+				}else{
+					$('.js-han').attr("disabled", false);
+				}
+			});
+
 			$('.js-han').bind('change', function(){
 				var selected_ver = $(this).val();
 				var data = {
@@ -301,6 +362,20 @@
 			$('.js-hen').bind('change', function(){
 				var selected_ver = $('[name="version"]').val();
 				var selected_hen = $(this).val();
+
+				if(selected_hen == '0'){
+					$('[name="sho"]').val('0');
+					$('.js-sho').attr("disabled", true);
+				}else{
+					$('.js-sho').attr("disabled", false);
+				}
+				$('[name="dai"]').val('0');
+				$('[name="chu"]').val('0');
+				$('[name="ko"]').val('0');
+				$('.js-dai').attr("disabled", true);
+				$('.js-chu').attr("disabled", true);
+				$('.js-ko').attr("disabled", true);
+
 				var data = {
 						'version': selected_ver,
 						'hen': selected_hen
@@ -322,6 +397,18 @@
 				var selected_ver = $('[name="version"]').val();
 				var selected_hen = $('[name="hen"]').val();
 				var selected_sho = $(this).val();
+
+				if(selected_sho == '0'){
+					$('[name="dai"]').val('0');
+					$('.js-dai').attr("disabled", true);
+				}else{
+					$('.js-dai').attr("disabled", false);
+				}
+				$('[name="chu"]').val('0');
+				$('[name="ko"]').val('0');
+				$('.js-chu').attr("disabled", true);
+				$('.js-ko').attr("disabled", true);
+
 				var data = {
 						'version': selected_ver,
 						'hen': selected_hen,
@@ -345,6 +432,16 @@
 				var selected_hen = $('[name="hen"]').val();
 				var selected_sho = $('[name="sho"]').val();
 				var selected_dai = $(this).val();
+
+				if(selected_dai == '0'){
+					$('[name="chu"]').val('0');
+					$('.js-chu').attr("disabled", true);
+				}else{
+					$('.js-chu').attr("disabled", false);
+				}
+				$('[name="ko"]').val('0');
+				$('.js-ko').attr("disabled", true);
+
 				var data = {
 						'version': selected_ver,
 						'hen': selected_hen,
@@ -370,6 +467,14 @@
 				var selected_sho = $('[name="sho"]').val();
 				var selected_dai = $('[name="dai"]').val();
 				var selected_chu = $(this).val();
+
+				if(selected_chu == '0'){
+					$('[name="ko"]').val('0');
+					$('.js-ko').attr("disabled", true);
+				}else{
+					$('.js-ko').attr("disabled", false);
+				}
+
 				var data = {
 						'version': selected_ver,
 						'hen': selected_hen,
@@ -395,5 +500,6 @@
 				form.submit();
 			});
 		});
+
 	</script>
 {% endblock %}

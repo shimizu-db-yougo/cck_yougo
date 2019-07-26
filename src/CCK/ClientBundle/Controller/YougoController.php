@@ -166,8 +166,19 @@ class YougoController extends BaseController {
 
 		$page = ($request->query->has('page') && $request->query->get('page') != '') ? $request->query->get('page') : 1; //pageのGETパラメータを直接設定(デフォルト1)
 
+		$sort_field = '';
+		$sort_order = '';
+		if($request->request->has('sort_up')){
+			$sort_field = $request->request->get('field');
+			$sort_order = ' ASC';
+		}
+		if($request->request->has('sort_down')){
+			$sort_field = $request->request->get('field');
+			$sort_order = ' DESC';
+		}
+
 		$entities = array();
-		$entities = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoList($curriculum, $version, $hen, $sho, $dai, $chu, $ko, $nombre, $text_freq, $center_freq, $news_exam, $term);
+		$entities = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoList($curriculum, $version, $hen, $sho, $dai, $chu, $ko, $nombre, $text_freq, $center_freq, $news_exam, $term, $sort_field, $sort_order);
 
 		// pagination
 		$pagination = $this->createPagination($request, $entities, $list_count, $page);
@@ -339,6 +350,24 @@ class YougoController extends BaseController {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * @Route("/preview", name="client.yougo.preview")
+	 * @Template()
+	 */
+	public function previewAction(Request $request) {
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+
+		return array(
+				'cur_list' => $cur_list,
+				'ver_list' => $ver_list,
+		);
 	}
 
 	/**

@@ -88,8 +88,14 @@
 		<script>
 			function generateOptions(response){
 				var options = [];
+
+				var option = $('<option></option>');
+				option.append('--------------');
+				option.attr('value', '0');
+				options.push(option);
+
 				$.each(response, function(key, list){
-					var option = $('<option></option>');
+					option = $('<option></option>');
 					option.append(list.name);
 					option.attr('value', list.id);
 					options.push(option);
