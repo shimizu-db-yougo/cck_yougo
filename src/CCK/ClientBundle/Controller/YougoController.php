@@ -353,10 +353,21 @@ class YougoController extends BaseController {
 	}
 
 	/**
-	 * @Route("/preview", name="client.yougo.preview")
+	 * @Route("/preview/{id}", name="client.yougo.preview")
 	 * @Template()
 	 */
-	public function previewAction(Request $request) {
+	public function previewAction(Request $request, $id) {
+
+		$id = (int) $id;
+
+		$em = $this->getDoctrine()->getManager();
+
+		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoList(null, null, null, null, null, null, null, null, null, null, null, null, null, null, $id);
+
+		if(!$entity){
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE
 		));
@@ -365,6 +376,7 @@ class YougoController extends BaseController {
 		));
 
 		return array(
+				'yougoEntity' => $entity,
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
 		);

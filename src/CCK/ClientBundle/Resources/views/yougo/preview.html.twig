@@ -20,6 +20,23 @@
 	<div class="col-lg-12">
 		<table class="table table-yougo table-striped">
 			<tbody>
+				{% for yougo in yougoEntity %}
+				<tr class="text-center">
+					<td width="60px" class="text-left">
+						<div>
+							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;color:#ff004C;">{{ yougo.main_term }}　■□</span>
+							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;">（国家権力■□）</span>
+							<span style="font-size: 10px; font-family: serif;">（けんりょく）</span>
+							<span style="font-size: 10px; font-family: serif;">（こっかけんりょく）</span>
+							<span style="font-size: 14px; font-family: serif;">政治に作用する強制力。具体的には，法に従わない者を逮捕することや，納税を強制することなどにあらわれる。軍隊が武力を対外的に行使することもある。国家は，こうした権力をもつ唯一の集団であり，その権力を国家権力，あるいは国家の政治権力とよぶ。</span>
+							<span style="font-size: 14px; font-family: sans-serif;">　→ｐ．１０４（統治行為論）</span>
+						</div>
+						<div class="text-right">
+							<span style="font-size: 16px; font-weight: bold;">■</span><span style="font-size: 14px; font-weight: bold;">政治権力■</span>
+						</div>
+					</td>
+				</tr>
+				{% endfor %}
 				<tr class="text-center">
 					<td width="60px" class="text-left">
 						<div>

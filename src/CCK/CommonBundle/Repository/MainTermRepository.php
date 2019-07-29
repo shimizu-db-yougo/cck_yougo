@@ -15,7 +15,7 @@ class MainTermRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
-	public function getYougoList($curriculum = null, $version = null, $hen = null, $sho = null, $dai = null, $chu = null, $ko = null, $nombre = null, $text_freq = null, $center_freq = null, $news_exam = null, $term = null, $sort_field = null, $sort_order = null){
+	public function getYougoList($curriculum = null, $version = null, $hen = null, $sho = null, $dai = null, $chu = null, $ko = null, $nombre = null, $text_freq = null, $center_freq = null, $news_exam = null, $term = null, $sort_field = null, $sort_order = null, $term_id = null){
 		$sql = "
 			SELECT
 				MainTerm.id,
@@ -126,6 +126,10 @@ class MainTermRepository extends EntityRepository
 
 		if($term){
 			$sql .= " AND MainTerm.main_term LIKE '%" . str_replace("'", "''", $term) . "%'";
+		}
+
+		if($term_id){
+			$sql .= " AND MainTerm.id = " . $term_id;
 		}
 
 		if($sort_field){
