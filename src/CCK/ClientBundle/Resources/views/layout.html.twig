@@ -22,9 +22,9 @@
 {% set toggleIcon = (app.request.cookies.get('sidebar')=='hide'?'right':'left') %}
 <div class="container-fluid">
 	<div class="row">
-		<div class="toggle-sidebar hidden-xs{{ classSide }}" data-btn="toggle-sidebar">
+		<!--<div class="toggle-sidebar hidden-xs{{ classSide }}" data-btn="toggle-sidebar">
 			<span data-toggletext={{ toggleText|raw }}</span><i class="fa fa-angle-{{ toggleIcon }}" data-toggleicon="fa-angle-right fa-angle-left"></i>
-		</div>
+		</div> -->
 		<div class="col-sm-1 col-md-1 sidebar{{ classSide }}">
 			{% include 'CCKClientBundle:Common:sidebar.html.twig' %}
 		</div>
