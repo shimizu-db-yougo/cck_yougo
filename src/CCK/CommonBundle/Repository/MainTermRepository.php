@@ -32,7 +32,12 @@ class MainTermRepository extends EntityRepository
 				MainTerm.index_abbreviation,
 				MainTerm.handover,
 				User.name,
-				MainTerm.modify_date
+				MainTerm.modify_date,
+				MainTerm.delimiter,
+				SubTerm.delimiter sub_delimiter,
+				MainTerm.term_explain,
+				Refer_term.nombre refer_nombre,
+				Synonym.term synonym_term
 			FROM
 				MainTerm
 					LEFT JOIN
@@ -40,8 +45,13 @@ class MainTermRepository extends EntityRepository
 					AND MainTerm.delete_flag = false
 					AND SubTerm.delete_flag = false)
 					LEFT JOIN
+				Synonym ON (MainTerm.term_id = Synonym.main_term_id
+					AND MainTerm.delete_flag = false
+					AND Synonym.delete_flag = false)
+					LEFT JOIN
 				(SELECT M.main_term refer_term,
 						R.main_term_id,
+						R.nombre,
 						R.delete_flag
 				FROM MainTerm M
 					INNER JOIN
@@ -145,49 +155,62 @@ class MainTermRepository extends EntityRepository
 		$wk_sub_kana = array();
 		$wk_sub_index_kana = array();
 		$wk_refer_term = array();
+		$wk_delimiter = array();
+		$wk_refer_nombre = array();
+		$wk_synonym_term = array();
+
 		$wk_result = array();
 		$wk_result_record = array('id' => '','term_id' => '','main_term' => '','kana' => '','index_kana' => '','sub_term' => '','sub_kana' => '','sub_index_kana' => '','refer_term' => '','index_original' => '','index_original_kana' => '','index_abbreviation' => '','handover' => '','name' => '','modify_date' => '');
 		foreach($result as $result_record){
 			if(($key_term_id != '')&&($result_record['term_id'] != $key_term_id)){
 				// (*1)でまとめたサブ用語・指矢印用語を主用語単位にレコード生成する
-				$wk_result = $this->setRecordPerMainTerm($wk_result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_result);
+				$wk_result = $this->setRecordPerMainTerm($wk_result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_delimiter, $wk_refer_nombre, $wk_synonym_term, $wk_result);
 
 				$wk_sub_term = array();
 				$wk_sub_kana = array();
 				$wk_sub_index_kana = array();
 				$wk_refer_term = array();
+				$wk_delimiter = array();
+				$wk_refer_nombre = array();
+				$wk_synonym_term = array();
 			}
 
 			// サブ用語・指矢印用語を主用語単位にまとめる(*1)
-			$this->stackSubTerm($result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term);
+			$this->stackSubTerm($result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_delimiter, $wk_refer_nombre, $wk_synonym_term);
 
 			$wk_result_record = $result_record;
 			$key_term_id = $result_record['term_id'];
 		}
 
 		// サブ用語・指矢印用語を主用語単位にまとめる(*1)
-		$this->stackSubTerm($result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term);
+		//$this->stackSubTerm($result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_delimiter);
 
 		// (*1)でまとめたサブ用語・指矢印用語を主用語単位にレコード生成する
-		$wk_result = $this->setRecordPerMainTerm($wk_result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_result);
+		$wk_result = $this->setRecordPerMainTerm($wk_result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_delimiter, $wk_refer_nombre, $wk_synonym_term, $wk_result);
 
 		return $wk_result;
 	}
 
-	function stackSubTerm(&$result_record, &$wk_sub_term, &$wk_sub_kana, &$wk_sub_index_kana, &$wk_refer_term){
+	function stackSubTerm(&$result_record, &$wk_sub_term, &$wk_sub_kana, &$wk_sub_index_kana, &$wk_refer_term, &$wk_delimiter, &$wk_refer_nombre, &$wk_synonym_term){
 		// サブ用語・指矢印用語を主用語単位にまとめる(*1)
-		if((array_search($result_record['sub_term'], $wk_sub_term) === false)&&(!is_null($result_record['sub_term']))) {array_push($wk_sub_term,$result_record['sub_term']);}
-		if((array_search($result_record['sub_kana'], $wk_sub_kana) === false)&&(!is_null($result_record['sub_kana']))) {array_push($wk_sub_kana,$result_record['sub_kana']);}
-		if((array_search($result_record['sub_index_kana'], $wk_sub_index_kana) === false)&&(!is_null($result_record['sub_index_kana']))) {array_push($wk_sub_index_kana,$result_record['sub_index_kana']);}
-		if((array_search($result_record['refer_term'], $wk_refer_term) === false)&&(!is_null($result_record['refer_term']))) {array_push($wk_refer_term,$result_record['refer_term']);}
+		if(!is_null($result_record['sub_term'])) {array_push($wk_sub_term,$result_record['sub_term']);}
+		if(!is_null($result_record['sub_kana'])) {array_push($wk_sub_kana,$result_record['sub_kana']);}
+		if(!is_null($result_record['sub_index_kana'])) {array_push($wk_sub_index_kana,$result_record['sub_index_kana']);}
+		if(!is_null($result_record['refer_term'])) {array_push($wk_refer_term,$result_record['refer_term']);}
+		if(!is_null($result_record['sub_delimiter'])) {array_push($wk_delimiter,$result_record['sub_delimiter']);}
+		if(!is_null($result_record['refer_nombre'])) {array_push($wk_refer_nombre,$result_record['refer_nombre']);}
+		if(!is_null($result_record['synonym_term'])) {array_push($wk_synonym_term,$result_record['synonym_term']);}
 	}
 
-	function setRecordPerMainTerm($wk_result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_result){
+	function setRecordPerMainTerm($wk_result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_delimiter, $wk_refer_nombre, $wk_synonym_term, $wk_result){
 		// (*1)でまとめたサブ用語・指矢印用語を主用語単位にレコード生成する
 		$wk_result_record['sub_term'] = implode('、' , $wk_sub_term);
 		$wk_result_record['sub_kana'] = implode('、' , $wk_sub_kana);
 		$wk_result_record['sub_index_kana'] = implode('、' , $wk_sub_index_kana);
 		$wk_result_record['refer_term'] = implode('、' , $wk_refer_term);
+		$wk_result_record['sub_delimiter'] = implode('、' , $wk_delimiter);
+		$wk_result_record['refer_nombre'] = implode('、' , $wk_refer_nombre);
+		$wk_result_record['synonym_term'] = implode('、' , $wk_synonym_term);
 
 		array_push($wk_result,$wk_result_record);
 
