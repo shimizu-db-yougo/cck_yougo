@@ -28,7 +28,7 @@ class User implements UserInterface, AdvancedUserInterface, \Serializable
     /**
      * @var string
      *
-     * @ORM\Column(name="user_id", type="string", length=6, nullable=false)
+     * @ORM\Column(name="user_id", type="string", length=100, nullable=false)
      */
     private $user_id;
 

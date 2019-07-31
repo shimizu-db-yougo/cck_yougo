@@ -154,7 +154,7 @@ class SecurityController extends Controller {
 
 	/**
 	 * @Route("/update_password", name="client.update.password")
-	 * @Template("CCKClientBundle:Security:update-password.html.twig")
+	 * @Template("CCKClientBundle:security:update-password.html.twig")
 	 */
 	public function updatePasswordAction(Request $request) {
 		$session = $request->getSession();
@@ -176,7 +176,7 @@ class SecurityController extends Controller {
 
 			if(count($error) == 0){
 				$userEntity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:User')->findOneBy(array(
-						'loginId' => $address,
+						'user_id' => $address,
 						'deleteFlag' => FALSE
 				));
 
@@ -194,8 +194,11 @@ class SecurityController extends Controller {
 				array_push($error, "現在のパスワードを入力してください。");
 			}
 
-			if(!preg_match("/^[a-z0-9]+$/", $current_password)){
-				array_push($error, "半角英数字で入力してください。");
+			if((!preg_match("/[a-z]/", $current_password))||
+				(!preg_match("/[A-Z]/", $current_password))||
+				(!preg_match("/[0-9]/", $current_password))||
+				(!preg_match("/[ -\/:-@\[-`\{-\~]/", $current_password))){
+				array_push($error, "パスワードは半角の英大文字・英小文字・数字・記号をすべて使用して入力してください。");
 			}
 
 			if(count($error) == 0){
