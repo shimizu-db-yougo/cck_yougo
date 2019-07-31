@@ -10,6 +10,7 @@
 	width: 1800px;
     justify-content: space-between;
     left: 90px;
+    top: 40px;
 }
 .content{
     line-height: 1.6;
@@ -19,6 +20,7 @@
 .panel-search {
 	width: 1200px;
 	margin-left: 60px;
+	margin-top: 40px;
 }
 .panel-search field_title {
     height: 20px;
@@ -258,7 +260,7 @@ tbody {
 					<td width="60px">
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{{ path('client.yougo.preview', {'id': yougo.id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.preview'|trans }}</button></a>
+								<a href="{{ path('client.yougo.preview', {'term_id': yougo.term_id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.preview'|trans }}</button></a>
 							</div>
 						</div>
 					</td>

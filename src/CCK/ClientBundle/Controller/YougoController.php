@@ -374,20 +374,28 @@ class YougoController extends BaseController {
 	}
 
 	/**
-	 * @Route("/preview/{id}", name="client.yougo.preview")
+	 * @Route("/preview/{term_id}", name="client.yougo.preview")
 	 * @Template()
 	 */
-	public function previewAction(Request $request, $id) {
-
-		$id = (int) $id;
+	public function previewAction(Request $request, $term_id) {
 
 		$em = $this->getDoctrine()->getManager();
 
-		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoList(null, null, null, null, null, null, null, null, null, null, null, null, null, null, $id);
+		// 主用語
+		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetail($term_id);
 
 		if(!$entity){
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
+
+		// サブ用語
+		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($term_id);
+
+		// 指矢印用語
+		$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($term_id);
+
+		// 同対類
+		$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($term_id);
 
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE
@@ -397,7 +405,10 @@ class YougoController extends BaseController {
 		));
 
 		return array(
-				'yougoEntity' => $entity,
+				'yougo' => $entity,
+				'subterm' => $entitySub,
+				'synonym' => $entitySyn,
+				'refer' => $entityRef,
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
 		);
