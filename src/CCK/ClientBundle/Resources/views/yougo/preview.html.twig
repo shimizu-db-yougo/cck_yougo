@@ -42,13 +42,12 @@
 								<span style="font-size: 14px; font-family: sans-serif;">ｐ．{{ rec_refer.nombre }}（{{ rec_refer.main_term }}）</span>
 								{% set i = i + 1 %}
 							{% endfor %}
-							{% for rec_synonym in synonym %}
+						</div>
+						{% for rec_synonym in synonym %}
+							<div class="text-right">
 								<span style="font-size: 16px; font-weight: bold;">■</span><span style="font-size: 14px; font-weight: bold;">{{ rec_synonym.term }}■</span>
-							{% endfor %}
-						</div>
-						<div class="text-right">
-
-						</div>
+							</div>
+						{% endfor %}
 					</td>
 				</tr>
 				<tr class="text-center">
