@@ -415,6 +415,128 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/edit/{term_id}", name="client.yougo.edit")
+	 * @Method("POST|GET")
+	 * @Template()
+	 */
+	public function editAction(Request $request, $term_id){
+		$session = $request->getSession();
+
+		// get user information
+		$user = $this->getUser();
+
+		$id = (int) $term_id;
+
+		$em = $this->getDoctrine()->getManager();
+
+		$entityMain = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+				'termId' => $id,
+				'deleteFlag' => false
+		));
+
+		if(!$entityMain){
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+
+		/*$entitySub = $em->getRepository('CCKCommonBundle:SubTerm')->findBy(array(
+				'mainTermId' => $id,
+				'deleteFlag' => false
+		));*/
+		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($id);
+
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '1',
+				'deleteFlag' => FALSE
+		));
+		$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '2',
+				'deleteFlag' => FALSE
+		));
+		$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '3',
+				'deleteFlag' => FALSE
+		));
+		$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '4',
+				'deleteFlag' => FALSE
+		));
+		$ko_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '5',
+				'deleteFlag' => FALSE
+		));
+
+		// 選択する教科
+		$entityVersion = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+				'id' => $entityMain->getCurriculumId(),
+				'deleteFlag' => FALSE
+		));
+
+		// 選択する見出し
+		$entityHeader = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findOneBy(array(
+				'id' => $entityMain->getHeaderId(),
+				'deleteFlag' => FALSE
+		));
+
+		// 掲載順に表示する用語
+		$printOrderList = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
+				'headerId' => $entityMain->getHeaderId(),
+				'deleteFlag' => false
+		));
+
+		$text_freq = '';
+		$center_freq = '';
+		$news_exam = '';
+		$term = '';
+		$list_count = '';
+		$sort_order_link = '';
+		$sort_field = '';
+
+		return array(
+				'term_id' => $id,
+				'yougo' => $entityMain,
+				'yougo_sub' => $entitySub,
+				'cur_list' => $cur_list,
+				'ver_list' => $ver_list,
+				'hen_list' => $hen_list,
+				'sho_list' => $sho_list,
+				'dai_list' => $dai_list,
+				'chu_list' => $chu_list,
+				'ko_list' => $ko_list,
+				'curriculum' => $entityVersion->getCurriculumId(),
+				'version' => $entityMain->getCurriculumId(),
+				'select_hen' => $entityHeader->getHen(),
+				'select_sho' => $entityHeader->getSho(),
+				'select_dai' => $entityHeader->getDai(),
+				'select_chu' => $entityHeader->getChu(),
+				'select_ko' => $entityHeader->getKo(),
+				'print_order_list' => $printOrderList,
+
+				'text_freq' => $text_freq,
+				'center_freq' => $center_freq,
+				'news_exam' => ($news_exam) ? true : false,
+				'term' => $term,
+				'list_count' => $list_count,
+				'sort_order' => $sort_order_link,
+				'sort_field' => $sort_field
+
+		);
+	}
+
+	/**
+	 * @Route("/edit/confirm", name="client.yougo.edit.confirm")
+	 * @Method("POST|GET")
+	 */
+	public function editConfirmAction(Request $request){
+
+	}
+
+	/**
 	 * session data remove
 	 */
 	private function sessionRemove($request){

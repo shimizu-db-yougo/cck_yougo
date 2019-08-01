@@ -173,6 +173,13 @@ text:
         handover: 申し送り
         update_user: 更新者
         modify_date: 最終編集日時
+        main.term: 主用語
+        red_letter: 赤文字
+        delimiter: 区切り文字
+        western_language: 欧文
+        birth_year: 年月日
+        index_add_letter: 索引追加文字
+        term_explain: 解説
         
 icon:
     ari: 有
