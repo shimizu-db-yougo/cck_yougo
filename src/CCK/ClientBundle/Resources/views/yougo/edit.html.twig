@@ -53,12 +53,12 @@ tbody {
 {% endblock %}
 
 {% block contents %}
-<form action="{{ path('client.yougo.edit.confirm') }}" class="form-horizontal" method="GET" autocomplete="off">
+<form class="form-horizontal" enctype='multipart/form-data' method='POST'  autocomplete="off" novalidate>
 <div class="row">
 	<div class="col-lg-12">
 		<div class="panel-body">
 			<div class="row">
-				<div class="form-horizontal">
+				<div class="form-horizontal" id="form_mainterm">
 					<div class="form-group">
 						<div class="col-lg-12">
 							<label class="col-sm-1">{{ 'text.yougo.term_id'|trans }}</label>
@@ -179,17 +179,18 @@ tbody {
 					<div class="form-group">
 						<div class="col-lg-12">
 							<label class="col-sm-1">{{ 'text.yougo.freq.text'|trans }}</label>
-							<div class="col-sm-2">
-								<select class="form-control input-sm" name="text_freq">
-									<option value="0">--------------</option>
-									<option value="1" {{ text_freq == '1' ? " selected " : '' }}">A</option>
-									<option value="2" {{ text_freq == '2' ? " selected " : '' }}">B</option>
-									<option value="3" {{ text_freq == '3' ? " selected " : '' }}">C</option>
-								</select>
+							<div class="col-sm-1">
+								<input type="text" class="form-control input-sm" name="text_freq" value="{{ text_freq }}">
+							</div>
+							<div class="col-sm-1">
+								<div id="text_rank">A</div>
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.freq.center'|trans }}</label>
-							<div class="col-sm-3">
-								<input type="text" class="form-control input-sm" name="center_freq" value="{{ center_freq }}">
+							<div class="col-sm-1">
+								<button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="{{ yougo.mainTerm }}" data-toggle="modal" center-target="#centerModal">{{ 'text.yougo.freq.center'|trans }}</button>
+							</div>
+							<div class="col-sm-1">
+								<div id="center_freq" value="{{ center_freq }}"></div>
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.news.exam'|trans }}</label>
 							<div class="col-sm-2">
@@ -260,7 +261,10 @@ tbody {
 						<div class="col-lg-12">
 							<label class="col-sm-1">{{ 'text.yougo.term_explain'|trans }}</label>
 							<div class="col-sm-9">
-								<textarea class="form-control" name="term_explain"></textarea>
+								<textarea class="form-control" id="term_explain" name="term_explain"></textarea>
+							</div>
+							<div class="col-sm-2">
+								<button type="button" class="btn btn-primary btn-sm js-explain-target" main-term-id="{{ yougo.mainTerm }}" data-toggle="modal" area-target="#explainModal">{{ 'text.yougo.term_explain'|trans }}</button>
 							</div>
 						</div>
 					</div>
@@ -269,24 +273,70 @@ tbody {
 		</div>
 	</div>
 </div>
-					<hr>
+<hr>
 <div class="row">
 	<div class="col-lg-12">
 		<div class="panel-body">
 			<div class="row">
-				<div class="form-horizontal">
-					<!-- サブ用語 -->
-					<div class="form-group">
-						<div class="col-lg-12">
-							<div id="formarea"></div>
-						</div>
-					</div>
+				<!-- サブ用語 -->
+				<div id="form_subterm" class="form-horizontal">
+					<div class="form-group"><div class="col-lg-12">
+						<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>
+						<div class="col-sm-3"><input class="form-control input-sm" type="text" name="sub_term" value=""></div>
+						<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>
+						<div class="col-sm-1"><input type="checkbox" name="red_letter[]"></div>
+						<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>
+						<div class="col-sm-3"><input class="form-control input-sm" type="text" name="kana" value=""></div>
+						<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>
+						<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">
+								<option value="0">--------------</option>
+								<option value="1">なし</option>
+								<option value="2">（</option>
+								<option value="3">）（</option>
+						</select></div>
+						</div></div>
+						<div class="form-group"><div class="col-lg-12">
+						<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>
+						<div class="col-sm-1"><input type="text" class="form-control input-sm" name="text_freq" value=""></div>
+						<div class="col-sm-1"><div id="text_rank">A</div></div>
+						<label class="col-sm-1">{{ "text.yougo.freq.center"|trans }}</label>
+						<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>
+						<div class="col-sm-1"><div id="center_freq" value="{{ center_freq }}"></div></div>
+						<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>
+						<div class="col-sm-2"><input type="checkbox" name="news_exam[]"></div>
+						</div></div>
+						<div class="form-group"><div class="col-lg-12">
+						<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>
+						<div class="col-sm-1"><select class="form-control input-sm" name="delimiter">
+								<option value="0">--------------</option>
+								<option value="1">なし</option>
+								<option value="2">（</option>
+								<option value="3">）（</option>
+						</select></div>
+						<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>
+						<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value=""></div>
+						<label class="col-sm-3">{{ "text.yougo.index_kana"|trans }}</label>
+						<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_kana" value=""></div>
+						</div></div>
+						<div class="form-group"><div class="col-lg-12">
+						<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>
+						<label class="col-sm-1"></label>
+						</div></div>
 				</div>
+				<button type="button" class="btn btn-primary btn-sm" id="addForm">{{ 'btn.add.subterm'|trans }}</button>
+				<button type="button" class="btn btn-primary btn-sm" id="removeForm">{{ 'btn.remove.subterm'|trans }}</button>
 			</div>
 		</div>
 	</div>
 </div>
-
+<hr>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="text-center">
+			<button type="button" class="btn btn-primary js-yougo-submit">{{ 'btn.submit'|trans }}</button>
+		</div>
+	</div>
+</div>
 </form>
 
 <!-- yougo list area -->
@@ -299,33 +349,231 @@ tbody {
 
 </div>
 
+<div class="modal fade" id="centerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				センター頻度追加
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4"></label>
+						<label class="col-sm-4">本試</label>
+						<label class="col-sm-4">追試</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2006</label>
+						<input class="col-sm-4" type="text" id="honshi2006" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2006" name="tsuishi">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2007</label>
+						<input class="col-sm-4" type="text" id="honshi2007" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2007" name="tsuishi">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2008</label>
+						<input class="col-sm-4" type="text" id="honshi2008" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2008" name="tsuishi">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2009</label>
+						<input class="col-sm-4" type="text" id="honshi2009" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2009" name="tsuishi">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2010</label>
+						<input class="col-sm-4" type="text" id="honshi2010" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2010" name="tsuishi">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2011</label>
+						<input class="col-sm-4" type="text" id="honshi2011" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2011" name="tsuishi">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2012</label>
+						<input class="col-sm-4" type="text" id="honshi2012" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2012" name="tsuishi">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2013</label>
+						<input class="col-sm-4" type="text" id="honshi2013" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2013" name="tsuishi">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2014</label>
+						<input class="col-sm-4" type="text" id="honshi2014" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2014" name="tsuishi">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2015</label>
+						<input class="col-sm-4" type="text" id="honshi2015" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2015" name="tsuishi">
+					</div>
+				</div>
+				<hr>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.cancel'|trans }}</button>
+						<button type="button" class="btn btn-primary js-center-submit">{{ 'btn.submit'|trans }}</button>
+						<button type="button" class="btn btn-danger js-area-delete">{{ 'btn.delete'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="explainModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				解説内さくいん用語設定
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-2">用語</label>
+						<label class="col-sm-4">さくいん読み仮名</label>
+						<label class="col-sm-4">さくいん時追加文字</label>
+						<label class="col-sm-2">ノンブル</label>
+					</div>
+				</div>
+				<div class="row">
+					<div id="formindex"></div>
+				</div>
+				<hr>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.cancel'|trans }}</button>
+						<button type="button" class="btn btn-primary js-explain-submit">{{ 'btn.submit'|trans }}</button>
+						<button type="button" class="btn btn-danger js-area-delete">{{ 'btn.delete'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+
 {% endblock %}
 
 {% block javascripts %}
 	{{ parent() }}
 	<script>
 
-	function buttonStyle(O,idx){
-		var UpButton = document.getElementById('UPBUTTON'+idx);
-		var DownButton = document.getElementById('DOWNBUTTON'+idx);
-		for(var i=0;i<O.options.length;i++){
-			if(O.options[i].selected){
-			if(i!=0) UpButton.disabled = false;
-			else UpButton.disabled = true;
-			if(i!=(O.options.length-1)) DownButton.disabled = false;
-			else DownButton.disabled = true;
+		// 掲載順リスト
+		function buttonStyle(O,idx){
+			var UpButton = document.getElementById('UPBUTTON'+idx);
+			var DownButton = document.getElementById('DOWNBUTTON'+idx);
+			for(var i=0;i<O.options.length;i++){
+				if(O.options[i].selected){
+					if(i!=0) UpButton.disabled = false;
+					else UpButton.disabled = true;
+					if(i!=(O.options.length-1)) DownButton.disabled = false;
+					else DownButton.disabled = true;
+				}
 			}
 		}
-	}
-	function optionMove(MODE,idx) {
-		var O = document.getElementById('SEL'+idx);
-		for(var i=0;i<O.options.length;i++)
-		if(O.options[i].selected) break;
-		var tmpOption = O.removeChild(O.options[i]);
-		O.insertBefore(tmpOption,O.options[i+MODE])
+		function optionMove(MODE,idx) {
+			var O = document.getElementById('SEL'+idx);
+			for(var i=0;i<O.options.length;i++)
+			if(O.options[i].selected) break;
+			var tmpOption = O.removeChild(O.options[i]);
+			O.insertBefore(tmpOption,O.options[i+MODE])
 
-		buttonStyle(O,idx);
-	}
+			buttonStyle(O,idx);
+		}
+
+		// センター頻度
+		$(".js-center-target").bind('click', function(e){
+			// get target
+			var target = $(e.currentTarget);
+			var main_term_id = target.attr('main-term-id');
+			$('#centerModal').modal();
+		});
+
+		$('.js-center-submit').bind('click', function(e){
+			var center_cnt = Number($('#honshi2006').val())+Number($('#honshi2007').val())+Number($('#honshi2008').val())+Number($('#honshi2009').val())+Number($('#honshi2010').val())+
+			Number($('#honshi2011').val())+Number($('#honshi2012').val())+Number($('#honshi2013').val())+Number($('#honshi2014').val())+Number($('#honshi2015').val());
+
+			$('#center_freq').text(center_cnt);
+
+			$('#centerModal').modal('hide');
+		});
+
+		// 解説内さくいん用語
+		$(".js-explain-target").bind('click', function(e){
+			// get target
+			var target = $(e.currentTarget);
+			var main_term_id = target.attr('main-term-id');
+
+			// さくいん用語タグで囲まれた用語を抽出
+			var match_regex = /(?<=\《c_SAK》).*?(?=\《\/c_SAK》)/g;
+			var match_chr = '';
+			var term_explain = $('#term_explain').val();
+
+			match_chr = term_explain.match(match_regex);
+			if(match_chr){
+				console.log(match_chr);
+
+				for(var i=0; i<match_chr.length; i++){
+					$('#formindex').append(
+							'<div class="col-lg-12">'
+							+'<label class="col-sm-2">'+ match_chr[i] + '</label>'
+							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" name="index_kana" value=""></div>'
+							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" name="index_add_letter" value=""></div>'
+							+'<div class="col-sm-2"><input class="form-control input-sm" type="text" name="nombre" value=""></div>'
+							+'</div>');
+				}
+
+
+			}
+
+			$('#explainModal').modal();
+		});
+
+		// 用語登録
+		$('.js-yougo-submit').bind('click', function(e){
+			var mainterm = $('#form_mainterm [name=main_term]').val();
+
+			var sub_term = [];
+			var form_mainterm = $('#form_subterm [name=sub_term]');
+			form_mainterm.each(function() {
+				var val_sub_term = $(this).val();
+				sub_term.push(val_sub_term);
+			});
+
+			// create form
+			$('<form>', {
+				"id": "maintermForm",
+				"html":  "<input type='hidden' name='add_main_term' value='" + mainterm + "'>"
+				+ "<input type='hidden' name='add_sub_term' value='" + sub_term + "'>",
+				"action": "{{ path('client.yougo.edit', {'term_id': yougo.termId}) }}",
+				"method": "POST"
+			}).appendTo(document.body).submit();
+		});
 
 		$(function(){
 			$(window).load(function(){
@@ -337,30 +585,118 @@ tbody {
 				console.log(yougo_sub_parse[0].sub_term);
 				console.log(yougo_sub_parse.length);
 
+				var header_sub = '<div class="form-group"><div class="col-lg-12">サブ用語</div></div>';
+
 				for(var i=0; i<yougo_sub_parse.length; i++){
 					console.log(yougo_sub_parse[i].sub_term);
 
-					var formarea_start = '<br><div class="row"><div class="col-sm-12"><label class="col-sm-2">サブ用語</label><div class="col-sm-10">';
-					var formarea_end = '</div></div></div>';
+					if(i>0){header_sub = ''};
 
-					$('#formarea').append(formarea_start +
-							'<div class="form-group"><div class="col-lg-12">'
-							+'<input class="form-control" type="text" name="sub_term" value="' + yougo_sub_parse[i].sub_term  + '">'
-							+'<input class="form-control" type="checkbox" name="red_letter[]">'
+					$('#form_subterm').append(
+							header_sub
+							+'<div class="form-group"><div class="col-lg-12">'
+							+'<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>'
+							+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="sub_term" value="' + yougo_sub_parse[i].sub_term  + '"></div>'
+							+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
+							+'<div class="col-sm-1"><input type="checkbox" name="red_letter[]"></div>'
+							+'<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>'
+							+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="kana" value="' + yougo_sub_parse[i].kana  + '"></div>'
+							+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
+							+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">'
+									+'<option value="0">--------------</option>'
+									+'<option value="1" {{ ' + yougo_sub_parse[i].delimiter_kana  + ' == "1" ? " selected " : "" }}">なし</option>'
+									+'<option value="2" {{ ' + yougo_sub_parse[i].delimiter_kana  + ' == "2" ? " selected " : "" }}">（</option>'
+									+'<option value="3" {{ ' + yougo_sub_parse[i].delimiter_kana  + ' == "3" ? " selected " : "" }}">）（</option>'
+							+'</select></div>'
 							+'</div></div>'
-							+'<input class="form-control" type="text" name="kana" value="' + yougo_sub_parse[i].kana  + '">'
-							+'<select class="form-control" name="delimiter">'
-							+'<option value="1" >なし</option>'
-							+'<option value="2" >（</option>'
-							+'<option value="3" >）（</option>'
-							+'</select>'
-							+'<input class="form-control" type="text" name="text_frequency" value="' + yougo_sub_parse[i].text_frequency  + '">'
-							+'<button type="button" class="btn btn-primary btn-sm js-area-target" area-id="2" data-toggle="modal" area-target="#areaModal">センター頻度</button>'
-							+'<input class="form-control" type="text" id="center"  name="center" readonly>'
-							+ formarea_end);
+							+'<div class="form-group"><div class="col-lg-12">'
+							+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
+							+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="text_freq" value="' + yougo_sub_parse[i].text_freq + '"></div>'
+							+'<div class="col-sm-1"><div id="text_rank">A</div></div>'
+							+'<label class="col-sm-1">{{ "text.yougo.freq.center"|trans }}</label>'
+							+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="' + yougo_sub_parse[i].sub_term  + '" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+							+'<div class="col-sm-1"><div id="center_freq" value="{{ center_freq }}"></div></div>'
+							+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
+							+'<div class="col-sm-2"><input type="checkbox" name="news_exam[]"></div>'
+							+'</div></div>'
+							+'<div class="form-group"><div class="col-lg-12">'
+							+'<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>'
+							+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter">'
+									+'<option value="0">--------------</option>'
+									+'<option value="1" {{ ' + yougo_sub_parse[i].delimiter  + ' == "1" ? " selected " : "" }}">なし</option>'
+									+'<option value="2" {{ ' + yougo_sub_parse[i].delimiter  + ' == "2" ? " selected " : "" }}">（</option>'
+									+'<option value="3" {{ ' + yougo_sub_parse[i].delimiter  + ' == "3" ? " selected " : "" }}">）（</option>'
+							+'</select></div>'
+							+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
+							+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value="' + yougo_sub_parse[i].index_add_letter + '"></div>'
+							+'<label class="col-sm-3">{{ "text.yougo.index_kana"|trans }}</label>'
+							+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_kana" value="' + yougo_sub_parse[i].index_kana + '"></div>'
+							+'</div></div>'
+							+'<div class="form-group"><div class="col-lg-12">'
+							+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
+							+'<label class="col-sm-1">{{ "' + yougo_sub_parse[i].nombre + '" }}</label>'
+							+'</div></div>'
+							+'<hr>'
+					);
 
 				}
 
+				$(document).on("click", ".js-center-target", function () {
+					$('#centerModal').modal();
+				});
+
+			});
+
+			$('#addForm').click(function(){
+				$('#form_subterm').append(
+						+'<div class="form-group"><div class="col-lg-12">'
+						+'<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>'
+						+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="sub_term" value=""></div>'
+						+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
+						+'<div class="col-sm-1"><input type="checkbox" name="red_letter[]"></div>'
+						+'<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>'
+						+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="kana" value=""></div>'
+						+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
+						+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">'
+								+'<option value="0">--------------</option>'
+								+'<option value="1">なし</option>'
+								+'<option value="2">（</option>'
+								+'<option value="3">）（</option>'
+						+'</select></div>'
+						+'</div></div>'
+						+'<div class="form-group"><div class="col-lg-12">'
+						+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
+						+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="text_freq" value=""></div>'
+						+'<div class="col-sm-1"><div id="text_rank">A</div></div>'
+						+'<label class="col-sm-1">{{ "text.yougo.freq.center"|trans }}</label>'
+						+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+						+'<div class="col-sm-1"><div id="center_freq" value="{{ center_freq }}"></div></div>'
+						+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
+						+'<div class="col-sm-2"><input type="checkbox" name="news_exam[]"></div>'
+						+'</div></div>'
+						+'<div class="form-group"><div class="col-lg-12">'
+						+'<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>'
+						+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter">'
+								+'<option value="0">--------------</option>'
+								+'<option value="1">なし</option>'
+								+'<option value="2">（</option>'
+								+'<option value="3">）（</option>'
+						+'</select></div>'
+						+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
+						+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value=""></div>'
+						+'<label class="col-sm-3">{{ "text.yougo.index_kana"|trans }}</label>'
+						+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_kana" value=""></div>'
+						+'</div></div>'
+						+'<div class="form-group"><div class="col-lg-12">'
+						+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
+						+'<label class="col-sm-1"></label>'
+						+'</div></div>'
+						+'<hr>'
+				);
+			});
+
+			$('#removeForm').click(function(){
+				$('#form_subterm').remove();
 			});
 
 			$('.js-cur').bind('change', function(){

@@ -41,6 +41,8 @@ btn:
     nextstatus: 次のフロー設定
     importcsv: CSV取込
     preview: プレビュー
+    add.subterm: サブ用語追加
+    remove.subterm: サブ用語削除
 
 # ソーティング
 sort:
@@ -180,6 +182,7 @@ text:
         birth_year: 年月日
         index_add_letter: 索引追加文字
         term_explain: 解説
+        yomigana: 読み仮名
         
 icon:
     ari: 有

@@ -420,6 +420,18 @@ class YougoController extends BaseController {
 	 * @Template()
 	 */
 	public function editAction(Request $request, $term_id){
+		// 登録画面から遷移した場合
+		if($request->request->has('add_main_term')){
+			$main_term = $request->request->get('add_main_term');
+			$sub_term = $request->request->get('add_sub_term');
+			print($main_term);
+			print_r($sub_term);
+
+			//DB登録後、一覧画面へ遷移する
+			exit();
+		}
+
+
 		$session = $request->getSession();
 
 		// get user information
@@ -533,6 +545,27 @@ class YougoController extends BaseController {
 	 * @Method("POST|GET")
 	 */
 	public function editConfirmAction(Request $request){
+		$this->get('logger')->error("***editConfirmAction start***");
+		$session = $request->getSession();
+
+		// get user information
+		$user = $this->getUser();
+
+		$em = $this->getDoctrine()->getManager();
+
+		if($request->request->has('add_main_term')){
+			$main_term = $request->request->get('add_main_term');
+		}
+
+		$add_akamoji = array();
+		if($request->request->has('add_akamoji')){
+			$add_akamoji = explode(",", $request->request->get('add_akamoji'));
+		}
+
+		$this->get('logger')->error("***editConfirmAction***");
+		$this->get('logger')->error($main_term);
+		print($main_term);
+		exit();
 
 	}
 
