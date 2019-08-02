@@ -6,6 +6,11 @@
 .table-yougo {
 	width: 360px;
 }
+.icon-half {
+	width: 8px;
+	hegiht: 16px;
+	padding-bottom: 2px;
+}
 	</style>
 {% endblock %}
 
@@ -23,7 +28,8 @@
 				<tr class="text-center">
 					<td width="60px" class="text-left">
 						<div>
-							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;color:#ff004C;">{{ yougo.main_term }}　■□</span>
+							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;color:#ff004C;">{{ yougo.main_term }}　<img src="{{ asset('./img/1_.jpg') }}" class="icon-half" alt="1_"><img src="{{ asset('./img/_0.jpg') }}" class="icon-half" alt="_0">□</span>
+
 							{% set sub_kana = '' %}
 							{% set i = 0 %}
 							{% for rec_sub_term in subterm %}
@@ -48,30 +54,6 @@
 								<span style="font-size: 16px; font-weight: bold;">■</span><span style="font-size: 14px; font-weight: bold;">{{ rec_synonym.term }}■</span>
 							</div>
 						{% endfor %}
-					</td>
-				</tr>
-				<tr class="text-center">
-					<td width="60px" class="text-left">
-						<div>
-							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;color:#ff004C;">権力　■□</span>
-							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;">（国家権力■□）</span>
-							<span style="font-size: 10px; font-family: serif;">（けんりょく）</span>
-							<span style="font-size: 10px; font-family: serif;">（こっかけんりょく）</span>
-							<span style="font-size: 14px; font-family: serif;">政治に作用する強制力。具体的には，法に従わない者を逮捕することや，納税を強制することなどにあらわれる。軍隊が武力を対外的に行使することもある。国家は，こうした権力をもつ唯一の集団であり，その権力を国家権力，あるいは国家の政治権力とよぶ。</span>
-							<span style="font-size: 14px; font-family: sans-serif;">　→ｐ．１０４（統治行為論）</span>
-						</div>
-						<div class="text-right">
-							<span style="font-size: 16px; font-weight: bold;">■</span><span style="font-size: 14px; font-weight: bold;">政治権力■</span>
-						</div>
-					</td>
-				</tr>
-				<tr class="text-center">
-					<td width="60px" class="text-left">
-						<div>
-							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;">マックス＝ウェーバー　■</span>
-							<span style="font-size: 16px; font-family: serif;">[Max Weber,1864～1920]　</span>
-							<span style="font-size: 14px; font-family: serif;">ドイツの社会学者・経済学者。その研究の業績は宗教社会学・経済史・政治学など多岐にわたり，現代の社会科学にも大きな影響を及ぼしている。『経済と社会』（1921～22年）では，「支配の社会学」として正統性による支配の3類型を明らかにした。『プロテスタンティズムの倫理と資本主義の精神』（1904年）においては，近代の資本主義社会の成立がプロテスタントの勤勉さ，禁欲的な生活態度とどのようにかかわったかを論じている。『職業としての政治』（1919年）では，心情倫理と責任倫理とを区別し，政治を評価する基準としては，結果責任としての後者の重要性を指摘している。このほかに『職業としての学問』（1919年）などがある。</span>
-						</div>
 					</td>
 				</tr>
 			</tbody>
