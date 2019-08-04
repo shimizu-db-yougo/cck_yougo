@@ -178,6 +178,7 @@ text:
         main.term: 主用語
         red_letter: 赤文字
         delimiter: 区切り文字
+        delimiter_kana: 区切り文字(仮名)
         western_language: 欧文
         birth_year: 年月日
         index_add_letter: 索引追加文字

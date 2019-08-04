@@ -143,9 +143,9 @@ tbody {
 									<tr>
 										<td>
 											<div id="formsort">
-												<select class="form-control" name="s2" size="5" multiple="multiple" onchange="buttonStyle(this,'')" id="SEL">
+												<select class="form-control" name="s2" size="5" multiple="multiple" onchange="buttonStyle(this)" id="SEL">
 												{% for print_order_term in print_order_list %}
-													<option value="{{ print_order_term.termId }}" {{ print_order_term.termId == term_id ? " selected " : '' }}">{{ print_order_term.mainTerm }}</option>
+													<option value="{{ print_order_term.termId }}" {{ print_order_term.termId == term_id ? " selected " : " disabled " }}">{{ print_order_term.mainTerm }}</option>
 												{% endfor %}
 												</select>
 											</div>
@@ -279,49 +279,7 @@ tbody {
 		<div class="panel-body">
 			<div class="row">
 				<!-- サブ用語 -->
-				<div id="form_subterm" class="form-horizontal">
-					<div class="form-group"><div class="col-lg-12">
-						<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>
-						<div class="col-sm-3"><input class="form-control input-sm" type="text" name="sub_term" value=""></div>
-						<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>
-						<div class="col-sm-1"><input type="checkbox" name="red_letter[]"></div>
-						<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>
-						<div class="col-sm-3"><input class="form-control input-sm" type="text" name="kana" value=""></div>
-						<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>
-						<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">
-								<option value="0">--------------</option>
-								<option value="1">なし</option>
-								<option value="2">（</option>
-								<option value="3">）（</option>
-						</select></div>
-						</div></div>
-						<div class="form-group"><div class="col-lg-12">
-						<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>
-						<div class="col-sm-1"><input type="text" class="form-control input-sm" name="text_freq" value=""></div>
-						<div class="col-sm-1"><div id="text_rank">A</div></div>
-						<label class="col-sm-1">{{ "text.yougo.freq.center"|trans }}</label>
-						<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>
-						<div class="col-sm-1"><div id="center_freq" value="{{ center_freq }}"></div></div>
-						<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>
-						<div class="col-sm-2"><input type="checkbox" name="news_exam[]"></div>
-						</div></div>
-						<div class="form-group"><div class="col-lg-12">
-						<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>
-						<div class="col-sm-1"><select class="form-control input-sm" name="delimiter">
-								<option value="0">--------------</option>
-								<option value="1">なし</option>
-								<option value="2">（</option>
-								<option value="3">）（</option>
-						</select></div>
-						<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>
-						<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value=""></div>
-						<label class="col-sm-3">{{ "text.yougo.index_kana"|trans }}</label>
-						<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_kana" value=""></div>
-						</div></div>
-						<div class="form-group"><div class="col-lg-12">
-						<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>
-						<label class="col-sm-1"></label>
-						</div></div>
+				<div id="form_subterms">
 				</div>
 				<button type="button" class="btn btn-primary btn-sm" id="addForm">{{ 'btn.add.subterm'|trans }}</button>
 				<button type="button" class="btn btn-primary btn-sm" id="removeForm">{{ 'btn.remove.subterm'|trans }}</button>
@@ -484,15 +442,29 @@ tbody {
 	<script>
 
 		// 掲載順リスト
-		function buttonStyle(O,idx){
-			var UpButton = document.getElementById('UPBUTTON'+idx);
-			var DownButton = document.getElementById('DOWNBUTTON'+idx);
+		function buttonStyle(O){
+			var UpButton = document.getElementById('UPBUTTON');
+			var DownButton = document.getElementById('DOWNBUTTON');
+			var UpButton10 = document.getElementById('UPBUTTON10');
+			var DownButton10 = document.getElementById('DOWNBUTTON10');
 			for(var i=0;i<O.options.length;i++){
 				if(O.options[i].selected){
 					if(i!=0) UpButton.disabled = false;
 					else UpButton.disabled = true;
 					if(i!=(O.options.length-1)) DownButton.disabled = false;
 					else DownButton.disabled = true;
+					
+					if(O.options.selectedIndex+10<O.options.length){
+						DownButton10.disabled = false;
+					}else{
+						DownButton10.disabled = true;
+					}
+
+					if(O.options.selectedIndex+1-10>0){
+						UpButton10.disabled = false;
+					}else{
+						UpButton10.disabled = true;
+					}
 				}
 			}
 		}
@@ -503,7 +475,7 @@ tbody {
 			var tmpOption = O.removeChild(O.options[i]);
 			O.insertBefore(tmpOption,O.options[i+MODE])
 
-			buttonStyle(O,idx);
+			buttonStyle(O);
 		}
 
 		// センター頻度
@@ -575,8 +547,73 @@ tbody {
 			}).appendTo(document.body).submit();
 		});
 
+		function constructSubForm(record){
+			var html =
+			'<div id="form_subterm" class="form-horizontal">'
+			+'<div class="form-group"><div class="col-lg-12">'
+			+'<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>'
+			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="sub_term" value="' + ((record) ? record.sub_term : '') + '"></div>'
+			+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
+			+'<div class="col-sm-1"><input type="checkbox" name="red_letter[]"></div>'
+			+'<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>'
+			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="kana" value="' + ((record) ? record.kana : '') + '"></div>'
+			+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
+			+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">'
+					+'<option value="0">--------------</option>';
+					
+			if(record){
+				html += '<option value="1" {{ ' + record.delimiter_kana + ' == "1" ? " selected " : "" }}">なし</option>'
+				+'<option value="2" {{ ' + record.delimiter_kana + ' == "2" ? " selected " : "" }}">（</option>'
+				+'<option value="3" {{ ' + record.delimiter_kana + ' == "3" ? " selected " : "" }}">）（</option>';			
+			}else{
+				html += '<option value="1">なし</option>'
+				+'<option value="2">（</option>'
+				+'<option value="3">）（</option>';			
+			}
+			html += '</select></div>'
+			+'</div></div>'
+			+'<div class="form-group"><div class="col-lg-12">'
+			+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="text_freq" value="' + ((record) ? record.text_freq : '') + '"></div>'
+			+'<div class="col-sm-1"><div id="text_rank">A</div></div>'
+			+'<label class="col-sm-1">{{ "text.yougo.freq.center"|trans }}</label>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="' + ((record) ? record.sub_term : '') + '" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+			+'<div class="col-sm-1"><div id="center_freq" value="{{ center_freq }}"></div></div>'
+			+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
+			+'<div class="col-sm-2"><input type="checkbox" name="news_exam[]"></div>'
+			+'</div></div>'
+			+'<div class="form-group"><div class="col-lg-12">'
+			+'<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>'
+			+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter">'
+					+'<option value="0">--------------</option>';
+			if(record){
+				html += '<option value="1" ' + record.delimiter + ' == "なし" ? " selected " : "" >なし</option>'
+				+'<option value="2" ' + record.delimiter + ' == "（" ? " selected " : "" >（</option>'
+				+'<option value="3" ' + record.delimiter + ' == "）（" ? " selected " : "" >）（</option>';			
+			}else{
+				html += '<option value="1">なし</option>'
+				+'<option value="2">（</option>'
+				+'<option value="3">）（</option>';			
+			}
+
+			html += '</select></div>'
+			+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value="' + ((record) ? record.index_add_letter : '') + '"></div>'
+			+'<label class="col-sm-3">{{ "text.yougo.index_kana"|trans }}</label>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_kana" value="' + ((record) ? record.index_kana : '') + '"></div>'
+			+'</div></div>'
+			+'<div class="form-group"><div class="col-lg-12">'
+			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
+			+'<label class="col-sm-1">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
+			+'</div></div><hr></div>';
+			return html;
+		}
+		
 		$(function(){
 			$(window).load(function(){
+				// 掲載順リスト初期化
+				buttonStyle(document.getElementById('SEL'));
+				
 				var yougo_sub = '{{ yougo_sub|json_encode|raw }}';
 				console.log("**サブ用語**");
 				console.log(yougo_sub);
@@ -592,51 +629,9 @@ tbody {
 
 					if(i>0){header_sub = ''};
 
-					$('#form_subterm').append(
-							header_sub
-							+'<div class="form-group"><div class="col-lg-12">'
-							+'<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>'
-							+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="sub_term" value="' + yougo_sub_parse[i].sub_term  + '"></div>'
-							+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
-							+'<div class="col-sm-1"><input type="checkbox" name="red_letter[]"></div>'
-							+'<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>'
-							+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="kana" value="' + yougo_sub_parse[i].kana  + '"></div>'
-							+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
-							+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">'
-									+'<option value="0">--------------</option>'
-									+'<option value="1" {{ ' + yougo_sub_parse[i].delimiter_kana  + ' == "1" ? " selected " : "" }}">なし</option>'
-									+'<option value="2" {{ ' + yougo_sub_parse[i].delimiter_kana  + ' == "2" ? " selected " : "" }}">（</option>'
-									+'<option value="3" {{ ' + yougo_sub_parse[i].delimiter_kana  + ' == "3" ? " selected " : "" }}">）（</option>'
-							+'</select></div>'
-							+'</div></div>'
-							+'<div class="form-group"><div class="col-lg-12">'
-							+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
-							+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="text_freq" value="' + yougo_sub_parse[i].text_freq + '"></div>'
-							+'<div class="col-sm-1"><div id="text_rank">A</div></div>'
-							+'<label class="col-sm-1">{{ "text.yougo.freq.center"|trans }}</label>'
-							+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="' + yougo_sub_parse[i].sub_term  + '" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-							+'<div class="col-sm-1"><div id="center_freq" value="{{ center_freq }}"></div></div>'
-							+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
-							+'<div class="col-sm-2"><input type="checkbox" name="news_exam[]"></div>'
-							+'</div></div>'
-							+'<div class="form-group"><div class="col-lg-12">'
-							+'<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>'
-							+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter">'
-									+'<option value="0">--------------</option>'
-									+'<option value="1" {{ ' + yougo_sub_parse[i].delimiter  + ' == "1" ? " selected " : "" }}">なし</option>'
-									+'<option value="2" {{ ' + yougo_sub_parse[i].delimiter  + ' == "2" ? " selected " : "" }}">（</option>'
-									+'<option value="3" {{ ' + yougo_sub_parse[i].delimiter  + ' == "3" ? " selected " : "" }}">）（</option>'
-							+'</select></div>'
-							+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
-							+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value="' + yougo_sub_parse[i].index_add_letter + '"></div>'
-							+'<label class="col-sm-3">{{ "text.yougo.index_kana"|trans }}</label>'
-							+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_kana" value="' + yougo_sub_parse[i].index_kana + '"></div>'
-							+'</div></div>'
-							+'<div class="form-group"><div class="col-lg-12">'
-							+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-							+'<label class="col-sm-1">{{ "' + yougo_sub_parse[i].nombre + '" }}</label>'
-							+'</div></div>'
-							+'<hr>'
+					$('#form_subterms').append(
+						header_sub
+						+ constructSubForm(yougo_sub_parse[i])
 					);
 
 				}
@@ -648,55 +643,13 @@ tbody {
 			});
 
 			$('#addForm').click(function(){
-				$('#form_subterm').append(
-						+'<div class="form-group"><div class="col-lg-12">'
-						+'<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>'
-						+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="sub_term" value=""></div>'
-						+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
-						+'<div class="col-sm-1"><input type="checkbox" name="red_letter[]"></div>'
-						+'<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>'
-						+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="kana" value=""></div>'
-						+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
-						+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">'
-								+'<option value="0">--------------</option>'
-								+'<option value="1">なし</option>'
-								+'<option value="2">（</option>'
-								+'<option value="3">）（</option>'
-						+'</select></div>'
-						+'</div></div>'
-						+'<div class="form-group"><div class="col-lg-12">'
-						+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
-						+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="text_freq" value=""></div>'
-						+'<div class="col-sm-1"><div id="text_rank">A</div></div>'
-						+'<label class="col-sm-1">{{ "text.yougo.freq.center"|trans }}</label>'
-						+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-						+'<div class="col-sm-1"><div id="center_freq" value="{{ center_freq }}"></div></div>'
-						+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
-						+'<div class="col-sm-2"><input type="checkbox" name="news_exam[]"></div>'
-						+'</div></div>'
-						+'<div class="form-group"><div class="col-lg-12">'
-						+'<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>'
-						+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter">'
-								+'<option value="0">--------------</option>'
-								+'<option value="1">なし</option>'
-								+'<option value="2">（</option>'
-								+'<option value="3">）（</option>'
-						+'</select></div>'
-						+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
-						+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value=""></div>'
-						+'<label class="col-sm-3">{{ "text.yougo.index_kana"|trans }}</label>'
-						+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_kana" value=""></div>'
-						+'</div></div>'
-						+'<div class="form-group"><div class="col-lg-12">'
-						+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-						+'<label class="col-sm-1"></label>'
-						+'</div></div>'
-						+'<hr>'
+				$('#form_subterms').append(
+						constructSubForm(null)
 				);
 			});
 
 			$('#removeForm').click(function(){
-				$('#form_subterm').remove();
+				$('#form_subterms #form_subterm:last-child').remove();
 			});
 
 			$('.js-cur').bind('change', function(){

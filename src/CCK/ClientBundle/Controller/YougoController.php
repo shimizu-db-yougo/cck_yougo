@@ -570,6 +570,62 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/genko/yogotest", name="client.genko.yogotest")
+	 * @Method("POST|GET")
+	 * @Template()
+	 */
+	public function yogotestAction(Request $request){
+		$session = $request->getSession();
+	
+		// get user information
+		$user = $this->getUser();
+	
+		$em = $this->getDoctrine()->getManager();
+	
+		$yogo = array();
+		if($request->request->has('add_yogo')){
+			$yogo = explode(",", $request->request->get('add_yogo'));
+		}
+	
+		$add_akamoji = array();
+		if($request->request->has('add_akamoji')){
+			$add_akamoji = explode(",", $request->request->get('add_akamoji'));
+		}
+	
+		$add_hindo = array();
+		if($request->request->has('add_hindo')){
+			$add_hindo = explode(",", $request->request->get('add_hindo'));
+		}
+	
+		$add_kaisetsu = array();
+		if($request->request->has('add_kaisetsu')){
+			$add_kaisetsu = explode(",", $request->request->get('add_kaisetsu'));
+		}
+	
+		$add_center = array();
+		if($request->request->has('add_center')){
+			$add_center= explode(",", $request->request->get('add_center'));
+		}
+	
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		
+		return array(
+				'cur_list' => $cur_list,
+				'ver_list' => $ver_list,
+				'yogos' => $yogo,
+				'akamojis' => $add_akamoji,
+				'hindos' => $add_hindo,
+				'kaisetsus' => $add_kaisetsu,
+				'centers' => $add_center,
+		);
+	}
+	
+	/**
 	 * session data remove
 	 */
 	private function sessionRemove($request){

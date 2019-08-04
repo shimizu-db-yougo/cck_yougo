@@ -1,0 +1,327 @@
+{% extends "CCKClientBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link href="{{ asset('bundles/cckcommon/jquery-timepicker/jquery.timepicker.css') }}" rel="stylesheet">
+	<style>
+	.table,
+	.table.no-border thead,
+	.table.no-border tbody,
+	.table.no-border tbody tr,
+	.table.no-border tbody tr th,
+	.table.no-border tbody tr td,
+	.table.no-border tr th,
+	.table.no-border tr td {
+		border: none;
+		vertical-align: middle;
+	}
+	</style>
+{% endblock %}
+
+{% block contents %}
+<blockquote class="blockquote-bottom pdr-0">
+	<div class="pull-right">{{ 'text.required'|trans|raw }}</div>
+	<p>用語登録</p>
+</blockquote>
+
+
+<form enctype='multipart/form-data' method='POST' novalidate>
+			<div class="modal-header">
+				主用語
+			</div>
+	<div class="row">
+		<div class="col-md-6">
+				<div id="formarea" class="area-modal-row">
+					<input class="form-control" type="text" name="yogo">
+					<input class="form-control" type="checkbox" name="akamoji">
+					<select class="form-control" name="hindo">
+						<option value="1" >A</option>
+						<option value="2" >B</option>
+						<option value="3" >C</option>
+					</select>
+					<textarea class="form-control" name="kaisetsu"></textarea>
+					<button type="button" class="btn btn-primary btn-sm js-area-target" area-id="{{ 1 }}" data-toggle="modal" area-target="#areaModal">センター頻度</button>
+					<input class="form-control" type="text" id="center"  name="center" readonly>
+				</div>
+				<input type="button" value="+" id="addForm">
+				<input type="button" value="-" id="removeForm">
+				<hr>
+		</div>
+	</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-primary js-area-submit">{{ 'btn.submit'|trans }}</button>
+					</div>
+			</div>
+</form>
+
+用語リクエスト:
+{% for yogo in yogos %}
+	{{ yogo }},
+{% endfor %}
+<br>
+赤文字リクエスト:
+{% for akamoji in akamojis %}
+	{{ akamoji }},
+{% endfor %}
+<br>
+頻度リクエスト:
+{% for hindo in hindos %}
+	{{ hindo }},
+{% endfor %}
+<br>
+用語解説リクエスト:
+{% for kaisetsu in kaisetsus %}
+	{{ kaisetsu }},
+{% endfor %}
+<br>
+センター頻度リクエスト:
+{% for center in centers %}
+	{{ center }},
+{% endfor %}
+<br>
+
+<div class="modal fade" id="areaModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				センター頻度追加
+			</div>
+			<div class="modal-body">
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4"></label>
+						<label class="col-sm-4">本試</label>
+						<label class="col-sm-4">追試</label>
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2006</label>
+						<input class="col-sm-4" type="text" id="honshi2006" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2006" name="tsuishi">
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2007</label>
+						<input class="col-sm-4" type="text" id="honshi2007" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2007" name="tsuishi">
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2008</label>
+						<input class="col-sm-4" type="text" id="honshi2008" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2008" name="tsuishi">
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2009</label>
+						<input class="col-sm-4" type="text" id="honshi2009" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2009" name="tsuishi">
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2010</label>
+						<input class="col-sm-4" type="text" id="honshi2010" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2010" name="tsuishi">
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2011</label>
+						<input class="col-sm-4" type="text" id="honshi2011" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2011" name="tsuishi">
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2012</label>
+						<input class="col-sm-4" type="text" id="honshi2012" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2012" name="tsuishi">
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2013</label>
+						<input class="col-sm-4" type="text" id="honshi2013" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2013" name="tsuishi">
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2014</label>
+						<input class="col-sm-4" type="text" id="honshi2014" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2014" name="tsuishi">
+					</div>
+				</div>
+				<div class="row area-modal-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">2015</label>
+						<input class="col-sm-4" type="text" id="honshi2015" name="honshi">
+						<input class="col-sm-4" type="text" id="tsuishi2015" name="tsuishi">
+					</div>
+				</div>
+				<hr>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.cancel'|trans }}</button>
+						<button type="button" class="btn btn-primary js-center-submit">{{ 'btn.submit'|trans }}</button>
+						<button type="button" class="btn btn-danger js-area-delete">{{ 'btn.delete'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('bundles/cckcommon/jquery-timepicker/jquery.timepicker.min.js') }}"></script>
+	<script src="{{ asset('bundles/cckcommon/js/jquery.datepair.min.js') }}"></script>
+	<script>
+
+	$(".js-area-target").bind('click', function(e){
+		// get target
+		var target = $(e.currentTarget);
+		var area_id = target.attr('area-id');
+		$('#areaModal').modal();
+	});
+
+	$('.js-center-submit').bind('click', function(e){
+		var center_cnt = Number($('#honshi2006').val())+Number($('#honshi2007').val())+Number($('#honshi2008').val())+Number($('#honshi2009').val())+Number($('#honshi2010').val())+
+		Number($('#honshi2011').val())+Number($('#honshi2012').val())+Number($('#honshi2013').val())+Number($('#honshi2014').val())+Number($('#honshi2015').val());
+
+		$('#center').val(center_cnt);
+
+		$('#areaModal').modal('hide');
+	});
+
+	// エリア更新
+	$('.js-area-submit').bind('click', function(e){
+
+		/*alert(area_target);
+		alert($('.js-prefecture').val());
+		alert($('.js-prefecture option:selected').text());*/
+
+		var add_prefecture_tag = '';
+
+		var update_districts = [];
+		var formupd = $('#formarea [name=upd]');
+		formupd.each(function() {
+			var district_name = $(this).val();
+			var district_id = $(this).attr("id");
+			update_districts.push(district_id + ":" + district_name);
+			//alert('formupd:' + district_name);
+			//alert('formupd_id:' + district_id);
+		});
+
+		var add_yogo = [];
+		var formadd = $('#formarea [name=yogo]');
+		formadd.each(function() {
+			var district_name = $(this).val();
+			add_yogo.push(district_name);
+		});
+
+		var add_akamoji = [];
+		var formadd = $('#formarea [name=akamoji]');
+		formadd.each(function() {
+			var district_name = $(this).prop("checked");
+			add_akamoji.push(district_name);
+		});
+
+		var add_hindo = [];
+		var formadd = $('#formarea [name=hindo]');
+		formadd.each(function() {
+			var district_name = $(this).val();
+			add_hindo.push(district_name);
+		});
+
+		var add_kaisetsu = [];
+		var formadd = $('#formarea [name=kaisetsu]');
+		formadd.each(function() {
+			var district_name = $(this).val();
+			add_kaisetsu.push(district_name);
+		});
+
+		var add_center = [];
+		var formadd = $('#formarea [name=center]');
+		formadd.each(function() {
+			var district_name = $(this).val();
+			add_center.push(district_name);
+		});
+
+		// create form
+		$('<form>', {
+			"id": "areaForm",
+			"html":  add_prefecture_tag + "<input type='hidden' name='update_district' value='" + update_districts + "'>"
+			+ "<input type='hidden' name='add_yogo' value='" + add_yogo + "'>"
+			+ "<input type='hidden' name='add_akamoji' value='" + add_akamoji + "'>"
+			+ "<input type='hidden' name='add_hindo' value='" + add_hindo + "'>"
+			+ "<input type='hidden' name='add_kaisetsu' value='" + add_kaisetsu + "'>"
+			+ "<input type='hidden' name='add_center' value='" + add_center + "'>",
+			"action": "{#{ path('client.genko.yogo') }#}",
+			"method": "POST"
+		}).appendTo(document.body).submit();
+	});
+
+	$(function(){
+		//***エリア追加
+		$('#addForm').click(function(){
+			var formarea_start = '<br><div class="row"><div class="col-sm-12"><label class="col-sm-2">追加用語</label><div class="col-sm-10">';
+			var formarea_end = '</div></div></div>';
+			//$('#formarea').append(formarea_start + '<input type="text" class="form-control" name="new" style="background-color:#ABFF7F;">' + formarea_end);
+
+			$('#formarea').append(formarea_start +
+			'<input class="form-control" type="text" name="yogo">'
+			+'<input class="form-control" type="checkbox" name="akamoji">'
+			+'<select class="form-control" name="hindo">'
+			+'<option value="1" >A</option>'
+			+'<option value="2" >B</option>'
+			+'<option value="3" >C</option>'
+			+'</select>'
+			+'<textarea class="form-control" name="kaisetsu"></textarea>'
+			+'<button type="button" class="btn btn-primary btn-sm js-area-target" area-id="2" data-toggle="modal" area-target="#areaModal">センター頻度</button>'
+			+'<input class="form-control" type="text" id="center"  name="center" readonly>'
+			+ formarea_end);
+
+			$(document).on("click", ".js-area-target", function () {
+				$('#areaModal').modal();
+			});
+		});
+
+		$('#removeForm').click(function(){
+			$('#formarea').remove();
+		});
+	});
+
+	// エリア削除
+	$('.js-area-delete').bind('click', function(e){
+		// チェックボックスの取得
+		var target = $('.row').find('input[type="checkbox"]:checked');
+
+		// チェックされたエリアは何番目かを取得する
+		var chkIdx = '';
+		$.each(target, function(key, element){
+			chkIdx = chkIdx + $(element).attr('value') + ";";
+		});
+		chkIdx = chkIdx.substr(0,chkIdx.length - 1);
+
+
+		if(target !== void 0){
+			// create form
+			$('<form>', {
+				"id": "areaDeleteForm",
+				"html": "<input type='hidden' name='id' value='" + chkIdx + "'>",
+				"action": "{#{ path('client.area.district.delete') }#}",
+				"method": "POST"
+			}).appendTo(document.body).submit();
+		}
+	});
+	</script>
+{% endblock %}
