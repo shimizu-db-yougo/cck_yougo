@@ -7,7 +7,12 @@
 	width: 360px;
 }
 .icon-half {
-	width: 8px;
+	width: 8.29px;
+	hegiht: 16px;
+	padding-bottom: 2px;
+}
+.icon-full {
+	width: 16px;
 	hegiht: 16px;
 	padding-bottom: 2px;
 }
@@ -28,13 +33,13 @@
 				<tr class="text-center">
 					<td width="60px" class="text-left">
 						<div>
-							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;color:#ff004C;">{{ yougo.main_term }}　<img src="{{ asset('./img/1_.jpg') }}" class="icon-half" alt="1_"><img src="{{ asset('./img/_0.jpg') }}" class="icon-half" alt="_0">□</span>
+							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (yougo.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ yougo.main_term }}　{{ getTextFreqIcon(yougo.text_frequency)|raw }}{{ getCenterFreqIcon(yougo.center_frequency)|raw }}{{ getNewsExamIcon(yougo.news_exam)|raw }}</span>
 
 							{% set sub_kana = '' %}
 							{% set i = 0 %}
 							{% for rec_sub_term in subterm %}
-								{% if i == 0 %}<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;">{{ yougo.delimiter }}</span>{% endif %}
-								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif;">{{ rec_sub_term.sub_term }}■□{{ rec_sub_term.delimiter }}</span>
+								{% if i == 0 %}<span style="font-size: 16px; font-family: sans-serif;">{{ yougo.delimiter }}</span>{% endif %}
+								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (rec_sub_term.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_sub_term.sub_term }}{{ getTextFreqIcon(rec_sub_term.text_frequency)|raw }}{{ getCenterFreqIcon(rec_sub_term.center_frequency)|raw }}{{ getNewsExamIcon(rec_sub_term.news_exam)|raw }}</span><span style="font-size: 16px; font-family: sans-serif;">{{ rec_sub_term.delimiter }}</span>
 								{% if rec_sub_term.kana != '' %}{% set sub_kana = sub_kana~'（'~rec_sub_term.kana~'）' %}{% endif %}
 								{% set i = i + 1 %}
 							{% endfor %}
@@ -44,14 +49,14 @@
 							<span style="font-size: 14px; font-family: serif;">{{ yougo.term_explain }}</span>
 							{% set i = 0 %}
 							{% for rec_refer in refer %}
-								{% if i == 0 %}<span style="font-size: 14px; font-family: sans-serif;">　→</span>{% endif %}
+								{% if i == 0 %}<span style="font-size: 14px; font-family: sans-serif;">　<img src="{{ asset('./img/yubi.jpg') }}" class="icon-full" alt="yubi"></span>{% endif %}
 								<span style="font-size: 14px; font-family: sans-serif;">ｐ．{{ rec_refer.nombre }}（{{ rec_refer.main_term }}）</span>
 								{% set i = i + 1 %}
 							{% endfor %}
 						</div>
 						{% for rec_synonym in synonym %}
 							<div class="text-right">
-								<span style="font-size: 16px; font-weight: bold;">■</span><span style="font-size: 14px; font-weight: bold;">{{ rec_synonym.term }}■</span>
+								<span style="font-size: 16px; font-weight: bold;">{{ getSynonymIcon(rec_synonym.synonym_id)|raw }}</span><span style="font-size: 14px; font-weight: bold; {{ (rec_synonym.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_synonym.term }}{{ getTextFreqIcon(rec_synonym.text_frequency)|raw }}{{ getNewsExamIcon(rec_synonym.news_exam)|raw }}</span>
 							</div>
 						{% endfor %}
 					</td>

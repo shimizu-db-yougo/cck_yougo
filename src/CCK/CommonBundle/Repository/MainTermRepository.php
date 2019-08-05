@@ -204,6 +204,10 @@ class MainTermRepository extends EntityRepository
 				MainTerm.id,
 				MainTerm.term_id,
 				MainTerm.main_term,
+				MainTerm.red_letter,
+				MainTerm.text_frequency,
+				MainTerm.center_frequency,
+				MainTerm.news_exam,
 				MainTerm.kana,
 				MainTerm.index_kana,
 				MainTerm.index_original,
@@ -235,6 +239,10 @@ class MainTermRepository extends EntityRepository
 		$sql = "
 			SELECT
 				SubTerm.sub_term,
+				SubTerm.red_letter,
+				SubTerm.text_frequency,
+				SubTerm.center_frequency,
+				SubTerm.news_exam,
 				SubTerm.kana,
 				SubTerm.index_kana,
 				SubTerm.delimiter
@@ -259,7 +267,12 @@ class MainTermRepository extends EntityRepository
 	public function getYougoDetailOfSynonym($term_id){
 		$sql = "
 			SELECT
-				Synonym.term
+				Synonym.term,
+				Synonym.synonym_id,
+				Synonym.red_letter,
+				Synonym.text_frequency,
+				Synonym.center_frequency,
+				Synonym.news_exam
 			FROM
 				Synonym
 			WHERE
