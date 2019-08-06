@@ -187,10 +187,10 @@ tbody {
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.freq.center'|trans }}</label>
 							<div class="col-sm-1">
-								<button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="{{ yougo.mainTerm }}" data-toggle="modal" center-target="#centerModal">{{ 'text.yougo.freq.center'|trans }}</button>
+								<button type="button" class="btn btn-primary btn-sm js-center-target" term-id="{{ yougo.termId }}" yougo-flag="1" data-toggle="modal" center-target="#centerModal">{{ 'text.yougo.freq.center'|trans }}</button>
 							</div>
 							<div class="col-sm-1">
-								<div id="center_freq" value="{{ center_freq }}"></div>
+								<div id="{{ 'center_freq'~yougo.termId }}" value=""><div id="center_freq" value="{{ center_freq }}"></div></div>
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.news.exam'|trans }}</label>
 							<div class="col-sm-2">
@@ -313,85 +313,8 @@ tbody {
 			<div class="modal-header">
 				センター頻度追加
 			</div>
-			<div class="modal-body">
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4"></label>
-						<label class="col-sm-4">本試</label>
-						<label class="col-sm-4">追試</label>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2006</label>
-						<input class="col-sm-4" type="text" id="honshi2006" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2006" name="tsuishi">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2007</label>
-						<input class="col-sm-4" type="text" id="honshi2007" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2007" name="tsuishi">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2008</label>
-						<input class="col-sm-4" type="text" id="honshi2008" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2008" name="tsuishi">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2009</label>
-						<input class="col-sm-4" type="text" id="honshi2009" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2009" name="tsuishi">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2010</label>
-						<input class="col-sm-4" type="text" id="honshi2010" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2010" name="tsuishi">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2011</label>
-						<input class="col-sm-4" type="text" id="honshi2011" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2011" name="tsuishi">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2012</label>
-						<input class="col-sm-4" type="text" id="honshi2012" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2012" name="tsuishi">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2013</label>
-						<input class="col-sm-4" type="text" id="honshi2013" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2013" name="tsuishi">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2014</label>
-						<input class="col-sm-4" type="text" id="honshi2014" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2014" name="tsuishi">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-12">
-						<label class="col-sm-4">2015</label>
-						<input class="col-sm-4" type="text" id="honshi2015" name="honshi">
-						<input class="col-sm-4" type="text" id="tsuishi2015" name="tsuishi">
-					</div>
-				</div>
-				<hr>
+			<div id="term_id"></div>
+			<div id="formcenter" class="modal-body">
 			</div>
 			<div class="modal-footer">
 					<div class="text-center">
@@ -453,7 +376,7 @@ tbody {
 					else UpButton.disabled = true;
 					if(i!=(O.options.length-1)) DownButton.disabled = false;
 					else DownButton.disabled = true;
-					
+
 					if(O.options.selectedIndex+10<O.options.length){
 						DownButton10.disabled = false;
 					}else{
@@ -480,17 +403,23 @@ tbody {
 
 		// センター頻度
 		$(".js-center-target").bind('click', function(e){
-			// get target
-			var target = $(e.currentTarget);
-			var main_term_id = target.attr('main-term-id');
-			$('#centerModal').modal();
+
+			getCenterPoint(e);
+
 		});
 
 		$('.js-center-submit').bind('click', function(e){
-			var center_cnt = Number($('#honshi2006').val())+Number($('#honshi2007').val())+Number($('#honshi2008').val())+Number($('#honshi2009').val())+Number($('#honshi2010').val())+
-			Number($('#honshi2011').val())+Number($('#honshi2012').val())+Number($('#honshi2013').val())+Number($('#honshi2014').val())+Number($('#honshi2015').val());
+			var center_cnt = 0;
+			var point_list = $('input[id^="main"],input[id^="sub"]');
+			for(var i in point_list){
+				console.log(point_list[i].value);
+				if(point_list[i].value !== void 0){center_cnt += Number(point_list[i].value);}
+			}
 
-			$('#center_freq').text(center_cnt);
+			var term_id = $('#term_id').val();
+
+			$('#center_freq' + term_id + ' #center_freq').text(center_cnt);
+			$('#center_freq' + term_id + ' input:hidden[name="center_freq_text"]').val(center_cnt);
 
 			$('#centerModal').modal('hide');
 		});
@@ -531,7 +460,7 @@ tbody {
 			var mainterm = $('#form_mainterm [name=main_term]').val();
 
 			var sub_term = [];
-			var form_mainterm = $('#form_subterm [name=sub_term]');
+			var form_mainterm = $('#form_subterm [name=center_freq_text]');
 			form_mainterm.each(function() {
 				var val_sub_term = $(this).val();
 				sub_term.push(val_sub_term);
@@ -560,15 +489,15 @@ tbody {
 			+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
 			+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">'
 					+'<option value="0">--------------</option>';
-					
+
 			if(record){
 				html += '<option value="1" {{ ' + record.delimiter_kana + ' == "1" ? " selected " : "" }}">なし</option>'
 				+'<option value="2" {{ ' + record.delimiter_kana + ' == "2" ? " selected " : "" }}">（</option>'
-				+'<option value="3" {{ ' + record.delimiter_kana + ' == "3" ? " selected " : "" }}">）（</option>';			
+				+'<option value="3" {{ ' + record.delimiter_kana + ' == "3" ? " selected " : "" }}">）（</option>';
 			}else{
 				html += '<option value="1">なし</option>'
 				+'<option value="2">（</option>'
-				+'<option value="3">）（</option>';			
+				+'<option value="3">）（</option>';
 			}
 			html += '</select></div>'
 			+'</div></div>'
@@ -577,8 +506,8 @@ tbody {
 			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="text_freq" value="' + ((record) ? record.text_freq : '') + '"></div>'
 			+'<div class="col-sm-1"><div id="text_rank">A</div></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.freq.center"|trans }}</label>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target" main-term-id="' + ((record) ? record.sub_term : '') + '" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-			+'<div class="col-sm-1"><div id="center_freq" value="{{ center_freq }}"></div></div>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value=""></div><input type="hidden" name="center_freq_text" value="test"></div></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
 			+'<div class="col-sm-2"><input type="checkbox" name="news_exam[]"></div>'
 			+'</div></div>'
@@ -589,11 +518,11 @@ tbody {
 			if(record){
 				html += '<option value="1" ' + record.delimiter + ' == "なし" ? " selected " : "" >なし</option>'
 				+'<option value="2" ' + record.delimiter + ' == "（" ? " selected " : "" >（</option>'
-				+'<option value="3" ' + record.delimiter + ' == "）（" ? " selected " : "" >）（</option>';			
+				+'<option value="3" ' + record.delimiter + ' == "）（" ? " selected " : "" >）（</option>';
 			}else{
 				html += '<option value="1">なし</option>'
 				+'<option value="2">（</option>'
-				+'<option value="3">）（</option>';			
+				+'<option value="3">）（</option>';
 			}
 
 			html += '</select></div>'
@@ -608,12 +537,56 @@ tbody {
 			+'</div></div><hr></div>';
 			return html;
 		}
-		
+
+		function getCenterPoint(e){
+			// get target
+			var target = $(e.currentTarget);
+			var term_id = target.attr('term-id');
+			var yougo_flag = target.attr('yougo-flag');
+
+			$('#term_id').val(term_id);
+			$('#formcenter').empty();
+
+			// センター頻度の取得
+			var data = {
+				'term_id': term_id,
+				'yougo_flag': yougo_flag
+			};
+			$.ajax({
+				url: "{{ path('client.yougo.center.ajax') }}",
+				data: data,
+				method: 'POST',
+				success: function(response){
+					var html = '<div class="row"><div class="col-sm-12"><label class="col-sm-4"></label>'
+					+'<label class="col-sm-4">本試</label><label class="col-sm-4">追試</label>'
+					+'</div>'
+					$('#formcenter').append(html);
+
+					$.each(response, function(key, list){
+						console.log(key);
+						console.log(list.year);
+
+						html = '<div class="row"><div class="col-sm-12"><label class="col-sm-4">' + list.year + '</label>'
+						+'<input type="text" class="col-sm-4" id="main' + list.year + '" name="main' + list.year + '" value="' + list.mainExam + '">'
+						+'<input type="text" class="col-sm-4" id="sub' + list.year + '" name="sub' + list.year + '" value="' + list.subExam + '">'
+						+'</div>';
+
+						$('#formcenter').append(html);
+					});
+				},
+				error: function(response){
+				}
+			});
+
+			$('#centerModal').modal();
+
+		}
+
 		$(function(){
 			$(window).load(function(){
 				// 掲載順リスト初期化
 				buttonStyle(document.getElementById('SEL'));
-				
+
 				var yougo_sub = '{{ yougo_sub|json_encode|raw }}';
 				console.log("**サブ用語**");
 				console.log(yougo_sub);
@@ -636,8 +609,10 @@ tbody {
 
 				}
 
-				$(document).on("click", ".js-center-target", function () {
-					$('#centerModal').modal();
+				$(document).on("click", ".js-center-target2", function (e) {
+
+					getCenterPoint(e);
+
 				});
 
 			});

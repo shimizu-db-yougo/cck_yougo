@@ -238,6 +238,8 @@ class MainTermRepository extends EntityRepository
 	public function getYougoDetailOfSubterm($term_id){
 		$sql = "
 			SELECT
+				SubTerm.id,
+				SubTerm.main_term_id,
 				SubTerm.sub_term,
 				SubTerm.red_letter,
 				SubTerm.text_frequency,

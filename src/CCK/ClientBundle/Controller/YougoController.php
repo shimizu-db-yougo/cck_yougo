@@ -541,6 +541,22 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/yougo/center/ajax", name="client.yougo.center.ajax")
+	 */
+	public function getCenterAjaxAction(Request $request){
+		if($request->request->has('term_id')){
+			$term_id = $request->request->get('term_id');
+			$yougo_flag = $request->request->get('yougo_flag');
+			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
+			$response = new JsonResponse($center_point);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * @Route("/edit/confirm", name="client.yougo.edit.confirm")
 	 * @Method("POST|GET")
 	 */
@@ -576,44 +592,44 @@ class YougoController extends BaseController {
 	 */
 	public function yogotestAction(Request $request){
 		$session = $request->getSession();
-	
+
 		// get user information
 		$user = $this->getUser();
-	
+
 		$em = $this->getDoctrine()->getManager();
-	
+
 		$yogo = array();
 		if($request->request->has('add_yogo')){
 			$yogo = explode(",", $request->request->get('add_yogo'));
 		}
-	
+
 		$add_akamoji = array();
 		if($request->request->has('add_akamoji')){
 			$add_akamoji = explode(",", $request->request->get('add_akamoji'));
 		}
-	
+
 		$add_hindo = array();
 		if($request->request->has('add_hindo')){
 			$add_hindo = explode(",", $request->request->get('add_hindo'));
 		}
-	
+
 		$add_kaisetsu = array();
 		if($request->request->has('add_kaisetsu')){
 			$add_kaisetsu = explode(",", $request->request->get('add_kaisetsu'));
 		}
-	
+
 		$add_center = array();
 		if($request->request->has('add_center')){
 			$add_center= explode(",", $request->request->get('add_center'));
 		}
-	
+
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE
 		));
 		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
 				'deleteFlag' => FALSE
 		));
-		
+
 		return array(
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
@@ -624,7 +640,7 @@ class YougoController extends BaseController {
 				'centers' => $add_center,
 		);
 	}
-	
+
 	/**
 	 * session data remove
 	 */
