@@ -180,10 +180,10 @@ tbody {
 						<div class="col-lg-12">
 							<label class="col-sm-1">{{ 'text.yougo.freq.text'|trans }}</label>
 							<div class="col-sm-1">
-								<input type="text" class="form-control input-sm" name="text_freq" value="{{ text_freq }}">
+								<input type="text" class="form-control input-sm js-text-freq" name="text_freq" value="{{ text_freq }}">
 							</div>
 							<div class="col-sm-1">
-								<div id="text_rank">A</div>
+								<div id="{{ 'text_rank'~yougo.termId }}" value=""><div id="text_rank"></div></div>
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.freq.center'|trans }}</label>
 							<div class="col-sm-1">
@@ -297,7 +297,6 @@ tbody {
 </div>
 </form>
 
-<!-- yougo list area -->
 <div class="content">
 
 <div class="row">
@@ -307,6 +306,7 @@ tbody {
 
 </div>
 
+<!-- サブ画面 -->
 <div class="modal fade" id="centerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
@@ -400,6 +400,13 @@ tbody {
 
 			buttonStyle(O);
 		}
+
+		// 教科書頻度
+		$('.js-text-freq').bind('keydown keyup keypress change', function () {
+
+			getTextPoint($(this).val(),"{{ yougo.termId }}");
+
+		});
 
 		// センター頻度
 		$(".js-center-target").bind('click', function(e){
@@ -503,8 +510,8 @@ tbody {
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="text_freq" value="' + ((record) ? record.text_freq : '') + '"></div>'
-			+'<div class="col-sm-1"><div id="text_rank">A</div></div>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" name="text_freq" value="' + ((record) ? record.text_freq : '') + '"></div>'
+			+'<div class="col-sm-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.freq.center"|trans }}</label>'
 			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
 			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value=""></div><input type="hidden" name="center_freq_text" value="test"></div></div>'
@@ -536,6 +543,18 @@ tbody {
 			+'<label class="col-sm-1">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
 			+'</div></div><hr></div>';
 			return html;
+		}
+
+		function getTextPoint(value,term_id){
+			var rank = '';
+			if(value >= 6){
+				rank = 'A';
+			}else if((value >= 3)&&(value <= 5)){
+				rank = 'B';
+			}else if((value >= 1)&&(value <= 2)){
+				rank = 'C';
+			}
+			$('#text_rank' + term_id + ' #text_rank').text(rank);
 		}
 
 		function getCenterPoint(e){
@@ -587,6 +606,7 @@ tbody {
 				// 掲載順リスト初期化
 				buttonStyle(document.getElementById('SEL'));
 
+				// サブ用語取得
 				var yougo_sub = '{{ yougo_sub|json_encode|raw }}';
 				console.log("**サブ用語**");
 				console.log(yougo_sub);
@@ -609,10 +629,17 @@ tbody {
 
 				}
 
+				$(document).on("keydown keyup keypress change", ".js-text-freq2", function (e) {
+					console.log("test");
+					// get target
+					var target = $(e.currentTarget);
+					var term_id = target.attr('term-id');
+
+					getTextPoint(e.currentTarget.value,term_id);
+				});
+
 				$(document).on("click", ".js-center-target2", function (e) {
-
 					getCenterPoint(e);
-
 				});
 
 			});
