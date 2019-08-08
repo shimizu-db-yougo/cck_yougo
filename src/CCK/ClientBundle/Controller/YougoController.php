@@ -455,6 +455,8 @@ class YougoController extends BaseController {
 				'deleteFlag' => false
 		));*/
 		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($id);
+		$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($id);
+		$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($id);
 
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE
@@ -501,18 +503,17 @@ class YougoController extends BaseController {
 				'deleteFlag' => false
 		));
 
-		$text_freq = '';
-		$center_freq = '';
-		$news_exam = '';
-		$term = '';
-		$list_count = '';
-		$sort_order_link = '';
-		$sort_field = '';
+		// 指矢印選択に表示する用語
+		$mainTermList = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
+				'deleteFlag' => false
+		));
 
 		return array(
 				'term_id' => $id,
 				'yougo' => $entityMain,
 				'yougo_sub' => $entitySub,
+				'yougo_syn' => $entitySyn,
+				'yougo_ref' => $entityRef,
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
 				'hen_list' => $hen_list,
@@ -528,15 +529,7 @@ class YougoController extends BaseController {
 				'select_chu' => $entityHeader->getChu(),
 				'select_ko' => $entityHeader->getKo(),
 				'print_order_list' => $printOrderList,
-
-				'text_freq' => $text_freq,
-				'center_freq' => $center_freq,
-				'news_exam' => ($news_exam) ? true : false,
-				'term' => $term,
-				'list_count' => $list_count,
-				'sort_order' => $sort_order_link,
-				'sort_field' => $sort_field
-
+				'main_term_list' => $mainTermList,
 		);
 	}
 
