@@ -48,7 +48,8 @@ class ClientExtension extends \Twig_Extension
 			new \Twig_SimpleFunction('getTextFreqIcon', array($this, 'getTextFreqIcon')),
 			new \Twig_SimpleFunction('getCenterFreqIcon', array($this, 'getCenterFreqIcon')),
 			new \Twig_SimpleFunction('getSynonymIcon', array($this, 'getSynonymIcon')),
-			new \Twig_SimpleFunction('getNewsExamIcon', array($this, 'getNewsExamIcon'))
+			new \Twig_SimpleFunction('getNewsExamIcon', array($this, 'getNewsExamIcon')),
+			new \Twig_SimpleFunction('replaceTag', array($this, 'replaceTag'))
 		);
 	}
 
@@ -124,6 +125,21 @@ class ClientExtension extends \Twig_Extension
 		}else{
 			return "";
 		}
+	}
+
+	/**
+	 * [replaceTag description]
+	 * @param  [type] $term_explain     [description]
+	 * @return [type]               [description]
+	 */
+	public function replaceTag($term_explain){
+		$term_explain = str_replace('《rtn》', '<br>', $term_explain);
+		$term_explain = str_replace('《c_SI》', '<img src="/./img/shiryo.jpg" class="icon-3times" alt="shiryo">', $term_explain);
+		$term_explain = preg_replace('/《c_G》(.*)《\/c_G》/u', '<span style="font-weight: bold;">$1</span>', $term_explain);
+		$term_explain = preg_replace('/《c_TM:[0-9]+》(.*)《\/c_TM》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_SAK》(.*)《\/c_SAK》/u', '$1', $term_explain);
+
+		return $term_explain;
 	}
 
 	public function twigFileExists($filename){

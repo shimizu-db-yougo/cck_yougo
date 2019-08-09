@@ -16,6 +16,11 @@
 	hegiht: 16px;
 	padding-bottom: 2px;
 }
+.icon-3times {
+	width: 48px;
+	hegiht: 16px;
+	padding-bottom: 2px;
+}
 	</style>
 {% endblock %}
 
@@ -46,7 +51,7 @@
 
 							{% if yougo.kana != '' %}<span style="font-size: 10px; font-family: serif;">（{{ yougo.kana }}）</span>{% endif %}
 							<span style="font-size: 10px; font-family: serif;">{{ sub_kana }}</span>
-							<span style="font-size: 14px; font-family: serif;">{{ yougo.term_explain }}</span>
+							<span style="font-size: 14px; font-family: serif;">{{ replaceTag(yougo.term_explain)|raw }}</span>
 							{% set i = 0 %}
 							{% for rec_refer in refer %}
 								{% if i == 0 %}<span style="font-size: 14px; font-family: sans-serif;">　<img src="{{ asset('./img/yubi.jpg') }}" class="icon-full" alt="yubi"></span>{% endif %}
@@ -56,7 +61,7 @@
 						</div>
 						{% for rec_synonym in synonym %}
 							<div class="text-right">
-								<span style="font-size: 16px; font-weight: bold;">{{ getSynonymIcon(rec_synonym.synonym_id)|raw }}</span><span style="font-size: 14px; font-weight: bold; {{ (rec_synonym.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_synonym.term }}{{ getTextFreqIcon(rec_synonym.text_frequency)|raw }}{{ getCenterFreqIcon(rec_synonym.center_frequency)|raw }}{{ getNewsExamIcon(rec_synonym.news_exam)|raw }}</span>
+								{{ getSynonymIcon(rec_synonym.synonym_id)|raw }}<span style="font-size: 14px; font-weight: bold; {{ (rec_synonym.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_synonym.term }}{{ getTextFreqIcon(rec_synonym.text_frequency)|raw }}{{ getCenterFreqIcon(rec_synonym.center_frequency)|raw }}{{ getNewsExamIcon(rec_synonym.news_exam)|raw }}</span>
 							</div>
 						{% endfor %}
 					</td>
