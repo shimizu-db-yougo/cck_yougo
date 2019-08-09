@@ -623,6 +623,7 @@ tbody {
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
 			+'<label class="col-sm-1">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-sub-remove">{{ "btn.remove.subterm"|trans }}</button></div>'
 			+'</div></div><hr></div>';
 			return html;
 		}
@@ -857,6 +858,11 @@ tbody {
 				$(document).on("click", ".js-center-target2", function (e) {
 					getCenterPoint(e);
 				});
+				// サブ用語　削除
+				$(document).on("click", ".js-sub-remove", function (e) {
+					$(this).parents('#form_subterm').remove();
+				});
+
 				// 同対類用語　教科書頻度　イベント設定
 				$(document).on("keydown keyup keypress change", ".js-text-freq3", function (e) {
 					// get target
