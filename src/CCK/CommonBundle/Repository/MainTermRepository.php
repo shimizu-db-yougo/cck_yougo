@@ -140,6 +140,10 @@ class MainTermRepository extends EntityRepository
 
 		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
 
+		if($result > 0){
+			return $result;
+		}
+
 		$key_term_id = '';
 		$wk_sub_term = array();
 		$wk_sub_kana = array();
