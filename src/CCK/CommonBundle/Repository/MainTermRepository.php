@@ -140,7 +140,7 @@ class MainTermRepository extends EntityRepository
 
 		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
 
-		if($result > 0){
+		if(count($result) == 0){
 			return $result;
 		}
 
