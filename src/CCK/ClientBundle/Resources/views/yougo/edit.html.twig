@@ -49,6 +49,9 @@ tbody {
 .sty_list_count {
     width: 60%;
 }
+textarea {
+  resize: vertical;
+}
 	</style>
 {% endblock %}
 
@@ -172,7 +175,9 @@ tbody {
 							<div class="col-sm-1">
 								<input type="checkbox" name="red_letter[]" {{ (yougo.redLetter == '1') ? ' checked ' : '' }}>
 							</div>
-							<div class="col-sm-1">
+							<label class="col-sm-1">{{ 'text.yougo.kana'|trans }}</label>
+							<div class="col-sm-3">
+								<input type="text" class="form-control input-sm" name="kana" value="{{ yougo.kana }}">
 							</div>
 						</div>
 					</div>
@@ -211,6 +216,10 @@ tbody {
 									<option value="6" {{ yougo.delimiter == '）' ? " selected " : '' }}">）</option>
 								</select>
 							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-lg-12">
 							<label class="col-sm-1">{{ 'text.yougo.western_language'|trans }}</label>
 							<div class="col-sm-3">
 								<input type="text" class="form-control input-sm" name="western_language" value="{{ yougo.westernLanguage }}">
@@ -223,10 +232,6 @@ tbody {
 					</div>
 					<div class="form-group">
 						<div class="col-lg-12">
-							<label class="col-sm-1">{{ 'text.yougo.kana'|trans }}</label>
-							<div class="col-sm-3">
-								<input type="text" class="form-control input-sm" name="kana" value="{{ yougo.kana }}">
-							</div>
 							<label class="col-sm-1">{{ 'text.yougo.index_add_letter'|trans }}</label>
 							<div class="col-sm-3">
 								<input type="text" class="form-control input-sm" name="index_add_letter" value="{{ yougo.indexAddLetter }}">
@@ -523,6 +528,7 @@ tbody {
 			var target = $(e.currentTarget);
 			var main_term_id = target.attr('main-term-id');
 
+			$('#formindex').empty();
 			// さくいん用語タグで囲まれた用語を抽出
 			var match_regex = /(?<=\《c_SAK》).*?(?=\《\/c_SAK》)/g;
 			var match_chr = '';
@@ -538,7 +544,7 @@ tbody {
 							+'<label class="col-sm-2">'+ match_chr[i] + '</label>'
 							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" name="index_kana" value=""></div>'
 							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" name="index_add_letter" value=""></div>'
-							+'<div class="col-sm-2"><input class="form-control input-sm" type="text" name="nombre" value=""></div>'
+							+'<label class="col-sm-2"></label>'
 							+'</div>');
 				}
 
@@ -581,19 +587,6 @@ tbody {
 			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="kana" value="' + (((record)&&(record.kana)) ? record.kana : '') + '"></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
-			+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">'
-					+'<option value="0">なし</option>';
-
-			html += '<option value="1" ' + (((record)&&(record.delimiter_kana == 'と')) ? ' selected ' : '') + '>と</option>'
-			+'<option value="2" ' + (((record)&&(record.delimiter_kana == '，')) ? ' selected ' : '') + '>，</option>'
-			+'<option value="3" ' + (((record)&&(record.delimiter_kana == '・')) ? ' selected ' : '') + '>・</option>'
-			+'<option value="4" ' + (((record)&&(record.delimiter_kana == '／')) ? ' selected ' : '') + '>／</option>'
-			+'<option value="5" ' + (((record)&&(record.delimiter_kana == '（')) ? ' selected ' : '') + '>（</option>'
-			+'<option value="6" ' + (((record)&&(record.delimiter_kana == '）')) ? ' selected ' : '') + '>）</option>'
-			+'<option value="7" ' + (((record)&&(record.delimiter_kana == '）（')) ? ' selected ' : '') + '>）（</option>';
-
-			html += '</select></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
 			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" name="text_freq" value="' + ((record) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-sm-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
@@ -615,6 +608,22 @@ tbody {
 			+'<option value="6" ' + (((record)&&(record.delimiter == '）')) ? ' selected ' : '') + '>）</option>';
 
 			html += '</select></div>'
+
+			+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
+			+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">'
+					+'<option value="0">なし</option>';
+
+			html += '<option value="1" ' + (((record)&&(record.delimiter_kana == 'と')) ? ' selected ' : '') + '>と</option>'
+			+'<option value="2" ' + (((record)&&(record.delimiter_kana == '，')) ? ' selected ' : '') + '>，</option>'
+			+'<option value="3" ' + (((record)&&(record.delimiter_kana == '・')) ? ' selected ' : '') + '>・</option>'
+			+'<option value="4" ' + (((record)&&(record.delimiter_kana == '／')) ? ' selected ' : '') + '>／</option>'
+			+'<option value="5" ' + (((record)&&(record.delimiter_kana == '（')) ? ' selected ' : '') + '>（</option>'
+			+'<option value="6" ' + (((record)&&(record.delimiter_kana == '）')) ? ' selected ' : '') + '>）</option>'
+			+'<option value="7" ' + (((record)&&(record.delimiter_kana == '）（')) ? ' selected ' : '') + '>）（</option>';
+
+			html += '</select></div>'
+			+'</div></div>'
+			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
 			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.index_kana"|trans }}</label>'
@@ -665,6 +674,8 @@ tbody {
 			+'<option value="6" ' + (((record)&&(record.delimiter == '）＋《rtn》')) ? ' selected ' : '') + '>）＋改行</option>'
 
 			html += '</select></div>'
+			+'</div></div>'
+			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
 			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.index_kana"|trans }}</label>'
