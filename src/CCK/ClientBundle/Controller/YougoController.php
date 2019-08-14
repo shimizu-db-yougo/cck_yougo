@@ -485,6 +485,93 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/new", name="client.yougo.new")
+	 * @Method("POST|GET")
+	 * @Template()
+	 */
+	public function newAction(Request $request){
+		// 登録画面から遷移した場合
+		if($request->request->has('add_main_term')){
+			$main_term = $request->request->get('add_main_term');
+			$sub_term = $request->request->get('add_sub_term');
+			print($main_term);
+			print_r($sub_term);
+
+			//DB登録後、一覧画面へ遷移する
+			exit();
+		}
+
+
+		$session = $request->getSession();
+
+		// get user information
+		$user = $this->getUser();
+
+		$em = $this->getDoctrine()->getManager();
+
+		$entityMain = new MainTerm();
+		$entitySub = new SubTerm();
+		$entitySyn = new Synonym();
+		$entityRef = new Refer();
+
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '1',
+				'deleteFlag' => FALSE
+		));
+		$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '2',
+				'deleteFlag' => FALSE
+		));
+		$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '3',
+				'deleteFlag' => FALSE
+		));
+		$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '4',
+				'deleteFlag' => FALSE
+		));
+		$ko_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'headerId' => '5',
+				'deleteFlag' => FALSE
+		));
+
+		// 掲載順に表示する用語
+		$printOrderList = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
+				'deleteFlag' => false
+		));
+
+		return array(
+				'term_id' => '',
+				'yougo' => $entityMain,
+				'yougo_sub' => $entitySub,
+				'yougo_syn' => $entitySyn,
+				'yougo_ref' => $entityRef,
+				'cur_list' => $cur_list,
+				'ver_list' => $ver_list,
+				'hen_list' => $hen_list,
+				'sho_list' => $sho_list,
+				'dai_list' => $dai_list,
+				'chu_list' => $chu_list,
+				'ko_list' => $ko_list,
+				'curriculum' => '',
+				'version' => '',
+				'select_hen' => '',
+				'select_sho' => '',
+				'select_dai' => '',
+				'select_chu' => '',
+				'select_ko' => '',
+				'print_order_list' => $printOrderList,
+				'main_term_list' => '',
+		);
+	}
+
+	/**
 	 * @Route("/edit/{term_id}", name="client.yougo.edit")
 	 * @Method("POST|GET")
 	 * @Template()
