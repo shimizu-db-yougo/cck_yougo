@@ -65,7 +65,7 @@ textarea {
 					<div class="form-group">
 						<div class="col-lg-12">
 							<label class="col-sm-1">{{ 'text.yougo.term_id'|trans }}</label>
-							<label class="col-sm-1">{{ yougo.termId }}</label>
+							<label class="col-sm-1" name="term_id">{{ yougo.termId }}</label>
 							<label class="col-sm-1">{{ 'text.yougo.curriculum'|trans }}</label>
 							<div class="col-sm-2">
 								<select class="form-control js-cur input-sm" name="curriculum">
@@ -173,7 +173,7 @@ textarea {
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.red_letter'|trans }}</label>
 							<div class="col-sm-1">
-								<input type="checkbox" name="red_letter[]" {{ (yougo.redLetter == '1') ? ' checked ' : '' }}>
+								<input type="checkbox" name="red_letter" {{ (yougo.redLetter == '1') ? ' checked ' : '' }}>
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.kana'|trans }}</label>
 							<div class="col-sm-3">
@@ -198,7 +198,7 @@ textarea {
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.news.exam'|trans }}</label>
 							<div class="col-sm-2">
-								<input type="checkbox" name="news_exam[]" {{ (yougo.newsExam == '1') ? ' checked ' : '' }}>
+								<input type="checkbox" name="news_exam" {{ (yougo.newsExam == '1') ? ' checked ' : '' }}>
 							</div>
 						</div>
 					</div>
@@ -261,10 +261,10 @@ textarea {
 					<div class="form-group">
 						<div class="col-lg-12">
 							<label class="col-sm-1">{{ 'text.yougo.nombre'|trans }}</label>
-							<label class="col-sm-1">{{ yougo.nombre }}</label>
+							<label class="col-sm-1" name="nombre">{{ yougo.nombre }}</label>
 							<label class="col-sm-1">{{ 'text.yougo.nombre.bold'|trans }}</label>
 							<div class="col-sm-2">
-								<input type="checkbox" name="nombre.bold[]">
+								<input type="checkbox" name="nombre.bold">
 							</div>
 						</div>
 					</div>
@@ -556,23 +556,51 @@ textarea {
 
 		// 用語登録
 		$('.js-yougo-submit').bind('click', function(e){
-			var mainterm = $('#form_mainterm [name=main_term]').val();
+			var mainterm = {};
+			mainterm.term_id = $('#form_mainterm [name=term_id]').text();
+			mainterm.main_term = $('#form_mainterm [name=main_term]').val();
+			mainterm.red_letter = $('#form_mainterm [name=red_letter]').prop("checked");
+			mainterm.kana = $('#form_mainterm [name=kana]').val();
+			mainterm.text_freq = $('#form_mainterm [name=text_freq]').val();
+			mainterm.center_freq = $('#form_mainterm [id=center_freq]').text();
+			mainterm.news_exam = $('#form_mainterm [name=news_exam]').prop("checked");
+			mainterm.delimiter = $('#form_mainterm [name=delimiter]').val();
+			mainterm.western_language = $('#form_mainterm [name=western_language]').val();
+			mainterm.birth_year = $('#form_mainterm [name=birth_year]').val();
+			mainterm.index_add_letter = $('#form_mainterm [name=index_add_letter]').val();
+			mainterm.index_kana = $('#form_mainterm [name=index_kana]').val();
+			mainterm.index_original_kana = $('#form_mainterm [name=index_original_kana]').val();
+			mainterm.index_original = $('#form_mainterm [name=index_original]').val();
+			mainterm.index_abbreviation = $('#form_mainterm [name=index_abbreviation]').val();
+			mainterm.nombre = $('#form_mainterm [name=nombre]').text();
+			mainterm.term_explain = $('#form_mainterm [name=term_explain]').text();
 
 			var sub_term = [];
-			var form_mainterm = $('#form_subterm [name=center_freq_text]');
-			form_mainterm.each(function() {
+			var form_subterm = $('#form_subterm [name=sub_term]');
+			form_subterm.each(function() {
 				var val_sub_term = $(this).val();
 				sub_term.push(val_sub_term);
 			});
+			mainterm.sub_term = sub_term;
 
 			// create form
-			$('<form>', {
+			/*$('<form>', {
 				"id": "maintermForm",
 				"html":  "<input type='hidden' name='add_main_term' value='" + mainterm + "'>"
 				+ "<input type='hidden' name='add_sub_term' value='" + sub_term + "'>",
 				"action": "{{ path('client.yougo.edit', {'term_id': yougo.termId}) }}",
 				"method": "POST"
-			}).appendTo(document.body).submit();
+			}).appendTo(document.body).submit();*/
+
+			$.post("{{ path('client.edit.save.ajax') }}", mainterm)
+			.done(function(r,s){
+				console.log('savePost:done',s,r);
+				window.location.href = "{{ path('client.yougo.list') }}";
+			})
+			.fail(function(e,s){
+				console.log('savePost:fail',s,e.status);
+				alert('DB更新エラー');
+			});
 		});
 
 		function constructSubForm(record){

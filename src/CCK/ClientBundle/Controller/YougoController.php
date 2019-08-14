@@ -572,6 +572,49 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/edit/save/ajax", name="client.edit.save.ajax")
+	 * @Method("POST")
+	 */
+	public function saveAjaxAction(Request $request){
+		$this->get('logger')->error("***saveAjaxAction start***");
+		$this->get('logger')->error($request->request->get('main_term'));
+		$this->get('logger')->error("***sub_term***".serialize($request->request->get('sub_term')));
+
+		$ret = ['result'=>'ok','error'=>''];
+
+		$main_term = $request->request->get('main_term');
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+				'termId' => $request->request->get('term_id'),
+				'deleteFlag' => FALSE
+		));
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			$entity->setMainTerm($main_term);
+
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$ret = ['result'=>'ng','error'=>'DB error'];
+		}
+
+		$response = new JsonResponse($ret);
+
+		return $response;
+	}
+
+	/**
 	 * @Route("/edit/{term_id}", name="client.yougo.edit")
 	 * @Method("POST|GET")
 	 * @Template()
