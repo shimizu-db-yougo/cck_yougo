@@ -208,12 +208,12 @@ textarea {
 							<div class="col-sm-1">
 								<select class="form-control input-sm" name="delimiter">
 									<option value="0">なし</option>
-									<option value="1" {{ yougo.delimiter == 'と' ? " selected " : '' }}">と</option>
-									<option value="2" {{ yougo.delimiter == '，' ? " selected " : '' }}">，</option>
-									<option value="3" {{ yougo.delimiter == '・' ? " selected " : '' }}">・</option>
-									<option value="4" {{ yougo.delimiter == '／' ? " selected " : '' }}">／</option>
-									<option value="5" {{ yougo.delimiter == '（' ? " selected " : '' }}">（</option>
-									<option value="6" {{ yougo.delimiter == '）' ? " selected " : '' }}">）</option>
+									<option value="1" {{ yougo.delimiter == '1' ? " selected " : '' }}">と</option>
+									<option value="2" {{ yougo.delimiter == '2' ? " selected " : '' }}">，</option>
+									<option value="3" {{ yougo.delimiter == '3' ? " selected " : '' }}">・</option>
+									<option value="4" {{ yougo.delimiter == '4' ? " selected " : '' }}">／</option>
+									<option value="5" {{ yougo.delimiter == '5' ? " selected " : '' }}">（</option>
+									<option value="6" {{ yougo.delimiter == '6' ? " selected " : '' }}">）</option>
 								</select>
 							</div>
 						</div>
@@ -508,7 +508,7 @@ textarea {
 
 		$('.js-center-submit').bind('click', function(e){
 			var center_cnt = 0;
-			var point_list = $('input[id^="main"],input[id^="sub"]');
+			var point_list = $('input[id^="center_main"],input[id^="center_sub"]');
 			for(var i in point_list){
 				console.log(point_list[i].value);
 				if(point_list[i].value !== void 0){center_cnt += Number(point_list[i].value);}
@@ -556,6 +556,7 @@ textarea {
 
 		// 用語登録
 		$('.js-yougo-submit').bind('click', function(e){
+			// 主用語
 			var mainterm = {};
 			mainterm.term_id = $('#form_mainterm [name=term_id]').text();
 			mainterm.main_term = $('#form_mainterm [name=main_term]').val();
@@ -573,24 +574,64 @@ textarea {
 			mainterm.index_original = $('#form_mainterm [name=index_original]').val();
 			mainterm.index_abbreviation = $('#form_mainterm [name=index_abbreviation]').val();
 			mainterm.nombre = $('#form_mainterm [name=nombre]').text();
-			mainterm.term_explain = $('#form_mainterm [name=term_explain]').text();
+			mainterm.term_explain = $('#form_mainterm [id=term_explain]').val();
+			mainterm.illust_filename = $('#form_illust [name=illust_filename]').val();
+			mainterm.illust_caption = $('#form_illust [name=illust_caption]').val();
+			mainterm.illust_kana = $('#form_illust [name=illust_kana]').val();
+			mainterm.handover = $('#form_handover [id=handover]').val();
 
-			var sub_term = [];
-			var form_subterm = $('#form_subterm [name=sub_term]');
-			form_subterm.each(function() {
-				var val_sub_term = $(this).val();
-				sub_term.push(val_sub_term);
+			// サブ用語
+			var subterm = {sub_term_id:[],sub_term:[],red_letter:[],kana:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],delimiter_kana:[],index_add_letter:[],index_kana:[],nombre:[]};
+			var form_subterm = $('.form_subterm');
+			form_subterm.each(function(i,elem) {
+				subterm.sub_term_id.push($(elem).find('#sub_term_id').val());
+				subterm.sub_term.push($(elem).find('#sub_term').val());
+				subterm.red_letter.push($(elem).find('#red_letter').prop("checked"));
+				subterm.kana.push($(elem).find('#kana').val());
+				subterm.text_freq.push($(elem).find('#text_freq').val());
+				subterm.center_freq.push($(elem).find('#center_freq').text());
+				subterm.news_exam.push($(elem).find('#news_exam').prop("checked"));
+				subterm.delimiter.push($(elem).find('#delimiter').val());
+				subterm.delimiter_kana.push($(elem).find('#delimiter_kana').val());
+				subterm.index_add_letter.push($(elem).find('#index_add_letter').val());
+				subterm.index_kana.push($(elem).find('#index_kana').val());
+				subterm.nombre.push($(elem).find('#nombre').text());
 			});
-			mainterm.sub_term = sub_term;
 
-			// create form
-			/*$('<form>', {
-				"id": "maintermForm",
-				"html":  "<input type='hidden' name='add_main_term' value='" + mainterm + "'>"
-				+ "<input type='hidden' name='add_sub_term' value='" + sub_term + "'>",
-				"action": "{{ path('client.yougo.edit', {'term_id': yougo.termId}) }}",
-				"method": "POST"
-			}).appendTo(document.body).submit();*/
+			console.log(subterm);
+			mainterm.subterm = subterm;
+
+			// 同対類用語
+			var synterm = {syn_term_id:[],synonym_id:[],term:[],red_letter:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],index_add_letter:[],index_kana:[],nombre:[]};
+			var form_synterm = $('.form_synterm');
+			form_synterm.each(function(i,elem) {
+				synterm.syn_term_id.push($(elem).find('#syn_term_id').val());
+				synterm.synonym_id.push($(elem).find('#synonym_id').val());
+				synterm.term.push($(elem).find('#syn_term').val());
+				synterm.red_letter.push($(elem).find('#red_letter').prop("checked"));
+				synterm.text_freq.push($(elem).find('#text_freq').val());
+				synterm.center_freq.push($(elem).find('#center_freq').text());
+				synterm.news_exam.push($(elem).find('#news_exam').prop("checked"));
+				synterm.delimiter.push($(elem).find('#delimiter').val());
+				synterm.index_add_letter.push($(elem).find('#index_add_letter').val());
+				synterm.index_kana.push($(elem).find('#index_kana').val());
+				synterm.nombre.push($(elem).find('#nombre').text());
+			});
+
+			console.log(synterm);
+			mainterm.synterm = synterm;
+
+			// 指矢印用語
+			var refterm = {ref_idx:[],ref_term_id:[],nombre:[]};
+			var form_refterm = $('.form_refterm');
+			form_refterm.each(function(i,elem) {
+				refterm.ref_idx.push($(elem).find('#ref_idx').val());
+				refterm.ref_term_id.push($(elem).find('#ref_term').val());
+				refterm.nombre.push($(elem).find('#nombre').text());
+			});
+
+			console.log(refterm);
+			mainterm.refterm = refterm;
 
 			$.post("{{ path('client.edit.save.ajax') }}", mainterm)
 			.done(function(r,s){
@@ -605,120 +646,123 @@ textarea {
 
 		function constructSubForm(record){
 			var html =
-			'<div id="form_subterm" class="form-horizontal">'
+			'<div class="form-horizontal form_subterm">'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>'
-			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="sub_term" value="' + ((record) ? record.sub_term : '') + '"></div>'
+			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="sub_term" name="sub_term" value="' + ((record) ? record.sub_term : '') + '"></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="checkbox" name="red_letter[]" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
+			+'<div class="col-sm-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>'
-			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="kana" value="' + (((record)&&(record.kana)) ? record.kana : '') + '"></div>'
+			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="kana" name="kana" value="' + (((record)&&(record.kana)) ? record.kana : '') + '"></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" name="text_freq" value="' + ((record) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((record) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-sm-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
 			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
 			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((record) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
-			+'<div class="col-sm-2"><input type="checkbox" name="news_exam[]" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
+			+'<div class="col-sm-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>'
-			+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter">'
+			+'<div class="col-sm-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
 					+'<option value="0">なし</option>';
 
-			html += '<option value="1" ' + (((record)&&(record.delimiter == 'と')) ? ' selected ' : '') + '>と</option>'
-			+'<option value="2" ' + (((record)&&(record.delimiter == '，')) ? ' selected ' : '') + '>，</option>'
-			+'<option value="3" ' + (((record)&&(record.delimiter == '・')) ? ' selected ' : '') + '>・</option>'
-			+'<option value="4" ' + (((record)&&(record.delimiter == '／')) ? ' selected ' : '') + '>／</option>'
-			+'<option value="5" ' + (((record)&&(record.delimiter == '（')) ? ' selected ' : '') + '>（</option>'
-			+'<option value="6" ' + (((record)&&(record.delimiter == '）')) ? ' selected ' : '') + '>）</option>';
+			html += '<option value="1" ' + (((record)&&(record.delimiter == '1')) ? ' selected ' : '') + '>と</option>'
+			+'<option value="2" ' + (((record)&&(record.delimiter == '2')) ? ' selected ' : '') + '>，</option>'
+			+'<option value="3" ' + (((record)&&(record.delimiter == '3')) ? ' selected ' : '') + '>・</option>'
+			+'<option value="4" ' + (((record)&&(record.delimiter == '4')) ? ' selected ' : '') + '>／</option>'
+			+'<option value="5" ' + (((record)&&(record.delimiter == '5')) ? ' selected ' : '') + '>（</option>'
+			+'<option value="6" ' + (((record)&&(record.delimiter == '6')) ? ' selected ' : '') + '>）</option>';
 
 			html += '</select></div>'
 
 			+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
-			+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter_kana">'
+			+'<div class="col-sm-1"><select class="form-control input-sm" id="delimiter_kana" name="delimiter_kana">'
 					+'<option value="0">なし</option>';
 
-			html += '<option value="1" ' + (((record)&&(record.delimiter_kana == 'と')) ? ' selected ' : '') + '>と</option>'
-			+'<option value="2" ' + (((record)&&(record.delimiter_kana == '，')) ? ' selected ' : '') + '>，</option>'
-			+'<option value="3" ' + (((record)&&(record.delimiter_kana == '・')) ? ' selected ' : '') + '>・</option>'
-			+'<option value="4" ' + (((record)&&(record.delimiter_kana == '／')) ? ' selected ' : '') + '>／</option>'
-			+'<option value="5" ' + (((record)&&(record.delimiter_kana == '（')) ? ' selected ' : '') + '>（</option>'
-			+'<option value="6" ' + (((record)&&(record.delimiter_kana == '）')) ? ' selected ' : '') + '>）</option>'
-			+'<option value="7" ' + (((record)&&(record.delimiter_kana == '）（')) ? ' selected ' : '') + '>）（</option>';
+			html += '<option value="1" ' + (((record)&&(record.delimiter_kana == '1')) ? ' selected ' : '') + '>と</option>'
+			+'<option value="2" ' + (((record)&&(record.delimiter_kana == '2')) ? ' selected ' : '') + '>，</option>'
+			+'<option value="3" ' + (((record)&&(record.delimiter_kana == '3')) ? ' selected ' : '') + '>・</option>'
+			+'<option value="4" ' + (((record)&&(record.delimiter_kana == '4')) ? ' selected ' : '') + '>／</option>'
+			+'<option value="5" ' + (((record)&&(record.delimiter_kana == '5')) ? ' selected ' : '') + '>（</option>'
+			+'<option value="6" ' + (((record)&&(record.delimiter_kana == '6')) ? ' selected ' : '') + '>）</option>'
+			+'<option value="7" ' + (((record)&&(record.delimiter_kana == '7')) ? ' selected ' : '') + '>）（</option>';
 
 			html += '</select></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" id="index_add_letter" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.index_kana"|trans }}</label>'
-			+'<div class="col-sm-3"><input type="text" class="form-control input-sm" name="index_kana" value="' + (((record)&&(record.index_kana)) ? record.index_kana : '') + '"></div>'
+			+'<div class="col-sm-3"><input type="text" class="form-control input-sm" id="index_kana" name="index_kana" value="' + (((record)&&(record.index_kana)) ? record.index_kana : '') + '"></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-			+'<label class="col-sm-1">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
+			+'<label class="col-sm-1" id="nombre">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
 			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-sub-remove">{{ "btn.remove.subterm"|trans }}</button></div>'
+			+'<input type="hidden" class="form-control input-sm" id="sub_term_id" name="sub_term_id" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
 			return html;
 		}
 
 		function constructSynForm(record){
 			var html =
-			'<div id="form_synterm" class="form-horizontal">'
+			'<div class="form-horizontal form_synterm">'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.icon"|trans }}</label>'
-			+'<div class="col-sm-1"><select class="form-control input-sm" name="synonym_id">'
+			+'<div class="col-sm-1"><select class="form-control input-sm" id="synonym_id" name="synonym_id">'
 			+'<option value="1" ' + (((record)&&(record.synonym_id == '1')) ? ' selected ' : '') + '>同</option>'
 			+'<option value="2" ' + (((record)&&(record.synonym_id == '2')) ? ' selected ' : '') + '>対</option>'
 			+'<option value="3" ' + (((record)&&(record.synonym_id == '3')) ? ' selected ' : '') + '>類</option>'
 			+'</select></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.syn_term"|trans }}</label>'
-			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" name="syn_term" value="' + ((record) ? record.term : '') + '"></div>'
+			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="syn_term" name="syn_term" value="' + ((record) ? record.term : '') + '"></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="checkbox" name="red_letter[]" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
+			+'<div class="col-sm-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" name="text_freq" value="' + ((record) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((record) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-sm-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
 			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target3" term-id="' + ((record) ? record.id : '') + '" yougo-flag="3" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
 			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((record) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
-			+'<div class="col-sm-2"><input type="checkbox" name="news_exam[]" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
+			+'<div class="col-sm-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>'
-			+'<div class="col-sm-1"><select class="form-control input-sm" name="delimiter">'
+			+'<div class="col-sm-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
 					+'<option value="0">なし</option>';
 
-			html += '<option value="1" ' + (((record)&&(record.delimiter == '　')) ? ' selected ' : '') + '>全角スペース</option>'
-			+'<option value="2" ' + (((record)&&(record.delimiter == '（')) ? ' selected ' : '') + '>（</option>'
-			+'<option value="3" ' + (((record)&&(record.delimiter == '）')) ? ' selected ' : '') + '>）</option>'
-			+'<option value="4" ' + (((record)&&(record.delimiter == '《rtn》')) ? ' selected ' : '') + '>改行</option>'
-			+'<option value="5" ' + (((record)&&(record.delimiter == '《rtn》＋（')) ? ' selected ' : '') + '>改行＋（</option>'
-			+'<option value="6" ' + (((record)&&(record.delimiter == '）＋《rtn》')) ? ' selected ' : '') + '>）＋改行</option>'
+			html += '<option value="1" ' + (((record)&&(record.delimiter == '1')) ? ' selected ' : '') + '>全角スペース</option>'
+			+'<option value="2" ' + (((record)&&(record.delimiter == '2')) ? ' selected ' : '') + '>（</option>'
+			+'<option value="3" ' + (((record)&&(record.delimiter == '3')) ? ' selected ' : '') + '>）</option>'
+			+'<option value="4" ' + (((record)&&(record.delimiter == '4')) ? ' selected ' : '') + '>改行</option>'
+			+'<option value="5" ' + (((record)&&(record.delimiter == '5')) ? ' selected ' : '') + '>改行＋（</option>'
+			+'<option value="6" ' + (((record)&&(record.delimiter == '6')) ? ' selected ' : '') + '>）＋改行</option>'
 
 			html += '</select></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" id="index_add_letter" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.index_kana"|trans }}</label>'
-			+'<div class="col-sm-3"><input type="text" class="form-control input-sm" name="index_kana" value="' + (((record)&&(record.index_kana)) ? record.index_kana : '') + '"></div>'
+			+'<div class="col-sm-3"><input type="text" class="form-control input-sm" id="index_kana" name="index_kana" value="' + (((record)&&(record.index_kana)) ? record.index_kana : '') + '"></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-			+'<label class="col-sm-1">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
+			+'<label class="col-sm-1" id="nombre">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-syn-remove">{{ "btn.remove.synterm"|trans }}</button></div>'
+			+'<input type="hidden" class="form-control input-sm" id="syn_term_id" name="syn_term_id" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
 			return html;
 		}
 
 		function constructRefForm(record){
 			var html =
-			'<div id="form_refterm" class="form-horizontal">'
+			'<div class="form-horizontal form_refterm">'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.head.hen"|trans }}</label>'
 			+'<div class="col-sm-3"><select class="form-control js-hen input-sm" name="hen">'
@@ -764,7 +808,9 @@ textarea {
 			+'</select></div></div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-			+'<label class="col-sm-1">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
+			+'<label class="col-sm-1" id="nombre">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-ref-remove">{{ "btn.remove.refterm"|trans }}</button></div>'
+			+'<input type="hidden" class="form-control input-sm" id="ref_idx" name="ref_idx" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
 			return html;
 		}
@@ -810,8 +856,8 @@ textarea {
 						console.log(list.year);
 
 						html = '<div class="row"><div class="col-sm-12"><label class="col-sm-4">' + list.year + '</label>'
-						+'<input type="text" class="col-sm-4" id="main' + list.year + '" name="main' + list.year + '" value="' + list.mainExam + '">'
-						+'<input type="text" class="col-sm-4" id="sub' + list.year + '" name="sub' + list.year + '" value="' + list.subExam + '">'
+						+'<input type="text" class="col-sm-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + list.mainExam + '">'
+						+'<input type="text" class="col-sm-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + list.subExam + '">'
 						+'</div>';
 
 						$('#formcenter').append(html);
@@ -881,7 +927,7 @@ textarea {
 							header_ref
 						+ constructRefForm(yougo_ref_parse[i])
 					);
-					$('#ref_term').val(yougo_ref_parse[i].refer_term_id);
+					$('.form_refterm:last-child #ref_term').val(yougo_ref_parse[i].refer_term_id);
 				}
 
 				// サブ用語　教科書頻度　イベント設定
@@ -899,7 +945,7 @@ textarea {
 				});
 				// サブ用語　削除
 				$(document).on("click", ".js-sub-remove", function (e) {
-					$(this).parents('#form_subterm').remove();
+					$(this).parents('.form_subterm').remove();
 				});
 
 				// 同対類用語　教科書頻度　イベント設定
@@ -914,7 +960,15 @@ textarea {
 				$(document).on("click", ".js-center-target3", function (e) {
 					getCenterPoint(e);
 				});
+				// 同対類用語　削除
+				$(document).on("click", ".js-syn-remove", function (e) {
+					$(this).parents('.form_synterm').remove();
+				});
 
+				// 指矢印用語　削除
+				$(document).on("click", ".js-ref-remove", function (e) {
+					$(this).parents('.form_refterm').remove();
+				});
 			});
 
 			$('#addForm').click(function(){
@@ -924,7 +978,7 @@ textarea {
 			});
 
 			$('#removeForm').click(function(){
-				$('#form_subterms #form_subterm:last-child').remove();
+				$('#form_subterms .form_subterm:last-child').remove();
 			});
 
 			$('#addFormSyn').click(function(){
@@ -934,7 +988,7 @@ textarea {
 			});
 
 			$('#removeFormSyn').click(function(){
-				$('#form_synterms #form_synterm:last-child').remove();
+				$('#form_synterms .form_synterm:last-child').remove();
 			});
 
 			$('#addFormRef').click(function(){
@@ -944,7 +998,7 @@ textarea {
 			});
 
 			$('#removeFormRef').click(function(){
-				$('#form_refterms #form_refterm:last-child').remove();
+				$('#form_refterms .form_refterm:last-child').remove();
 			});
 
 

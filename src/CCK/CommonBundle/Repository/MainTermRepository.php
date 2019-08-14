@@ -308,6 +308,7 @@ class MainTermRepository extends EntityRepository
 	public function getYougoDetailOfRefer($term_id){
 		$sql = "
 			SELECT
+				Refer.id,
 				MainTerm.main_term,
 				Refer.refer_term_id,
 				Refer.nombre

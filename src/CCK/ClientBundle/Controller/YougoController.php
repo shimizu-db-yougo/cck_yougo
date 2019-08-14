@@ -578,9 +578,41 @@ class YougoController extends BaseController {
 	public function saveAjaxAction(Request $request){
 		$this->get('logger')->error("***saveAjaxAction start***");
 		$this->get('logger')->error($request->request->get('main_term'));
-		$this->get('logger')->error("***sub_term***".serialize($request->request->get('sub_term')));
 
 		$ret = ['result'=>'ok','error'=>''];
+
+		if(!($request->request->has('main_term'))){
+			$ret = ['result'=>'ng','error'=>'parameter error'];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		if($this->saveMainTerm($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		if($this->saveSubTerm($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		if($this->saveSynTerm($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		if($this->saveRefTerm($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		$response = new JsonResponse($ret);
+		return $response;
+	}
+
+	private function saveMainTerm($request,&$ret){
+		$return_flag = true;
 
 		$main_term = $request->request->get('main_term');
 
@@ -594,11 +626,28 @@ class YougoController extends BaseController {
 
 		try{
 			$entity->setMainTerm($main_term);
+			$entity->setRedLetter(($request->request->get('red_letter') == 'true') ? true : false);
+			$entity->setKana($request->request->get('kana'));
+			$entity->setTextFrequency($request->request->get('text_freq'));
+			$entity->setCenterFrequency($request->request->get('center_freq'));
+			$entity->setNewsExam(($request->request->get('news_exam') == 'true') ? true : false);
+			$entity->setDelimiter($request->request->get('delimiter'));
+			$entity->setWesternLanguage($request->request->get('western_language'));
+			$entity->setBirthYear($request->request->get('birth_year'));
+			$entity->setIndexAddLetter($request->request->get('index_add_letter'));
+			$entity->setIndexKana($request->request->get('index_kana'));
+			$entity->setIndexOriginal($request->request->get('index_original'));
+			$entity->setIndexOriginalKana($request->request->get('index_original_kana'));
+			$entity->setIndexAbbreviation($request->request->get('index_abbreviation'));
+			$entity->setTermExplain($request->request->get('term_explain'));
+			$entity->setIllustFilename($request->request->get('illust_filename'));
+			$entity->setIllustCaption($request->request->get('illust_caption'));
+			$entity->setIllustKana($request->request->get('illust_kana'));
+			$entity->setHandover($request->request->get('handover'));
 
 			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
-			// もし、DBに登録失敗した場合rollbackする
 			$em->getConnection()->rollback();
 			$em->close();
 
@@ -606,12 +655,159 @@ class YougoController extends BaseController {
 			$this->get('logger')->error($e->getMessage());
 			$this->get('logger')->error($e->getTraceAsString());
 
-			$ret = ['result'=>'ng','error'=>'DB error'];
+			$ret = ['result'=>'ng','error'=>'MainTermDB error termId:'.$request->request->get('term_id')];
+			$return_flag = false;
+		}
+		return $return_flag;
+	}
+
+	private function saveSubTerm($request,&$ret){
+		$return_flag = true;
+
+		$subterm = $request->request->get('subterm');
+
+		if(is_null($subterm)){
+			return $return_flag;
 		}
 
-		$response = new JsonResponse($ret);
+		$idx = 0;
+		foreach($subterm['sub_term_id'] as $ele_subterm){
+			$this->get('logger')->error("***sub_term_elem***".$ele_subterm);
 
-		return $response;
+			$em = $this->get('doctrine.orm.entity_manager');
+			$entity = $em->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
+			'id' => $ele_subterm,
+			'deleteFlag' => FALSE
+			));
+
+			$em->getConnection()->beginTransaction();
+
+			try{
+				$entity->setSubTerm($subterm['sub_term'][$idx]);
+				$entity->setRedLetter(($subterm['red_letter'][$idx] == 'true') ? true : false);
+				$entity->setKana($subterm['kana'][$idx]);
+				$entity->setTextFrequency($subterm['text_freq'][$idx]);
+				$entity->setCenterFrequency($subterm['center_freq'][$idx]);
+				$entity->setNewsExam(($subterm['news_exam'][$idx] == 'true') ? true : false);
+				$entity->setDelimiter($subterm['delimiter'][$idx]);
+				$entity->setDelimiterKana($subterm['delimiter_kana'][$idx]);
+				$entity->setIndexAddLetter($subterm['index_add_letter'][$idx]);
+				$entity->setIndexKana($subterm['index_kana'][$idx]);
+
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$ret = ['result'=>'ng','error'=>'SubTermDB error sub_term_id:'.$ele_subterm];
+				$return_flag = false;
+				return $return_flag;
+			}
+			$idx++;
+		}
+
+		return $return_flag;
+	}
+
+	private function saveSynTerm($request,&$ret){
+		$return_flag = true;
+
+		$synterm = $request->request->get('synterm');
+
+		if(is_null($synterm)){
+			return $return_flag;
+		}
+
+		$idx = 0;
+		foreach($synterm['syn_term_id'] as $ele_synterm){
+			$this->get('logger')->error("***syn_term_elem***".$ele_synterm);
+
+			$em = $this->get('doctrine.orm.entity_manager');
+			$entity = $em->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
+					'id' => $ele_synterm,
+					'deleteFlag' => FALSE
+			));
+
+			$em->getConnection()->beginTransaction();
+
+			try{
+				$entity->setSynonymId($synterm['synonym_id'][$idx]);
+				$entity->setTerm($synterm['term'][$idx]);
+				$entity->setRedLetter(($synterm['red_letter'][$idx] == 'true') ? true : false);
+				$entity->setTextFrequency($synterm['text_freq'][$idx]);
+				$entity->setCenterFrequency($synterm['center_freq'][$idx]);
+				$entity->setNewsExam(($synterm['news_exam'][$idx] == 'true') ? true : false);
+				$entity->setDelimiter($synterm['delimiter'][$idx]);
+				$entity->setIndexAddLetter($synterm['index_add_letter'][$idx]);
+				$entity->setIndexKana($synterm['index_kana'][$idx]);
+
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$ret = ['result'=>'ng','error'=>'SynonymDB error id:'.$ele_synterm];
+				$return_flag = false;
+				return $return_flag;
+			}
+			$idx++;
+		}
+
+		return $return_flag;
+	}
+
+	private function saveRefTerm($request,&$ret){
+		$return_flag = true;
+
+		$refterm = $request->request->get('refterm');
+
+		if(is_null($refterm)){
+			return $return_flag;
+		}
+
+		$idx = 0;
+		foreach($refterm['ref_idx'] as $ele_refterm){
+			$this->get('logger')->error("***ref_idx_elem***".$ele_refterm);
+
+			$em = $this->get('doctrine.orm.entity_manager');
+			$entity = $em->getRepository('CCKCommonBundle:Refer')->findOneBy(array(
+					'id' => $ele_refterm,
+					'deleteFlag' => FALSE
+			));
+
+			$em->getConnection()->beginTransaction();
+
+			try{
+				$entity->setReferTermId($refterm['ref_term_id'][$idx]);
+
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$ret = ['result'=>'ng','error'=>'ReferDB error id:'.$ele_refterm];
+				$return_flag = false;
+				return $return_flag;
+			}
+			$idx++;
+		}
+
+		return $return_flag;
 	}
 
 	/**
