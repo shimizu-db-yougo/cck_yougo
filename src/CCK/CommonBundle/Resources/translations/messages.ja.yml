@@ -195,6 +195,7 @@ text:
         illust_caption: 図版キャプション
         illust_kana: 図版キャプション仮名
         illust_nombre: 図版キャプションノンブル
+        preview.title: プレビュー画面
         
 icon:
     ari: 有

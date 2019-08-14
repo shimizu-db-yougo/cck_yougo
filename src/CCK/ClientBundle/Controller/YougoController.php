@@ -18,6 +18,10 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Response;
+use CCK\CommonBundle\Entity\MainTerm;
+use CCK\CommonBundle\Entity\SubTerm;
+use CCK\CommonBundle\Entity\Synonym;
+use CCK\CommonBundle\Entity\Refer;
 
 /**
  * yougo controller.
@@ -46,6 +50,8 @@ class YougoController extends BaseController {
 	const SES_SEARCH_LIST_COUNT_KEY = "ses_search_list_count_key";
 	const SES_SORT_ORDER_KEY = "ses_sort_order_key";
 	const SES_SORT_FIELD_KEY = "ses_sort_field_key";
+
+	const SES_SEARCH_RESPONCE_TERM_ID_KEY = "ses_search_responce_term_id_key";
 
 	/**
 	 * genko page session key
@@ -216,6 +222,14 @@ class YougoController extends BaseController {
 		$session->set(self::SES_SEARCH_LIST_COUNT_KEY, $list_count);
 		$session->set(self::SES_SORT_ORDER_KEY, $sort_order_link);
 		$session->set(self::SES_SORT_FIELD_KEY, $sort_field);
+
+		$arr_term_id = array();
+		foreach ($entities as $entitiy){
+			array_push($arr_term_id,$entitiy['term_id']);
+		}
+
+		$session->set(self::SES_SEARCH_RESPONCE_TERM_ID_KEY, $arr_term_id);
+
 
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE
@@ -415,6 +429,62 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/preview_search", name="client.yougo.preview.search")
+	 * @Template("CCKClientBundle:yougo:preview.search.html.twig")
+	 */
+	public function previewSearchAction(Request $request) {
+		// session
+		$session = $request->getSession();
+
+		$em = $this->getDoctrine()->getManager();
+
+		$arr_term_id = $session->get(self::SES_SEARCH_RESPONCE_TERM_ID_KEY);
+
+		$arr_mainterm_entity = array();
+		$arr_subterm_entity = array();
+		$arr_refterm_entity = array();
+		$arr_synterm_entity = array();
+		foreach($arr_term_id as $term_id){
+			// 主用語
+			$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetail($term_id);
+
+			if(!$entity){
+				return $this->redirect($this->generateUrl('client.yougo.list'));
+			}else{
+				array_push($arr_mainterm_entity, $entity);
+			}
+
+			// サブ用語
+			$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($term_id);
+			array_push($arr_subterm_entity, $entitySub);
+
+			// 指矢印用語
+			$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($term_id);
+			array_push($arr_refterm_entity, $entityRef);
+
+			// 同対類
+			$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($term_id);
+			array_push($arr_synterm_entity, $entitySyn);
+		}
+
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+
+		return array(
+				'arr_yougo' => $arr_mainterm_entity,
+				'arr_subterm' => $arr_subterm_entity,
+				'arr_synonym' => $arr_synterm_entity,
+				'arr_refer' => $arr_refterm_entity,
+				'cur_list' => $cur_list,
+				'ver_list' => $ver_list,
+		);
+	}
+
+	/**
 	 * @Route("/edit/{term_id}", name="client.yougo.edit")
 	 * @Method("POST|GET")
 	 * @Template()
@@ -424,7 +494,7 @@ class YougoController extends BaseController {
 		if($request->request->has('add_main_term')){
 			$main_term = $request->request->get('add_main_term');
 			$sub_term = $request->request->get('add_sub_term');
-			print($main_term);
+			print_r($main_term);
 			print_r($sub_term);
 
 			//DB登録後、一覧画面へ遷移する
@@ -655,6 +725,6 @@ class YougoController extends BaseController {
 		$session->remove(self::SES_SEARCH_LIST_COUNT_KEY);
 		$session->remove(self::SES_SORT_ORDER_KEY);
 		$session->remove(self::SES_SORT_FIELD_KEY);
-
+		$session->remove(self::SES_SEARCH_RESPONCE_TERM_ID_KEY);
 	}
 }

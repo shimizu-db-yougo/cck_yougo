@@ -186,13 +186,20 @@ tbody {
 </div>
 </form>
 
+
 </header>
 
 <!-- yougo list area -->
 <div class="content">
 <div class="row">
-	<div class="col-lg-10 text-center">
+	<div class="col-lg-8 text-center">
 		{{ knp_pagination_render(pagination) }}
+	</div>
+	<div class="col-lg-1 text-center">
+		<a href="{{ path('client.yougo.new') }}"><button class="btn btn-primary btn-sm" name="id">{{ 'btn.new.default'|trans }}</button></a>
+	</div>
+	<div class="col-lg-1 text-center">
+		<a href="{{ path('client.yougo.preview.search') }}"><button class="btn btn-primary btn-sm" name="id">{{ 'btn.preview'|trans }}</button></a>
 	</div>
 	<div class="col-lg-2 text-right">
 	<form action="{{ path('client.yougo.index') }}" class="form-horizontal sty_list_count" method="GET">

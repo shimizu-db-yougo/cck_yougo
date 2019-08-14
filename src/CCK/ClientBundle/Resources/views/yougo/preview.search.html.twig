@@ -1,0 +1,89 @@
+{% extends "CCKClientBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<style>
+.table-yougo {
+	width: 360px;
+}
+.icon-half {
+	width: 8.29px;
+	hegiht: 16px;
+	padding-bottom: 2px;
+}
+.icon-full {
+	width: 16px;
+	hegiht: 16px;
+	padding-bottom: 2px;
+}
+.icon-3times {
+	width: 48px;
+	hegiht: 16px;
+	padding-bottom: 2px;
+}
+	</style>
+{% endblock %}
+
+{% block contents %}
+<div class="row">
+<blockquote class="blockquote-bottom pdr-0">
+	<p>{{ 'text.yougo.preview.title'|trans }}</p>
+</blockquote>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+		<table class="table table-yougo table-striped">
+			<tbody>
+				<tr class="text-center">
+					<td width="60px" class="text-left">
+
+						{% set record = 0 %}
+						{% for yougo in arr_yougo %}
+
+						<div>
+							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (yougo.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ yougo.main_term }}　{{ getTextFreqIcon(yougo.text_frequency)|raw }}{{ getCenterFreqIcon(yougo.center_frequency)|raw }}{{ getNewsExamIcon(yougo.news_exam)|raw }}</span>
+
+							{% set sub_kana = '' %}
+							{% set i = 0 %}
+							{% for rec_sub_term in arr_subterm[record] %}
+								{% if i == 0 %}<span style="font-size: 16px; font-family: sans-serif;">{{ yougo.delimiter }}</span>{% endif %}
+								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (rec_sub_term.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_sub_term.sub_term }}{{ getTextFreqIcon(rec_sub_term.text_frequency)|raw }}{{ getCenterFreqIcon(rec_sub_term.center_frequency)|raw }}{{ getNewsExamIcon(rec_sub_term.news_exam)|raw }}</span><span style="font-size: 16px; font-family: sans-serif;">{{ rec_sub_term.delimiter }}</span>
+								{% if rec_sub_term.kana != '' %}{% set sub_kana = sub_kana~'（'~rec_sub_term.kana~'）' %}{% endif %}
+								{% set i = i + 1 %}
+							{% endfor %}
+
+							{% if yougo.kana != '' %}<span style="font-size: 10px; font-family: serif;">（{{ yougo.kana }}）</span>{% endif %}
+							<span style="font-size: 10px; font-family: serif;">{{ sub_kana }}</span>
+							<span style="font-size: 14px; font-family: serif;">{{ replaceTag(yougo.term_explain)|raw }}</span>
+							{% set i = 0 %}
+							{% for rec_refer in arr_refer[record] %}
+								{% if i == 0 %}<span style="font-size: 14px; font-family: sans-serif;">　<img src="{{ asset('./img/yubi.jpg') }}" class="icon-full" alt="yubi"></span>{% endif %}
+								<span style="font-size: 14px; font-family: sans-serif;">ｐ．{{ rec_refer.nombre }}（{{ rec_refer.main_term }}）</span>
+								{% set i = i + 1 %}
+							{% endfor %}
+						</div>
+						{% for rec_synonym in arr_synonym[record] %}
+							<div class="text-right">
+								{{ getSynonymIcon(rec_synonym.synonym_id)|raw }}<span style="font-size: 14px; font-weight: bold; {{ (rec_synonym.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_synonym.term }}{{ getTextFreqIcon(rec_synonym.text_frequency)|raw }}{{ getCenterFreqIcon(rec_synonym.center_frequency)|raw }}{{ getNewsExamIcon(rec_synonym.news_exam)|raw }}</span>
+							</div>
+						{% endfor %}
+
+						<div style="height:2px;"></div>
+						{% set record = record + 1 %}
+						{% endfor %}
+
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+	</script>
+{% endblock %}
