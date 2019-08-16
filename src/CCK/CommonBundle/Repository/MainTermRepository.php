@@ -331,4 +331,16 @@ class MainTermRepository extends EntityRepository
 
 		return $result_ref;
 	}
+
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function getNewTermID(){
+		$sql = "
+			SELECT * FROM MainTerm WHERE MainTerm.term_id = (SELECT MAX(MainTerm.term_id) FROM MainTerm)
+		";
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result;
+	}
 }

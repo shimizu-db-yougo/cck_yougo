@@ -388,6 +388,23 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/yougo/header/ajax", name="client.yougo.header.ajax")
+	 */
+	public function getHeaderAjaxAction(Request $request){
+		if($request->request->has('id')){
+			$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findOneBy(array(
+					'id' => $request->request->get('id'),
+					'deleteFlag' => FALSE
+			));
+			$response = new JsonResponse(['hen'=>$entity->getHen(),'sho'=>$entity->getSho(),'dai'=>$entity->getDai(),'chu'=>$entity->getChu(),'ko'=>$entity->getKo()]);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * @Route("/preview/{term_id}", name="client.yougo.preview")
 	 * @Template()
 	 */
@@ -514,6 +531,39 @@ class YougoController extends BaseController {
 		$entitySyn = new Synonym();
 		$entityRef = new Refer();
 
+		// 用語IDの発番
+		$maxTermIDRec = $em->getRepository('CCKCommonBundle:MainTerm')->getNewTermID();
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try{
+			$entityMain->setTermId((int)$maxTermIDRec[0]['term_id'] + 1);
+			$entityMain->setCurriculumId(0);
+			$entityMain->setHeaderId(0);
+			$entityMain->setPrintOrder(0);
+			$entityMain->setRedLetter(0);
+			$entityMain->setTextFrequency(0);
+			$entityMain->setCenterFrequency(0);
+			$entityMain->setNewsExam(0);
+			$entityMain->setNombre(0);
+			$entityMain->setIllustNombre(0);
+			$entityMain->setDeleteFlag(true);
+
+			$em->persist($entityMain);
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE
 		));
@@ -615,12 +665,19 @@ class YougoController extends BaseController {
 		$return_flag = true;
 
 		$main_term = $request->request->get('main_term');
+		$update_mode = $request->request->get('update_mode');
 
 		$em = $this->get('doctrine.orm.entity_manager');
-		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
-				'termId' => $request->request->get('term_id'),
-				'deleteFlag' => FALSE
-		));
+		if($update_mode == 'edit'){
+			$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+					'termId' => $request->request->get('term_id'),
+					'deleteFlag' => FALSE
+			));
+		}else{
+			$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+					'termId' => $request->request->get('term_id')
+			));
+		}
 
 		$em->getConnection()->beginTransaction();
 
@@ -644,6 +701,12 @@ class YougoController extends BaseController {
 			$entity->setIllustCaption($request->request->get('illust_caption'));
 			$entity->setIllustKana($request->request->get('illust_kana'));
 			$entity->setHandover($request->request->get('handover'));
+			if($update_mode == 'new'){
+				$entity->setCurriculumId(false);
+				$entity->setUserId($this->getUser()->getUserId());
+				$entity->setDeleteFlag(false);
+
+			}
 
 			$em->flush();
 			$em->getConnection()->commit();
