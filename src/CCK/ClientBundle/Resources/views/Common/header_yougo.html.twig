@@ -35,7 +35,7 @@
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.head.sho'|trans }}</label>
 							<div class="col-sm-3">
-								<select class="form-control js-sho input-sm" name="sho" disabled>
+								<select class="form-control js-sho input-sm" name="sho">
 									<option value="0">--------------</option>
 									{% for sho in sho_list %}
 										<option value="{{ sho.sho }}" {{ sho.sho == select_sho ? " selected " : '' }}">{{ sho.name }}</option>
@@ -44,7 +44,7 @@
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.head.dai'|trans }}</label>
 							<div class="col-sm-3">
-								<select class="form-control js-dai input-sm" name="dai" disabled>
+								<select class="form-control js-dai input-sm" name="dai">
 									<option value="0">--------------</option>
 									{% for dai in dai_list %}
 										<option value="{{ dai.dai }}" {{ dai.dai == select_dai ? " selected " : '' }}">{{ dai.name }}</option>
@@ -57,7 +57,7 @@
 						<div class="col-lg-12">
 							<label class="col-sm-1">{{ 'text.yougo.head.chu'|trans }}</label>
 							<div class="col-sm-3">
-								<select class="form-control js-chu input-sm" name="chu" disabled>
+								<select class="form-control js-chu input-sm" name="chu">
 									<option value="0">--------------</option>
 									{% for chu in chu_list %}
 										<option value="{{ chu.chu }}" {{ chu.chu == select_chu ? " selected " : '' }}">{{ chu.name }}</option>
@@ -66,7 +66,7 @@
 							</div>
 							<label class="col-sm-1">{{ 'text.yougo.head.ko'|trans }}</label>
 							<div class="col-sm-3">
-								<select class="form-control js-ko input-sm" name="ko" disabled>
+								<select class="form-control js-ko input-sm" name="ko">
 									<option value="0">--------------</option>
 									{% for ko in ko_list %}
 										<option value="{{ ko.ko }}" {{ ko.ko == select_ko ? " selected " : '' }}">{{ ko.name }}</option>
@@ -82,9 +82,9 @@
 									<tr>
 										<td>
 											<div id="formsort">
-												<select class="form-control" name="s2" size="5" multiple="multiple" onchange="buttonStyle(this)" id="SEL">
+												<select class="form-control" name="print_order" size="5" multiple="multiple" onchange="buttonStyle(this)" id="print_order">
 												{% for print_order_term in print_order_list %}
-													<option value="{{ print_order_term.termId }}" {{ print_order_term.termId == term_id ? " selected " : " disabled " }}">{{ print_order_term.mainTerm }}</option>
+													<option value="{{ print_order_term.term_id }}" {{ print_order_term.term_id == term_id ? " selected " : " disabled " }}">{{ print_order_term.main_term }}</option>
 												{% endfor %}
 												</select>
 											</div>

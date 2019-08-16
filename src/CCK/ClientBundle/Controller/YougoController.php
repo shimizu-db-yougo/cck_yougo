@@ -405,6 +405,34 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/yougo/term/ajax", name="client.yougo.term.ajax")
+	 */
+	public function getTermAjaxAction(Request $request){
+		if($request->request->has('hen')){
+			$ver = $request->request->get('version');
+			$hen = $request->request->get('hen');
+			$header = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+					'hen' => $hen,
+					'deleteFlag' => FALSE
+			));
+			$list_header_id = '';
+			foreach($header as $header_ele){
+				$list_header_id .= $header_ele->getId() . ',';
+			}
+
+			$this->get('logger')->error("***list_header_id***".$list_header_id);
+			if(strlen($list_header_id)>0){$list_header_id = substr($list_header_id, 0, strlen($list_header_id)-1);}
+			$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoListByHeader($ver, $list_header_id);
+
+			$response = new JsonResponse($term);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * @Route("/preview/{term_id}", name="client.yougo.preview")
 	 * @Template()
 	 */
@@ -592,9 +620,7 @@ class YougoController extends BaseController {
 		));
 
 		// 掲載順に表示する用語
-		$printOrderList = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
-				'deleteFlag' => false
-		));
+		$printOrderList = $em->getRepository('CCKCommonBundle:MainTerm')->getPrintOrderList();
 
 		return array(
 				'term_id' => '',
@@ -657,6 +683,11 @@ class YougoController extends BaseController {
 			return $response;
 		}
 
+		if($this->savePrintOrder($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
 		$response = new JsonResponse($ret);
 		return $response;
 	}
@@ -682,6 +713,16 @@ class YougoController extends BaseController {
 		$em->getConnection()->beginTransaction();
 
 		try{
+			$entityHeader = $em->getRepository('CCKCommonBundle:Header')->findOneBy(array(
+					'hen' => $request->request->get('hen'),
+					'sho' => $request->request->get('sho'),
+					'dai' => $request->request->get('dai'),
+					'chu' => $request->request->get('chu'),
+					'ko' => $request->request->get('ko')
+			));
+
+			$entity->setHeaderId($entityHeader->getId());
+
 			$entity->setMainTerm($main_term);
 			$entity->setRedLetter(($request->request->get('red_letter') == 'true') ? true : false);
 			$entity->setKana($request->request->get('kana'));
@@ -701,11 +742,11 @@ class YougoController extends BaseController {
 			$entity->setIllustCaption($request->request->get('illust_caption'));
 			$entity->setIllustKana($request->request->get('illust_kana'));
 			$entity->setHandover($request->request->get('handover'));
-			if($update_mode == 'new'){
-				$entity->setCurriculumId(false);
-				$entity->setUserId($this->getUser()->getUserId());
-				$entity->setDeleteFlag(false);
+			$entity->setUserId($this->getUser()->getUserId());
 
+			if($update_mode == 'new'){
+				$entity->setCurriculumId($request->request->get('version'));
+				$entity->setDeleteFlag(false);
 			}
 
 			$em->flush();
@@ -728,6 +769,7 @@ class YougoController extends BaseController {
 		$return_flag = true;
 
 		$subterm = $request->request->get('subterm');
+		$update_mode = $request->request->get('update_mode');
 
 		if(is_null($subterm)){
 			return $return_flag;
@@ -738,10 +780,14 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***sub_term_elem***".$ele_subterm);
 
 			$em = $this->get('doctrine.orm.entity_manager');
-			$entity = $em->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
-			'id' => $ele_subterm,
-			'deleteFlag' => FALSE
-			));
+			if($update_mode == 'edit'){
+				$entity = $em->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
+						'id' => $ele_subterm,
+						'deleteFlag' => FALSE
+				));
+			}else{
+				$entity = new SubTerm();
+			}
 
 			$em->getConnection()->beginTransaction();
 
@@ -757,6 +803,11 @@ class YougoController extends BaseController {
 				$entity->setIndexAddLetter($subterm['index_add_letter'][$idx]);
 				$entity->setIndexKana($subterm['index_kana'][$idx]);
 
+				if($update_mode == 'new'){
+					$entity->setMainTermId($request->request->get('term_id'));
+					$entity->setNombre($subterm['nombre'][$idx]);
+					$em->persist($entity);
+				}
 				$em->flush();
 				$em->getConnection()->commit();
 			} catch (\Exception $e){
@@ -781,6 +832,7 @@ class YougoController extends BaseController {
 		$return_flag = true;
 
 		$synterm = $request->request->get('synterm');
+		$update_mode = $request->request->get('update_mode');
 
 		if(is_null($synterm)){
 			return $return_flag;
@@ -791,10 +843,14 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***syn_term_elem***".$ele_synterm);
 
 			$em = $this->get('doctrine.orm.entity_manager');
-			$entity = $em->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
-					'id' => $ele_synterm,
-					'deleteFlag' => FALSE
-			));
+			if($update_mode == 'edit'){
+				$entity = $em->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
+						'id' => $ele_synterm,
+						'deleteFlag' => FALSE
+				));
+			}else{
+				$entity = new Synonym();
+			}
 
 			$em->getConnection()->beginTransaction();
 
@@ -809,6 +865,11 @@ class YougoController extends BaseController {
 				$entity->setIndexAddLetter($synterm['index_add_letter'][$idx]);
 				$entity->setIndexKana($synterm['index_kana'][$idx]);
 
+				if($update_mode == 'new'){
+					$entity->setMainTermId($request->request->get('term_id'));
+					$entity->setNombre($synterm['nombre'][$idx]);
+					$em->persist($entity);
+				}
 				$em->flush();
 				$em->getConnection()->commit();
 			} catch (\Exception $e){
@@ -833,6 +894,7 @@ class YougoController extends BaseController {
 		$return_flag = true;
 
 		$refterm = $request->request->get('refterm');
+		$update_mode = $request->request->get('update_mode');
 
 		if(is_null($refterm)){
 			return $return_flag;
@@ -843,16 +905,25 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***ref_idx_elem***".$ele_refterm);
 
 			$em = $this->get('doctrine.orm.entity_manager');
-			$entity = $em->getRepository('CCKCommonBundle:Refer')->findOneBy(array(
-					'id' => $ele_refterm,
-					'deleteFlag' => FALSE
-			));
+			if($update_mode == 'edit'){
+				$entity = $em->getRepository('CCKCommonBundle:Refer')->findOneBy(array(
+						'id' => $ele_refterm,
+						'deleteFlag' => FALSE
+				));
+			}else{
+				$entity = new Refer();
+			}
 
 			$em->getConnection()->beginTransaction();
 
 			try{
 				$entity->setReferTermId($refterm['ref_term_id'][$idx]);
 
+				if($update_mode == 'new'){
+					$entity->setMainTermId($request->request->get('term_id'));
+					$entity->setNombre($refterm['nombre'][$idx]);
+					$em->persist($entity);
+				}
 				$em->flush();
 				$em->getConnection()->commit();
 			} catch (\Exception $e){
@@ -869,6 +940,46 @@ class YougoController extends BaseController {
 			}
 			$idx++;
 		}
+
+		return $return_flag;
+	}
+
+	private function savePrintOrder($request,&$ret){
+		$return_flag = true;
+
+		$print_order_list = $request->request->get('print_order_list');
+		$this->get('logger')->error('***print_order_list***');
+		$this->get('logger')->error(serialize($print_order_list));
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		$idx = 1;
+		foreach ($print_order_list as $print_order){
+			$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+					'termId' => $print_order,
+					'deleteFlag' => FALSE
+			));
+
+			try{
+				$entity->setPrintOrder($idx);
+				$idx++;
+
+				$em->flush();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$ret = ['result'=>'ng','error'=>'MainTermDB print_order error termId:'.$print_order];
+				$return_flag = false;
+				return $return_flag;
+			}
+		}
+		$em->getConnection()->commit();
 
 		return $return_flag;
 	}
@@ -909,10 +1020,6 @@ class YougoController extends BaseController {
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
 
-		/*$entitySub = $em->getRepository('CCKCommonBundle:SubTerm')->findBy(array(
-				'mainTermId' => $id,
-				'deleteFlag' => false
-		));*/
 		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($id);
 		$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($id);
 		$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($id);
@@ -923,23 +1030,45 @@ class YougoController extends BaseController {
 		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
 				'deleteFlag' => FALSE
 		));
+
+		// 選択する見出し
+		$entityHeader = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findOneBy(array(
+				'id' => $entityMain->getHeaderId(),
+				'deleteFlag' => FALSE
+		));
+
 		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'versionId' => $entityMain->getCurriculumId(),
 				'headerId' => '1',
 				'deleteFlag' => FALSE
 		));
 		$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'versionId' => $entityMain->getCurriculumId(),
+				'hen' => $entityHeader->getHen(),
 				'headerId' => '2',
 				'deleteFlag' => FALSE
 		));
 		$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'versionId' => $entityMain->getCurriculumId(),
+				'hen' => $entityHeader->getHen(),
+				'sho' => $entityHeader->getSho(),
 				'headerId' => '3',
 				'deleteFlag' => FALSE
 		));
 		$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'versionId' => $entityMain->getCurriculumId(),
+				'hen' => $entityHeader->getHen(),
+				'sho' => $entityHeader->getSho(),
+				'dai' => $entityHeader->getDai(),
 				'headerId' => '4',
 				'deleteFlag' => FALSE
 		));
 		$ko_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'versionId' => $entityMain->getCurriculumId(),
+				'hen' => $entityHeader->getHen(),
+				'sho' => $entityHeader->getSho(),
+				'dai' => $entityHeader->getDai(),
+				'chu' => $entityHeader->getChu(),
 				'headerId' => '5',
 				'deleteFlag' => FALSE
 		));
@@ -950,20 +1079,13 @@ class YougoController extends BaseController {
 				'deleteFlag' => FALSE
 		));
 
-		// 選択する見出し
-		$entityHeader = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findOneBy(array(
-				'id' => $entityMain->getHeaderId(),
-				'deleteFlag' => FALSE
-		));
-
 		// 掲載順に表示する用語
-		$printOrderList = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
-				'headerId' => $entityMain->getHeaderId(),
-				'deleteFlag' => false
-		));
+		$printOrderList = $em->getRepository('CCKCommonBundle:MainTerm')->getPrintOrderList($entityMain->getCurriculumId(), $entityMain->getHeaderId());
 
 		// 指矢印選択に表示する用語
 		$mainTermList = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
+				'curriculumId' => $entityMain->getCurriculumId(),
+				'headerId' => $entityMain->getHeaderId(),
 				'deleteFlag' => false
 		));
 

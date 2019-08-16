@@ -1,12 +1,12 @@
 <ul class="nav nav-sidebar">
-	<li class="side-select"><select class="form-control js-cur" name="cur">
+	<li class="side-select"><select class="form-control js-cur-side" name="cur">
 		<option value="0">{{ 'text.curriculum.all'|trans }}</option>
 		{% for cur in cur_list %}
 			<option value="{{ cur.id }}">{{ cur.name }}</option>
 		{% endfor %}
 	</select></li>
 	<li>&nbsp;</li>
-	<li class="side-select"><select class="form-control js-han" name="ver">
+	<li class="side-select"><select class="form-control js-han-side" name="ver">
 		<option value="0">--------------</option>
 		{% for ver in ver_list %}
 			<option value="{{ ver.id }}">{{ ver.name }}</option>

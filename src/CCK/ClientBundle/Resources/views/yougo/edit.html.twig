@@ -52,10 +52,19 @@
 
 		$(function(){
 			$(window).load(function(){
+				// 教科・版を変更不可にする
+				$('[name="curriculum"]').prop("disabled", true);
+				$('[name="version"]').prop("disabled", true);
+
+				// 見出しの初期設定
+				/*changeHenHeader($('.js-hen'),'sho','dai','chu','ko');
+				changeShoHeader($('.js-sho'),'hen','dai','chu','ko');
+				changeDaiHeader($('.js-dai'),'hen','sho','chu','ko');
+				changeChuHeader($('.js-chu'),'hen','sho','dai','ko');*/
 				setHeaderSelectedIdx("{{ yougo.headerId }}",'hen','sho','dai','chu','ko');
 
 				// 掲載順リスト初期化
-				buttonStyle(document.getElementById('SEL'));
+				buttonStyle(document.getElementById('print_order'));
 
 				// 教科書頻度
 				getTextPoint("{{ yougo.textFrequency }}","{{ yougo.termId }}");

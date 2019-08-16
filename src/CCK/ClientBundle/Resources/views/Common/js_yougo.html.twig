@@ -27,7 +27,7 @@
 			}
 		}
 		function optionMove(MODE,idx) {
-			var O = document.getElementById('SEL'+idx);
+			var O = document.getElementById('print_order'+idx);
 			for(var i=0;i<O.options.length;i++)
 			if(O.options[i].selected) break;
 			var tmpOption = O.removeChild(O.options[i]);
@@ -104,6 +104,15 @@
 			var mainterm = {};
 			mainterm.update_mode = $('#form_mainterm [name=update_mode]').val();
 			mainterm.version = $('#form_mainterm [name=version]').val();
+			mainterm.hen = $('#form_mainterm [name=hen]').val();
+			mainterm.sho = $('#form_mainterm [name=sho]').val();
+			mainterm.dai = $('#form_mainterm [name=dai]').val();
+			mainterm.chu = $('#form_mainterm [name=chu]').val();
+			mainterm.ko = $('#form_mainterm [name=ko]').val();
+
+			var print_order_list = $("#form_mainterm [name=print_order] option").map(function() {return $(this).val();}).get();
+			console.log(print_order_list);
+			mainterm.print_order_list = print_order_list;
 
 			mainterm.term_id = $('#form_mainterm [name=term_id]').text();
 			mainterm.main_term = $('#form_mainterm [name=main_term]').val();
@@ -319,14 +328,14 @@
 				+'{% endfor %}'
 			+'</select></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.head.sho"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-sho4 input-sm" name="ref_sho' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '" disabled>'
+			+'<div class="col-sm-3"><select class="form-control js-sho4 input-sm" name="ref_sho' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
 				+'<option value="0">--------------</option>'
 				+'{% for sho in sho_list %}'
 					+'<option value="{{ sho.sho }}" term-id="' + ((record) ? record.id : '') + '" {{ sho.sho == select_sho ? " selected " : "" }}>{{ sho.name }}</option>'
 				+'{% endfor %}'
 			+'</select></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.head.dai"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-dai4 input-sm" name="ref_dai' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '" disabled>'
+			+'<div class="col-sm-3"><select class="form-control js-dai4 input-sm" name="ref_dai' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
 				+'<option value="0">--------------</option>'
 				+'{% for dai in dai_list %}'
 					+'<option value="{{ dai.dai }}" term-id="' + ((record) ? record.id : '') + '" {{ dai.dai == select_dai ? " selected " : "" }}>{{ dai.name }}</option>'
@@ -334,21 +343,21 @@
 			+'</select></div></div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.head.chu"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-chu4 input-sm" name="ref_chu' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '" disabled>'
+			+'<div class="col-sm-3"><select class="form-control js-chu4 input-sm" name="ref_chu' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
 				+'<option value="0">--------------</option>'
 				+'{% for chu in chu_list %}'
 					+'<option value="{{ chu.chu }}" term-id="' + ((record) ? record.id : '') + '" {{ chu.chu == select_chu ? " selected " : "" }}>{{ chu.name }}</option>'
 				+'{% endfor %}'
 			+'</select></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.head.ko"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-ko input-sm" name="ref_ko' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '" disabled>'
+			+'<div class="col-sm-3"><select class="form-control js-ko input-sm" name="ref_ko' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
 				+'<option value="0">--------------</option>'
 				+'{% for ko in ko_list %}'
 					+'<option value="{{ ko.ko }}" term-id="' + ((record) ? record.id : '') + '" {{ ko.ko == select_ko ? " selected " : "" }}>{{ ko.name }}</option>'
 				+'{% endfor %}'
 			+'</select></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.refer_term"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-term input-sm" name="ref_term" id="ref_term">'
+			+'<div class="col-sm-3"><select class="form-control js-term input-sm" name="ref_term' + ((record) ? record.id : '') + '" id="ref_term">'
 			+'{% for refer_term in main_term_list %}'
 				+'<option value="{{ refer_term.termId }}">{{ refer_term.mainTerm }}</option>'
 			+'{% endfor %}'
@@ -448,22 +457,22 @@
 
 		}
 
-		function changeHenHeader(e,sho,dai,chu,ko){
+		function changeHenHeader(e,sho,dai,chu,ko,term){
 			var selected_ver = $('[name="version"]').val();
 			var selected_hen = e.val();
 
 			if(selected_hen == '0'){
 				$('[name="' + sho + '"]').val('0');
-				$('[name="' + sho + '"]').prop("disabled", true);
+				//$('[name="' + sho + '"]').prop("disabled", true);
 			}else{
-				$('[name="' + sho + '"]').prop("disabled", false);
+				//$('[name="' + sho + '"]').prop("disabled", false);
 			}
 			$('[name="' + dai + '"]').val('0');
 			$('[name="' + chu + '"]').val('0');
 			$('[name="' + ko + '"]').val('0');
-			$('[name="' + dai + '"]').prop("disabled", true);
-			$('[name="' + chu + '"]').prop("disabled", true);
-			$('[name="' + ko + '"]').prop("disabled", true);
+			//$('[name="' + dai + '"]').prop("disabled", true);
+			//$('[name="' + chu + '"]').prop("disabled", true);
+			//$('[name="' + ko + '"]').prop("disabled", true);
 
 			var data = {
 					'version': selected_ver,
@@ -472,6 +481,7 @@
 			$.ajax({
 				url: "{{ path('client.yougo.sho.ajax') }}",
 				data: data,
+				async: false,
 				method: 'POST',
 				success: function(response){
 					var options = generateOptions(response);
@@ -481,6 +491,24 @@
 				error: function(response){
 				}
 			});
+
+			var data = {
+					'version': selected_ver,
+					'hen': selected_hen
+			};
+			$.ajax({
+				url: "{{ path('client.yougo.term.ajax') }}",
+				data: data,
+				async: false,
+				method: 'POST',
+				success: function(response){
+					var options = generateOptions(response);
+					injectOption('[name="' + term + '"]', options);
+				},
+				error: function(response){
+				}
+			});
+
 		}
 
 		function changeShoHeader(e,hen,dai,chu,ko){
@@ -490,14 +518,14 @@
 
 			if(selected_sho == '0'){
 				$('[name="' + dai + '"]').val('0');
-				$('[name="' + dai + '"]').prop("disabled", true);
+				//$('[name="' + dai + '"]').prop("disabled", true);
 			}else{
-				$('[name="' + dai + '"]').prop("disabled", false);
+				//$('[name="' + dai + '"]').prop("disabled", false);
 			}
 			$('[name="' + chu + '"]').val('0');
 			$('[name="' + ko + '"]').val('0');
-			$('[name="' + chu + '"]').prop("disabled", true);
-			$('[name="' + ko + '"]').prop("disabled", true);
+			//$('[name="' + chu + '"]').prop("disabled", true);
+			//$('[name="' + ko + '"]').prop("disabled", true);
 
 			var data = {
 					'version': selected_ver,
@@ -507,6 +535,7 @@
 			$.ajax({
 				url: "{{ path('client.yougo.dai.ajax') }}",
 				data: data,
+				async: false,
 				method: 'POST',
 				success: function(response){
 					var options = generateOptions(response);
@@ -525,12 +554,12 @@
 
 			if(selected_dai == '0'){
 				$('[name="' + chu + '"]').val('0');
-				$('[name="' + chu + '"]').prop("disabled", true);
+				//$('[name="' + chu + '"]').prop("disabled", true);
 			}else{
-				$('[name="' + chu + '"]').prop("disabled", false);
+				//$('[name="' + chu + '"]').prop("disabled", false);
 			}
 			$('[name="' + ko + '"]').val('0');
-			$('[name="' + ko + '"]').prop("disabled", true);
+			//$('[name="' + ko + '"]').prop("disabled", true);
 
 			var data = {
 					'version': selected_ver,
@@ -541,6 +570,7 @@
 			$.ajax({
 				url: "{{ path('client.yougo.chu.ajax') }}",
 				data: data,
+				async: false,
 				method: 'POST',
 				success: function(response){
 					var options = generateOptions(response);
@@ -560,9 +590,9 @@
 
 			if(selected_chu == '0'){
 				$('[name="' + ko + '"]').val('0');
-				$('[name="' + ko + '"]').attr("disabled", true);
+				//$('[name="' + ko + '"]').attr("disabled", true);
 			}else{
-				$('[name="' + ko + '"]').attr("disabled", false);
+				//$('[name="' + ko + '"]').attr("disabled", false);
 			}
 
 			var data = {
@@ -575,6 +605,7 @@
 			$.ajax({
 				url: "{{ path('client.yougo.ko.ajax') }}",
 				data: data,
+				async: false,
 				method: 'POST',
 				success: function(response){
 					var options = generateOptions(response);
@@ -592,6 +623,7 @@
 			$.ajax({
 				url: "{{ path('client.yougo.header.ajax') }}",
 				data: data,
+				async: false,
 				method: 'POST',
 				success: function(response){
 					console.log(response);
@@ -646,7 +678,7 @@
 			$(document).on("click", ".js-hen4", function (e) {
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
-				changeHenHeader($(e.currentTarget),'ref_sho'+term_id,'ref_dai'+term_id,'ref_chu'+term_id,'ref_ko'+term_id);
+				changeHenHeader($(e.currentTarget),'ref_sho'+term_id,'ref_dai'+term_id,'ref_chu'+term_id,'ref_ko'+term_id,'ref_term'+term_id);
 			});
 
 			$(document).on("click", ".js-sho4", function (e) {
@@ -676,11 +708,26 @@
 	$(function(){
 		$('.js-cur').bind('change', function(){
 			var selected_ver = $(this).val();
+			var data = {
+					'cur': selected_ver
+			};
+			$.ajax({
+				url: "{{ path('client.yougo.curriculum.ajax') }}",
+				data: data,
+				method: 'POST',
+				success: function(response){
+					var options = generateOptions(response);
+					injectOption('[name="version"]', options);
+				},
+				error: function(response){
+				}
+			});
+
 			if(selected_ver == '0'){
 				$('[name="version"]').val('0');
-				$('.js-han').attr("disabled", true);
+				$('[name="version"]').prop("disabled", true);
 			}else{
-				$('.js-han').attr("disabled", false);
+				$('[name="version"]').prop("disabled", false);
 			}
 		});
 
@@ -703,7 +750,7 @@
 		});
 
 		$('.js-hen').bind('change', function(){
-			changeHenHeader($('.js-hen'),'sho','dai','chu','ko');
+			changeHenHeader($('.js-hen'),'sho','dai','chu','ko','print_order');
 		});
 
 		$('.js-sho').bind('change', function(){

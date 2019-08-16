@@ -343,4 +343,48 @@ class MainTermRepository extends EntityRepository
 
 		return $result;
 	}
+
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function getPrintOrderList($curriculumId = null, $headerId = null){
+		$sql = "
+			SELECT
+				*
+			FROM
+				MainTerm
+			WHERE";
+		if($curriculumId){
+			$sql .= " MainTerm.curriculum_id = " . $curriculumId . " AND ";
+		}
+		if($headerId){
+			$sql .= " MainTerm.header_id = " . $headerId . " AND ";
+		}
+		$sql .= " MainTerm.delete_flag = false
+			ORDER BY
+				MainTerm.print_order
+		";
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result;
+	}
+
+	public function getYougoListByHeader($curriculum_id, $header_id){
+		$sql = "
+			SELECT
+				MainTerm.term_id id,
+				MainTerm.main_term name
+			FROM
+				MainTerm
+			WHERE
+				MainTerm.curriculum_id = ".$curriculum_id."
+				AND MainTerm.header_id IN (".$header_id.")
+				AND MainTerm.delete_flag = false
+			ORDER BY
+				MainTerm.header_id, MainTerm.print_order
+		";
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result;
+	}
 }

@@ -116,7 +116,7 @@
 			}
 
 			$(function(){
-				$('.js-cur').bind('change', function(){
+				$('[name="cur"]').bind('change', function(){
 					var selected = $(this).val();
 					var data = {
 							'cur': selected
@@ -127,7 +127,7 @@
 						method: 'POST',
 						success: function(response){
 							var options = generateOptions(response);
-							injectOption('js-han', options);
+							injectOption('[name="ver"]', options);
 						},
 						error: function(response){
 						}
