@@ -1,0 +1,50 @@
+<div class="modal fade" id="centerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				{{ 'text.yougo.center.frequency'|trans }}
+			</div>
+			<div id="term_id"></div>
+			<div id="formcenter" class="modal-body">
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.cancel'|trans }}</button>
+						<button type="button" class="btn btn-primary js-center-submit">{{ 'btn.submit'|trans }}</button>
+						<button type="button" class="btn btn-danger js-area-delete">{{ 'btn.delete'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="explainModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				{{ 'text.yougo.explain.index'|trans }}
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-2">{{ 'text.yougo.explain.term'|trans }}</label>
+						<label class="col-sm-4">{{ 'text.yougo.explain.index.kana'|trans }}</label>
+						<label class="col-sm-4">{{ 'text.yougo.explain.index.add'|trans }}</label>
+						<label class="col-sm-2">{{ 'text.yougo.explain.nombre'|trans }}</label>
+					</div>
+				</div>
+				<div class="row">
+					<div id="formindex"></div>
+				</div>
+				<hr>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.cancel'|trans }}</button>
+						<button type="button" class="btn btn-primary js-explain-submit">{{ 'btn.submit'|trans }}</button>
+						<button type="button" class="btn btn-danger js-area-delete">{{ 'btn.delete'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>

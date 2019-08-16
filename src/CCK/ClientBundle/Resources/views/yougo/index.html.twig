@@ -2,54 +2,7 @@
 
 {% block stylesheets %}
 	{{ parent() }}
-	<style>
-.site-header{
-    z-index: 30;
-    background: #F8F7F2;
-    position: fixed;
-	width: 1800px;
-    justify-content: space-between;
-    left: 90px;
-    top: 40px;
-}
-.content{
-    line-height: 1.6;
-    margin: 0 auto;
-    padding-top: 320px;
-}
-.panel-search {
-	width: 1200px;
-	margin-left: 60px;
-	margin-top: 40px;
-}
-.panel-search field_title {
-    height: 20px;
-}
-.table-yougo {
-	overflow-x: scroll;
-    overflow-y: hidden;
-	width: 1720px;
-}
-thead, tbody {
-  display: block;
-}
-tbody {
-  overflow-x: hidden;
-}
-.sort-button {
-    width: auto;
-    padding:0;
-    margin:0;
-    background:none;
-    border:0;
-    overflow:visible;
-    cursor:pointer;
-    font-size:8px;
-}
-.sty_list_count {
-    width: 60%;
-}
-	</style>
+	{% include 'CCKClientBundle:Common:style_yougo.html.twig' %}
 {% endblock %}
 
 {% block contents %}
