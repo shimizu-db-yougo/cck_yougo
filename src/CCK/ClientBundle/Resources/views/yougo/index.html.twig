@@ -227,7 +227,7 @@
 					<td width="60px">
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{#{ path('client.yougo.delete', {'id': yougo.id}) }#}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.delete'|trans }}</button></a>
+								<a href="{{ path('client.yougo.delete', {'id': yougo.id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" onClick="return checkDelete(this.form)">{{ 'btn.delete'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
@@ -286,6 +286,14 @@
 			$('.js-ko').attr("disabled", true);
 		}
 
+		function checkDelete(form){
+			if(window.confirm('用語データを削除します。よろしいですか。')){
+				return true;
+			}else{
+				return false;
+			}
+		}
+		
 		$(function(){
 			$('.js-cur').bind('change', function(){
 				var selected_ver = $(this).val();

@@ -1168,6 +1168,86 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/delete/{id}", name="client.yougo.delete")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:yougo:index.html.twig")
+	 */
+	public function deleteAction(Request $request, $id){
+		// get user information
+		$user = $this->getUser();
+	
+		$id = (int) $id;
+	
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+				'id' =>$id,
+				'deleteFlag' => FALSE
+		));
+		if(!$entity){
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+		$entity->setDeleteFlag(true);
+		$entity->setModifyDate(new \DateTime());
+		$entity->setDeleteDate(new \DateTime());
+	
+		// 紐付くsubtermの検索
+		$entity_sub = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:SubTerm')->findBy(array(
+				'mainTermId' =>$entity->getTermId(),
+				'deleteFlag' => FALSE
+		));
+	
+		foreach($entity_sub as $entity_sub_rec){
+			$entity_sub_rec->setDeleteFlag(true);
+			$entity_sub_rec->setModifyDate(new \DateTime());
+			$entity_sub_rec->setDeleteDate(new \DateTime());
+		}
+
+		// 紐付くsynonymの検索
+		$entity_syn = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Synonym')->findBy(array(
+				'mainTermId' =>$entity->getTermId(),
+				'deleteFlag' => FALSE
+		));
+		
+		foreach($entity_syn as $entity_syn_rec){
+			$entity_syn_rec->setDeleteFlag(true);
+			$entity_syn_rec->setModifyDate(new \DateTime());
+			$entity_syn_rec->setDeleteDate(new \DateTime());
+		}
+		
+		// 紐付くreferの検索
+		$entity_ref = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Refer')->findBy(array(
+				'mainTermId' =>$entity->getTermId(),
+				'deleteFlag' => FALSE
+		));
+		
+		foreach($entity_ref as $entity_ref_rec){
+			$entity_ref_rec->setDeleteFlag(true);
+			$entity_ref_rec->setModifyDate(new \DateTime());
+			$entity_ref_rec->setDeleteDate(new \DateTime());
+		}
+		
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+	
+		try {
+			// 登録
+			$em->flush();
+			// 実行
+			$em->getConnection()->commit();
+		} catch(\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+	
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		}
+	
+		return $this->redirect($this->generateUrl('client.yougo.list'));
+	}
+	
+	/**
 	 * @Route("/genko/yogotest", name="client.genko.yogotest")
 	 * @Method("POST|GET")
 	 * @Template()
