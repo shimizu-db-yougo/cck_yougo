@@ -93,13 +93,16 @@
 		<script src="{{ asset('bundles/cckcommon/js/docs.min.js') }}"></script>
 		<script src="{{ asset('bundles/cckcommon/js/common.js') }}?{{ 'now'|date('U') }}"></script>
 		<script>
-			function generateOptions(response){
+			function generateOptions(response,skipNotApplicable = false){
 				var options = [];
 
-				var option = $('<option></option>');
-				option.append('--------------');
-				option.attr('value', '0');
-				options.push(option);
+				var option;
+				if(!skipNotApplicable){
+					option = $('<option></option>');
+					option.append('--------------');
+					option.attr('value', '0');
+					options.push(option);
+				}
 
 				$.each(response, function(key, list){
 					option = $('<option></option>');

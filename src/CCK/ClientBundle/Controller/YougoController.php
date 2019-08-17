@@ -411,10 +411,18 @@ class YougoController extends BaseController {
 		if($request->request->has('hen')){
 			$ver = $request->request->get('version');
 			$hen = $request->request->get('hen');
-			$header = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-					'hen' => $hen,
-					'deleteFlag' => FALSE
-			));
+
+			$param_header = array('hen' => $hen,'deleteFlag' => FALSE);
+			if($request->request->has('sho')){
+				$param_header = array_merge($param_header, array('sho' => $request->request->get('sho')));
+			}
+			if($request->request->has('dai')){
+				$param_header = array_merge($param_header, array('dai' => $request->request->get('dai')));
+			}
+			if($request->request->has('chu')){
+				$param_header = array_merge($param_header, array('chu' => $request->request->get('chu')));
+			}
+			$header = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy($param_header);
 			$list_header_id = '';
 			foreach($header as $header_ele){
 				$list_header_id .= $header_ele->getId() . ',';

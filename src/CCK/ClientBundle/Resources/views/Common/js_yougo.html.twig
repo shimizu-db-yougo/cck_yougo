@@ -502,7 +502,7 @@
 				async: false,
 				method: 'POST',
 				success: function(response){
-					var options = generateOptions(response);
+					var options = generateOptions(response,true);
 					injectOption('[name="' + term + '"]', options);
 				},
 				error: function(response){
@@ -511,7 +511,7 @@
 
 		}
 
-		function changeShoHeader(e,hen,dai,chu,ko){
+		function changeShoHeader(e,hen,dai,chu,ko,term){
 			var selected_ver = $('[name="version"]').val();
 			var selected_hen = $('[name="' + hen + '"]').val();
 			var selected_sho = e.val();
@@ -544,9 +544,27 @@
 				error: function(response){
 				}
 			});
+			
+			var data = {
+					'version': selected_ver,
+					'hen': selected_hen,
+					'sho': selected_sho
+			};
+			$.ajax({
+				url: "{{ path('client.yougo.term.ajax') }}",
+				data: data,
+				async: false,
+				method: 'POST',
+				success: function(response){
+					var options = generateOptions(response,true);
+					injectOption('[name="' + term + '"]', options);
+				},
+				error: function(response){
+				}
+			});
 		}
 
-		function changeDaiHeader(e,hen,sho,chu,ko){
+		function changeDaiHeader(e,hen,sho,chu,ko,term){
 			var selected_ver = $('[name="version"]').val();
 			var selected_hen = $('[name="' + hen + '"]').val();
 			var selected_sho = $('[name="' + sho + '"]').val();
@@ -579,9 +597,28 @@
 				error: function(response){
 				}
 			});
+
+			var data = {
+					'version': selected_ver,
+					'hen': selected_hen,
+					'sho': selected_sho,
+					'dai': selected_dai
+			};
+			$.ajax({
+				url: "{{ path('client.yougo.term.ajax') }}",
+				data: data,
+				async: false,
+				method: 'POST',
+				success: function(response){
+					var options = generateOptions(response,true);
+					injectOption('[name="' + term + '"]', options);
+				},
+				error: function(response){
+				}
+			});
 		}
 
-		function changeChuHeader(e,hen,sho,dai,ko){
+		function changeChuHeader(e,hen,sho,dai,ko,term){
 			var selected_ver = $('[name="version"]').val();
 			var selected_hen = $('[name="' + hen + '"]').val();
 			var selected_sho = $('[name="' + sho + '"]').val();
@@ -610,6 +647,26 @@
 				success: function(response){
 					var options = generateOptions(response);
 					injectOption('[name="' + ko + '"]', options);
+				},
+				error: function(response){
+				}
+			});
+			
+			var data = {
+					'version': selected_ver,
+					'hen': selected_hen,
+					'sho': selected_sho,
+					'dai': selected_dai,
+					'chu': selected_chu
+			};
+			$.ajax({
+				url: "{{ path('client.yougo.term.ajax') }}",
+				data: data,
+				async: false,
+				method: 'POST',
+				success: function(response){
+					var options = generateOptions(response,true);
+					injectOption('[name="' + term + '"]', options);
 				},
 				error: function(response){
 				}
@@ -684,19 +741,19 @@
 			$(document).on("click", ".js-sho4", function (e) {
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
-				changeShoHeader($(e.currentTarget),'ref_hen'+term_id,'ref_dai'+term_id,'ref_chu'+term_id,'ref_ko'+term_id);
+				changeShoHeader($(e.currentTarget),'ref_hen'+term_id,'ref_dai'+term_id,'ref_chu'+term_id,'ref_ko'+term_id,'ref_term'+term_id);
 			});
 
 			$(document).on("click", ".js-dai4", function (e) {
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
-				changeDaiHeader($(e.currentTarget),'ref_hen'+term_id,'ref_sho'+term_id,'ref_chu'+term_id,'ref_ko'+term_id);
+				changeDaiHeader($(e.currentTarget),'ref_hen'+term_id,'ref_sho'+term_id,'ref_chu'+term_id,'ref_ko'+term_id,'ref_term'+term_id);
 			});
 
 			$(document).on("click", ".js-chu4", function (e) {
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
-				changeChuHeader($(e.currentTarget),'ref_hen'+term_id,'ref_sho'+term_id,'ref_dai'+term_id,'ref_ko'+term_id);
+				changeChuHeader($(e.currentTarget),'ref_hen'+term_id,'ref_sho'+term_id,'ref_dai'+term_id,'ref_ko'+term_id,'ref_term'+term_id);
 			});
 
 			// 指矢印用語　削除
@@ -754,15 +811,15 @@
 		});
 
 		$('.js-sho').bind('change', function(){
-			changeShoHeader($('.js-sho'),'hen','dai','chu','ko');
+			changeShoHeader($('.js-sho'),'hen','dai','chu','ko','print_order');
 		});
 
 		$('.js-dai').bind('change', function(){
-			changeDaiHeader($('.js-dai'),'hen','sho','chu','ko');
+			changeDaiHeader($('.js-dai'),'hen','sho','chu','ko','print_order');
 		});
 
 		$('.js-chu').bind('change', function(){
-			changeChuHeader($('.js-chu'),'hen','sho','dai','ko');
+			changeChuHeader($('.js-chu'),'hen','sho','dai','ko','print_order');
 		});
 
 		$('.js-list-count').bind('change', function(){
