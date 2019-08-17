@@ -1246,6 +1246,49 @@ class YougoController extends BaseController {
 	
 		return $this->redirect($this->generateUrl('client.yougo.list'));
 	}
+
+	/**
+	 * @Route("/yougo/sub/delete/ajax", name="client.yougo.sub.delete.ajax")
+	 */
+	public function getSubDeleteAjaxAction(Request $request){
+		if($request->request->has('id')){
+			$id = $request->request->get('id');
+			$table = $request->request->get('table');
+			$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:'.$table)->findOneBy(array(
+					'id' =>$id,
+					'deleteFlag' => FALSE
+			));
+
+			$entity->setDeleteFlag(true);
+			$entity->setModifyDate(new \DateTime());
+			$entity->setDeleteDate(new \DateTime());
+			
+			// transaction
+			$em = $this->get('doctrine.orm.entity_manager');
+			$em->getConnection()->beginTransaction();
+			
+			try {
+				// 登録
+				$em->flush();
+				// 実行
+				$em->getConnection()->commit();
+			} catch(\Exception $e){
+				// もし、DBに登録失敗した場合rollbackする
+				$em->getConnection()->rollback();
+				$em->close();
+			
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+			}
+			
+			$response = new JsonResponse(JsonResponse::HTTP_OK);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+	
+		return $response;
+	}
 	
 	/**
 	 * @Route("/genko/yogotest", name="client.genko.yogotest")

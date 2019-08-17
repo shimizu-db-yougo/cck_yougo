@@ -257,7 +257,7 @@
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
 			+'<label class="col-sm-1" id="nombre">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-sub-remove">{{ "btn.remove.subterm"|trans }}</button></div>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-sub-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.subterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="sub_term_id" name="sub_term_id" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
 			return html;
@@ -310,7 +310,7 @@
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
 			+'<label class="col-sm-1" id="nombre">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-syn-remove">{{ "btn.remove.synterm"|trans }}</button></div>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-syn-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.synterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="syn_term_id" name="syn_term_id" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
 			return html;
@@ -365,7 +365,7 @@
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
 			+'<label class="col-sm-1" id="nombre">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-ref-remove">{{ "btn.remove.refterm"|trans }}</button></div>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-ref-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.refterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="ref_idx" name="ref_idx" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
 			return html;
@@ -711,6 +711,29 @@
 			});
 			// サブ用語　削除
 			$(document).on("click", ".js-sub-remove", function (e) {
+				if(!window.confirm('用語データを削除します。よろしいですか。')){
+					return false;
+				}
+				var target = $(e.currentTarget);
+				var term_id = target.attr('term-id');
+				console.log(term_id);
+
+				var data = {
+						'id': term_id,
+						'table': 'SubTerm'
+				};
+				$.ajax({
+					url: "{{ path('client.yougo.sub.delete.ajax') }}",
+					data: data,
+					async: false,
+					method: 'POST',
+					success: function(response){
+
+					},
+					error: function(response){
+						alert('DB更新エラー');
+					}
+				});
 				$(this).parents('.form_subterm').remove();
 			});
 
@@ -728,6 +751,30 @@
 			});
 			// 同対類用語　削除
 			$(document).on("click", ".js-syn-remove", function (e) {
+				if(!window.confirm('用語データを削除します。よろしいですか。')){
+					return false;
+				}
+				var target = $(e.currentTarget);
+				var term_id = target.attr('term-id');
+				console.log(term_id);
+
+				var data = {
+						'id': term_id,
+						'table': 'Synonym'
+				};
+				$.ajax({
+					url: "{{ path('client.yougo.sub.delete.ajax') }}",
+					data: data,
+					async: false,
+					method: 'POST',
+					success: function(response){
+
+					},
+					error: function(response){
+						alert('DB更新エラー');
+					}
+				});
+				
 				$(this).parents('.form_synterm').remove();
 			});
 
@@ -758,6 +805,30 @@
 
 			// 指矢印用語　削除
 			$(document).on("click", ".js-ref-remove", function (e) {
+				if(!window.confirm('用語データを削除します。よろしいですか。')){
+					return false;
+				}
+				var target = $(e.currentTarget);
+				var term_id = target.attr('term-id');
+				console.log(term_id);
+
+				var data = {
+						'id': term_id,
+						'table': 'Refer'
+				};
+				$.ajax({
+					url: "{{ path('client.yougo.sub.delete.ajax') }}",
+					data: data,
+					async: false,
+					method: 'POST',
+					success: function(response){
+
+					},
+					error: function(response){
+						alert('DB更新エラー');
+					}
+				});
+				
 				$(this).parents('.form_refterm').remove();
 			});
 		}
