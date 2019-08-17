@@ -135,9 +135,17 @@ class ClientExtension extends \Twig_Extension
 	public function replaceTag($term_explain){
 		$term_explain = str_replace('《rtn》', '<br>', $term_explain);
 		$term_explain = str_replace('《c_SI》', '<img src="/./img/shiryo.jpg" class="icon-3times" alt="shiryo">', $term_explain);
-		$term_explain = preg_replace('/《c_G》(.*)《\/c_G》/u', '<span style="font-weight: bold;">$1</span>', $term_explain);
-		$term_explain = preg_replace('/《c_TM:[0-9]+》(.*)《\/c_TM》/u', '$1', $term_explain);
-		$term_explain = preg_replace('/《c_SAK》(.*)《\/c_SAK》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_G》(.*?)《\/c_G》/u', '<span style="font-weight: bold;">$1</span>', $term_explain);
+		$term_explain = preg_replace('/《c_SY》(.*?)《\/c_SY》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_SK》(.*?)《\/c_SK》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_KJ》(.*?)《\/c_KJ》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_KA》(.*?)《\/c_KA》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_GAI》(.*?)《\/c_GAI》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_UT》(.*?)《\/c_UT》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_ST》(.*?)《\/c_ST》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_UBK》(.*?)《\/c_UBK》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_TM:[0-9]+》(.*?)《\/c_TM》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/《c_SAK》(.*?)《\/c_SAK》/u', '$1', $term_explain);
 
 		return $term_explain;
 	}
