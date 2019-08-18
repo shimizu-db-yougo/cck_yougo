@@ -22,6 +22,7 @@ use CCK\CommonBundle\Entity\MainTerm;
 use CCK\CommonBundle\Entity\SubTerm;
 use CCK\CommonBundle\Entity\Synonym;
 use CCK\CommonBundle\Entity\Refer;
+use CCK\CommonBundle\Entity\ExplainIndex;
 
 /**
  * yougo controller.
@@ -1138,6 +1139,74 @@ class YougoController extends BaseController {
 		return $response;
 	}
 
+	/**
+	 * @Route("/explain/save/ajax", name="client.explain.save.ajax")
+	 * @Method("POST")
+	 */
+	public function saveExplainAjaxAction(Request $request){
+		$this->get('logger')->error("***saveExplainAjaxAction start***");
+		$this->get('logger')->error(serialize($request->request->get('term_id')));
+		//$this->get('logger')->error(serialize($request->request->get('index_term')));
+		$this->get('logger')->error(serialize($request->request->get('index_add_letter')));
+		
+		$ret = ['result'=>'ok','error'=>''];
+	
+		if(!($request->request->has('index_term'))){
+			$ret = ['result'=>'ng','error'=>'parameter error'];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		$return_flag = true;
+		
+		$idx = 0;
+		foreach($request->request->get('index_term') as $ele_expterm){
+			//$this->get('logger')->error("***exp_term_elem***".serialize($ele_expterm));
+			
+			$em = $this->get('doctrine.orm.entity_manager');
+			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+					'indexTerm' => $ele_expterm,
+					'deleteFlag' => FALSE
+			));
+			$update_mode = 'update';
+			if(!$entity){
+				$entity = new ExplainIndex();
+				$update_mode = 'new';
+			}
+		
+			$em->getConnection()->beginTransaction();
+		
+			try{
+				$entity->setMainTermId($request->request->get('term_id')[$idx]);
+				$entity->setIndexTerm($ele_expterm);
+				$entity->setIndexAddLetter($request->request->get('index_add_letter')[$idx]);
+				$entity->setIndexKana($request->request->get('index_kana')[$idx]);
+				$entity->setNombre($request->request->get('nombre')[$idx]);
+				
+				if($update_mode == 'new'){
+					$em->persist($entity);
+				}
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+		
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$ret = ['result'=>'ng','error'=>'ExplainDB error id:'.$ele_expterm];
+				$response = new JsonResponse($ret);
+				return $response;
+			}
+			$idx++;
+		}
+
+		$response = new JsonResponse($ret);
+		return $response;
+	}
+	
 	/**
 	 * @Route("/edit/confirm", name="client.yougo.edit.confirm")
 	 * @Method("POST|GET")

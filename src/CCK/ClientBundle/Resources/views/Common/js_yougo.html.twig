@@ -72,7 +72,7 @@
 			var target = $(e.currentTarget);
 			var main_term_id = target.attr('main-term-id');
 
-			$('#formindex').empty();
+			$('#form_explains').empty();
 			// さくいん用語タグで囲まれた用語を抽出
 			var match_regex = /(?<=\《c_SAK》).*?(?=\《\/c_SAK》)/g;
 			var match_chr = '';
@@ -83,12 +83,15 @@
 				console.log(match_chr);
 
 				for(var i=0; i<match_chr.length; i++){
-					$('#formindex').append(
-							'<div class="col-lg-12">'
+					$('#form_explains').append(
+							'<div class="col-lg-12 form_index">'
+							+'<input class="form-control input-sm" type="hidden" id="explain_main_term_id" name="explain_main_term_id" value="' + main_term_id + '">'
+							+'<input class="form-control input-sm" type="hidden" id="explain_index_term" name="explain_index_term" value="' + match_chr[i] + '">'
+							+'<input class="form-control input-sm" type="hidden" id="explain_nombre" name="explain_nombre" value="0">'
 							+'<label class="col-sm-2">'+ match_chr[i] + '</label>'
-							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" name="index_kana" value=""></div>'
-							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" name="index_add_letter" value=""></div>'
-							+'<label class="col-sm-2"></label>'
+							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value=""></div>'
+							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value=""></div>'
+							+'<label class="col-sm-2">0</label>'
 							+'</div>');
 				}
 
@@ -98,6 +101,34 @@
 			$('#explainModal').modal();
 		});
 
+		$('.js-explain-submit').bind('click', function(e){
+			var explain = {term_id:[],index_term:[],index_add_letter:[],index_kana:[],nombre:[]};
+			explain.term_id = setExplainList('explain_main_term_id',explain.term_id);
+			explain.index_term = setExplainList('explain_index_term',explain.index_term);
+			explain.index_kana = setExplainList('explain_index_kana',explain.index_kana);
+			explain.index_add_letter = setExplainList('explain_index_add_letter',explain.index_add_letter);
+			explain.nombre = setExplainList('explain_nombre',explain.nombre);
+			console.log(explain);
+			
+			$.post("{{ path('client.explain.save.ajax') }}", explain)
+			.done(function(r,s){
+				console.log('savePost:done',s,r);
+				alert('解説内さくいん用語の登録が完了しました。');
+			})
+			.fail(function(e,s){
+				console.log('savePost:fail',s,e.status);
+				alert('DB更新エラー');
+			});
+		});
+		
+		function setExplainList(field,explain_attr){
+			var explain_list = $('input[id="' + field + '"]');
+			for(var i in explain_list){
+				if(explain_list[i].value !== void 0){explain_attr.push(explain_list[i].value);}
+			}
+			return explain_attr;
+		}
+		
 		// 用語登録
 		$('.js-yougo-submit').bind('click', function(e){
 			// 主用語
