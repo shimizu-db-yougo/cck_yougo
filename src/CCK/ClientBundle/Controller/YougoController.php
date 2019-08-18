@@ -1164,6 +1164,44 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/yougo/subterm/new/ajax", name="client.yougo.subterm.new.ajax")
+	 */
+	public function getSubtermNewAjaxAction(Request $request){
+		$em = $this->getDoctrine()->getManager();
+		
+		$entitySub = new SubTerm();
+		
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+		
+		try{
+			$entitySub->setMainTermId(0);
+			$entitySub->setRedLetter(0);
+			$entitySub->setTextFrequency(0);
+			$entitySub->setCenterFrequency(0);
+			$entitySub->setNewsExam(0);
+			$entitySub->setNombre(0);
+		
+			$em->persist($entitySub);
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+		
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($entitySub->getId(),true);
+		$response = new JsonResponse(json_encode($entitySub));
+		
+		return $response;
+	}
+	
+	/**
 	 * @Route("/yougo/center/ajax", name="client.yougo.center.ajax")
 	 */
 	public function getCenterAjaxAction(Request $request){
@@ -1187,7 +1225,7 @@ class YougoController extends BaseController {
 
 		return $response;
 	}
-
+	
 	/**
 	 * @Route("/explain/save/ajax", name="client.explain.save.ajax")
 	 * @Method("POST")

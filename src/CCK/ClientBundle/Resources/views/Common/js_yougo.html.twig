@@ -403,6 +403,18 @@
 		}
 
 		$('#addForm').click(function(){
+			/*$.ajax({
+				url: "{{ path('client.yougo.subterm.new.ajax') }}",
+				method: 'POST',
+				success: function(response){
+						console.log(response);
+						$('#form_subterms').append(
+								constructSubForm(response)
+						);
+				},
+				error: function(response){
+				}
+			});*/
 			$('#form_subterms').append(
 					constructSubForm(null)
 			);

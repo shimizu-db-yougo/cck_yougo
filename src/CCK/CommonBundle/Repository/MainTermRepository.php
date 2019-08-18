@@ -239,7 +239,7 @@ class MainTermRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
-	public function getYougoDetailOfSubterm($term_id){
+	public function getYougoDetailOfSubterm($term_id,$is_getId=false){
 		$sql = "
 			SELECT
 				SubTerm.id,
@@ -261,8 +261,12 @@ class MainTermRepository extends EntityRepository
 				SubTerm.delete_flag = false
 		";
 
-		if($term_id){
-			$sql .= " AND SubTerm.main_term_id = " . $term_id;
+		if($is_getId){
+			$sql .= " AND SubTerm.id = " . $term_id;
+		}else{
+			if($term_id){
+				$sql .= " AND SubTerm.main_term_id = " . $term_id;
+			}
 		}
 
 		$result_sub = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
