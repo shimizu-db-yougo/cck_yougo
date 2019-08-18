@@ -23,6 +23,7 @@ use CCK\CommonBundle\Entity\SubTerm;
 use CCK\CommonBundle\Entity\Synonym;
 use CCK\CommonBundle\Entity\Refer;
 use CCK\CommonBundle\Entity\ExplainIndex;
+use CCK\CommonBundle\Entity\Center;
 
 /**
  * yougo controller.
@@ -771,6 +772,7 @@ class YougoController extends BaseController {
 			$ret = ['result'=>'ng','error'=>'MainTermDB error termId:'.$request->request->get('term_id')];
 			$return_flag = false;
 		}
+		
 		return $return_flag;
 	}
 
@@ -993,6 +995,44 @@ class YougoController extends BaseController {
 		return $return_flag;
 	}
 
+	private function saveCenterFrequency($term_id,$sub){
+		$return_flag = true;
+		
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+		
+		$year = date('Y')-10;
+		for ($idx=0;$idx<10;$idx++){
+		
+			try{
+				$entity = new Center();
+				
+				$entity->setMainTermId($term_id);
+				$entity->setSubTermId(null);
+				$entity->setYougoFlag(1);
+				$entity->setYear($year+$idx);
+				$entity->setMainExam(0);
+				$entity->setSubExam(0);
+				
+				$em->persist($entity);
+				$em->flush();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+		
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+		
+				$return_flag = false;
+				return $return_flag;
+			}
+		}
+		$em->getConnection()->commit();
+
+		return $return_flag;
+	}
+	
 	/**
 	 * @Route("/edit/{term_id}", name="client.yougo.edit")
 	 * @Method("POST|GET")
@@ -1131,6 +1171,15 @@ class YougoController extends BaseController {
 			$term_id = $request->request->get('term_id');
 			$yougo_flag = $request->request->get('yougo_flag');
 			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
+			
+			if(count($center_point)==0){
+				if($this->saveCenterFrequency($term_id,$yougo_flag) == false){
+					$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+					return $response;
+				}
+				$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
+			}
+			
 			$response = new JsonResponse($center_point);
 		}else{
 			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
