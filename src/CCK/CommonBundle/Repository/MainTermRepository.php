@@ -277,7 +277,7 @@ class MainTermRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
-	public function getYougoDetailOfSynonym($term_id){
+	public function getYougoDetailOfSynonym($term_id,$is_getId=false){
 		$sql = "
 			SELECT
 				Synonym.id,
@@ -297,8 +297,12 @@ class MainTermRepository extends EntityRepository
 				Synonym.delete_flag = false
 		";
 
-		if($term_id){
-			$sql .= " AND Synonym.main_term_id = " . $term_id;
+		if($is_getId){
+			$sql .= " AND Synonym.id = " . $term_id;
+		}else{
+			if($term_id){
+				$sql .= " AND Synonym.main_term_id = " . $term_id;
+			}
 		}
 
 		$result_syn = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();

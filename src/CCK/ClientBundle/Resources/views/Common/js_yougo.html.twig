@@ -53,12 +53,42 @@
 		$('.js-center-submit').bind('click', function(e){
 			var center_cnt = 0;
 			var point_list = $('input[id^="center_main"],input[id^="center_sub"]');
+			var tbl_center_point = {};
 			for(var i in point_list){
 				console.log(point_list[i].value);
-				if(point_list[i].value !== void 0){center_cnt += Number(point_list[i].value);}
+				if(point_list[i].value !== void 0){
+					center_cnt += Number(point_list[i].value);
+
+					if(point_list[i].id.indexOf("center_main") !== -1){
+						tbl_center_point[point_list[i].id.slice(-4)] = {};
+						tbl_center_point[point_list[i].id.slice(-4)].main = Number(point_list[i].value);
+					}
+					if(point_list[i].id.indexOf("center_sub") !== -1){
+						tbl_center_point[point_list[i].id.slice(-4)].sub = Number(point_list[i].value);
+					}
+					console.log(tbl_center_point);
+				}
 			}
 
 			var term_id = $('#term_id').val();
+			var yougo_flag = $('#yougo_flag').val();
+
+			// センター頻度の登録
+			var data = {
+				'term_id': term_id,
+				'center_tbl': tbl_center_point,
+				'yougo_flag': yougo_flag
+			};
+			$.ajax({
+				url: "{{ path('client.yougo.center.update.ajax') }}",
+				data: data,
+				method: 'POST',
+				success: function(response){
+				},
+				error: function(response){
+					alert("DBエラー");
+				}
+			});
 
 			$('#center_freq' + term_id + ' #center_freq').text(center_cnt);
 			$('#center_freq' + term_id + ' input:hidden[name="center_freq_text"]').val(center_cnt);
@@ -305,16 +335,16 @@
 			+'<option value="3" ' + (((record)&&(record.synonym_id == '3')) ? ' selected ' : '') + '>類</option>'
 			+'</select></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.syn_term"|trans }}</label>'
-			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="syn_term" name="syn_term" value="' + ((record) ? record.term : '') + '"></div>'
+			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="syn_term" name="syn_term" value="' + (((record)&&(record.term)) ? record.term : '') + '"></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
 			+'<div class="col-sm-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((record) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-sm-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target3" term-id="' + ((record) ? record.id : '') + '" yougo-flag="3" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((record) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target3" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="3" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + (((record)&&(record.center_frequency)) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
 			+'<div class="col-sm-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
@@ -340,7 +370,7 @@
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-			+'<label class="col-sm-1" id="nombre">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
+			+'<label class="col-sm-1" id="nombre">{{ "' + (((record)&&(record.nombre)) ? record.nombre : '') + '" }}</label>'
 			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-syn-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.synterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="syn_term_id" name="syn_term_id" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
@@ -422,9 +452,18 @@
 		});
 
 		$('#addFormSyn').click(function(){
-			$('#form_synterms').append(
-					constructSynForm(null)
-			);
+			$.ajax({
+				url: "{{ path('client.yougo.synonym.new.ajax') }}",
+				method: 'POST',
+				success: function(response){
+						console.log(response);
+						$('#form_synterms').append(
+								constructSynForm(JSON.parse(response))
+						);
+				},
+				error: function(response){
+				}
+			});
 		});
 
 		$('#removeFormSyn').click(function(){
@@ -461,6 +500,7 @@
 			var yougo_flag = target.attr('yougo-flag');
 
 			$('#term_id').val(term_id);
+			$('#yougo_flag').val(yougo_flag);
 			$('#formcenter').empty();
 
 			// センター頻度の取得

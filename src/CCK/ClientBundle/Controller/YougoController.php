@@ -848,14 +848,10 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***syn_term_elem***".$ele_synterm);
 
 			$em = $this->get('doctrine.orm.entity_manager');
-			if($update_mode == 'edit'){
-				$entity = $em->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
-						'id' => $ele_synterm,
-						'deleteFlag' => FALSE
-				));
-			}else{
-				$entity = new Synonym();
-			}
+			$entity = $em->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
+					'id' => $ele_synterm,
+					'deleteFlag' => FALSE
+			));
 
 			$em->getConnection()->beginTransaction();
 
@@ -870,11 +866,9 @@ class YougoController extends BaseController {
 				$entity->setIndexAddLetter($synterm['index_add_letter'][$idx]);
 				$entity->setIndexKana($synterm['index_kana'][$idx]);
 
-				if($update_mode == 'new'){
-					$entity->setMainTermId($request->request->get('term_id'));
-					$entity->setNombre($synterm['nombre'][$idx]);
-					$em->persist($entity);
-				}
+				$entity->setMainTermId($request->request->get('term_id'));
+				$entity->setNombre($synterm['nombre'][$idx]);
+
 				$em->flush();
 				$em->getConnection()->commit();
 			} catch (\Exception $e){
@@ -910,12 +904,12 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***ref_idx_elem***".$ele_refterm);
 
 			$em = $this->get('doctrine.orm.entity_manager');
-			if($update_mode == 'edit'){
-				$entity = $em->getRepository('CCKCommonBundle:Refer')->findOneBy(array(
-						'id' => $ele_refterm,
-						'deleteFlag' => FALSE
-				));
-			}else{
+			$entity = $em->getRepository('CCKCommonBundle:Refer')->findOneBy(array(
+					'id' => $ele_refterm,
+					'deleteFlag' => FALSE
+			));
+			if(!$entity){
+				$update_mode = 'new';
 				$entity = new Refer();
 			}
 
@@ -1031,6 +1025,70 @@ class YougoController extends BaseController {
 		$em->getConnection()->commit();
 
 		return $return_flag;
+	}
+
+	/**
+	 * @Route("/yougo/center/update/ajax", name="client.yougo.center.update.ajax")
+	 */
+	public function getCenterUpdateAjaxAction(Request $request){
+		if($request->request->has('term_id')){
+			$term_id = $request->request->get('term_id');
+			$center_tbl = $request->request->get('center_tbl');
+			$yougo_flag = $request->request->get('yougo_flag');
+
+			$em = $this->get('doctrine.orm.entity_manager');
+			$em->getConnection()->beginTransaction();
+
+			foreach ($center_tbl as $center_key=>$center_rec){
+
+				$this->get('logger')->error('***center_update***');
+				$this->get('logger')->error($center_key);
+				$this->get('logger')->error($center_rec['main']);
+				$this->get('logger')->error($center_rec['sub']);
+
+				try{
+					if($yougo_flag == '1'){
+						$entity = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+								'mainTermId' => $term_id,
+								'yougoFlag' => $yougo_flag,
+								'year' => $center_key,
+								'deleteFlag' => FALSE
+						));
+					}else{
+						$entity = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+								'subTermId' => $term_id,
+								'yougoFlag' => $yougo_flag,
+								'year' => $center_key,
+								'deleteFlag' => FALSE
+						));
+					}
+
+					if($entity){
+						$entity->setMainExam($center_rec['main']);
+						$entity->setSubExam($center_rec['sub']);
+					}
+
+					$em->flush();
+				} catch (\Exception $e){
+					$em->getConnection()->rollback();
+					$em->close();
+
+					// log
+					$this->get('logger')->error($e->getMessage());
+					$this->get('logger')->error($e->getTraceAsString());
+
+					$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+					return $response;
+				}
+			}
+			$em->getConnection()->commit();
+
+			$response = new JsonResponse(JsonResponse::HTTP_OK);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
 	}
 
 	/**
@@ -1202,6 +1260,50 @@ class YougoController extends BaseController {
 			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
 		}
 		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($entitySub->getId(),true);
+		$response = new JsonResponse(json_encode($entitySub[0]));
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/yougo/synonym/new/ajax", name="client.yougo.synonym.new.ajax")
+	 */
+	public function getSynonymNewAjaxAction(Request $request){
+		$em = $this->getDoctrine()->getManager();
+
+		$entitySub = new Synonym();
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try{
+			$entitySub->setMainTermId(0);
+			$entitySub->setTerm("");
+			$entitySub->setRedLetter(0);
+			$entitySub->setSynonymId(0);
+			$entitySub->setTextFrequency(0);
+			$entitySub->setCenterFrequency(0);
+			$entitySub->setNewsExam(0);
+			$entitySub->setDelimiter("0");
+			$entitySub->setKana("");
+			$entitySub->setIndexAddLetter("");
+			$entitySub->setIndexKana("");
+			$entitySub->setNombre(0);
+
+			$em->persist($entitySub);
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($entitySub->getId(),true);
 		$response = new JsonResponse(json_encode($entitySub[0]));
 
 		return $response;
