@@ -109,7 +109,7 @@
 			explain.index_add_letter = setExplainList('explain_index_add_letter',explain.index_add_letter);
 			explain.nombre = setExplainList('explain_nombre',explain.nombre);
 			console.log(explain);
-			
+
 			$.post("{{ path('client.explain.save.ajax') }}", explain)
 			.done(function(r,s){
 				console.log('savePost:done',s,r);
@@ -120,7 +120,7 @@
 				alert('DB更新エラー');
 			});
 		});
-		
+
 		function setExplainList(field,explain_attr){
 			var explain_list = $('input[id="' + field + '"]');
 			for(var i in explain_list){
@@ -128,7 +128,7 @@
 			}
 			return explain_attr;
 		}
-		
+
 		// 用語登録
 		$('.js-yougo-submit').bind('click', function(e){
 			// 主用語
@@ -236,7 +236,7 @@
 			'<div class="form-horizontal form_subterm">'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>'
-			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="sub_term" name="sub_term" value="' + ((record) ? record.sub_term : '') + '"></div>'
+			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="sub_term" name="sub_term" value="' + (((record)&&(record.sub_term)) ? record.sub_term : '') + '"></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
 			+'<div class="col-sm-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>'
@@ -244,10 +244,10 @@
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((record) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-sm-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((record) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
+			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + (((record)&&(record.center_frequency)) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
 			+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
 			+'<div class="col-sm-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
@@ -287,7 +287,7 @@
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
 			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-			+'<label class="col-sm-1" id="nombre">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
+			+'<label class="col-sm-1" id="nombre">{{ "' + (((record)&&(record.nombre)) ? record.nombre : '') + '" }}</label>'
 			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-sub-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.subterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="sub_term_id" name="sub_term_id" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
@@ -403,21 +403,18 @@
 		}
 
 		$('#addForm').click(function(){
-			/*$.ajax({
+			$.ajax({
 				url: "{{ path('client.yougo.subterm.new.ajax') }}",
 				method: 'POST',
 				success: function(response){
 						console.log(response);
 						$('#form_subterms').append(
-								constructSubForm(response)
+								constructSubForm(JSON.parse(response))
 						);
 				},
 				error: function(response){
 				}
-			});*/
-			$('#form_subterms').append(
-					constructSubForm(null)
-			);
+			});
 		});
 
 		$('#removeForm').click(function(){
@@ -460,6 +457,7 @@
 			// get target
 			var target = $(e.currentTarget);
 			var term_id = target.attr('term-id');
+			var main_term_id = target.attr('main-term-id');
 			var yougo_flag = target.attr('yougo-flag');
 
 			$('#term_id').val(term_id);
@@ -468,6 +466,7 @@
 			// センター頻度の取得
 			var data = {
 				'term_id': term_id,
+				'main_term_id': main_term_id,
 				'yougo_flag': yougo_flag
 			};
 			$.ajax({
@@ -587,7 +586,7 @@
 				error: function(response){
 				}
 			});
-			
+
 			var data = {
 					'version': selected_ver,
 					'hen': selected_hen,
@@ -694,7 +693,7 @@
 				error: function(response){
 				}
 			});
-			
+
 			var data = {
 					'version': selected_ver,
 					'hen': selected_hen,
@@ -817,7 +816,7 @@
 						alert('DB更新エラー');
 					}
 				});
-				
+
 				$(this).parents('.form_synterm').remove();
 			});
 
@@ -871,7 +870,7 @@
 						alert('DB更新エラー');
 					}
 				});
-				
+
 				$(this).parents('.form_refterm').remove();
 			});
 		}

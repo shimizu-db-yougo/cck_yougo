@@ -772,7 +772,7 @@ class YougoController extends BaseController {
 			$ret = ['result'=>'ng','error'=>'MainTermDB error termId:'.$request->request->get('term_id')];
 			$return_flag = false;
 		}
-		
+
 		return $return_flag;
 	}
 
@@ -791,14 +791,10 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***sub_term_elem***".$ele_subterm);
 
 			$em = $this->get('doctrine.orm.entity_manager');
-			if($update_mode == 'edit'){
-				$entity = $em->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
-						'id' => $ele_subterm,
-						'deleteFlag' => FALSE
-				));
-			}else{
-				$entity = new SubTerm();
-			}
+			$entity = $em->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
+					'id' => $ele_subterm,
+					'deleteFlag' => FALSE
+			));
 
 			$em->getConnection()->beginTransaction();
 
@@ -814,11 +810,9 @@ class YougoController extends BaseController {
 				$entity->setIndexAddLetter($subterm['index_add_letter'][$idx]);
 				$entity->setIndexKana($subterm['index_kana'][$idx]);
 
-				if($update_mode == 'new'){
-					$entity->setMainTermId($request->request->get('term_id'));
-					$entity->setNombre($subterm['nombre'][$idx]);
-					$em->persist($entity);
-				}
+				$entity->setMainTermId($request->request->get('term_id'));
+				$entity->setNombre($subterm['nombre'][$idx]);
+
 				$em->flush();
 				$em->getConnection()->commit();
 			} catch (\Exception $e){
@@ -995,35 +989,41 @@ class YougoController extends BaseController {
 		return $return_flag;
 	}
 
-	private function saveCenterFrequency($term_id,$sub){
+	private function saveCenterFrequency($term_id,$main_term_id,$sub){
 		$return_flag = true;
-		
+
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
-		
+
 		$year = date('Y')-10;
 		for ($idx=0;$idx<10;$idx++){
-		
+
 			try{
 				$entity = new Center();
-				
-				$entity->setMainTermId($term_id);
-				$entity->setSubTermId(null);
-				$entity->setYougoFlag(1);
+
+				$entity->setMainTermId($main_term_id);
+
+				if($sub == '1'){
+					$entity->setSubTermId(null);
+				}else{
+					$entity->setSubTermId($term_id);
+				}
+
+				$entity->setYougoFlag($sub);
 				$entity->setYear($year+$idx);
 				$entity->setMainExam(0);
 				$entity->setSubExam(0);
-				
+
 				$em->persist($entity);
 				$em->flush();
 			} catch (\Exception $e){
 				$em->getConnection()->rollback();
 				$em->close();
-		
+
 				// log
 				$this->get('logger')->error($e->getMessage());
 				$this->get('logger')->error($e->getTraceAsString());
-		
+
 				$return_flag = false;
 				return $return_flag;
 			}
@@ -1032,7 +1032,7 @@ class YougoController extends BaseController {
 
 		return $return_flag;
 	}
-	
+
 	/**
 	 * @Route("/edit/{term_id}", name="client.yougo.edit")
 	 * @Method("POST|GET")
@@ -1168,56 +1168,63 @@ class YougoController extends BaseController {
 	 */
 	public function getSubtermNewAjaxAction(Request $request){
 		$em = $this->getDoctrine()->getManager();
-		
+
 		$entitySub = new SubTerm();
-		
+
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
-		
+
 		try{
 			$entitySub->setMainTermId(0);
+			$entitySub->setSubTerm("");
 			$entitySub->setRedLetter(0);
 			$entitySub->setTextFrequency(0);
 			$entitySub->setCenterFrequency(0);
 			$entitySub->setNewsExam(0);
+			$entitySub->setDelimiter("0");
+			$entitySub->setKana("");
+			$entitySub->setDelimiterKana("0");
+			$entitySub->setIndexAddLetter("");
+			$entitySub->setIndexKana("");
 			$entitySub->setNombre(0);
-		
+
 			$em->persist($entitySub);
 			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
 			$em->getConnection()->rollback();
 			$em->close();
-		
+
 			// log
 			$this->get('logger')->error($e->getMessage());
 			$this->get('logger')->error($e->getTraceAsString());
-		
+
 			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
 		}
 		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($entitySub->getId(),true);
-		$response = new JsonResponse(json_encode($entitySub));
-		
+		$response = new JsonResponse(json_encode($entitySub[0]));
+
 		return $response;
 	}
-	
+
 	/**
 	 * @Route("/yougo/center/ajax", name="client.yougo.center.ajax")
 	 */
 	public function getCenterAjaxAction(Request $request){
 		if($request->request->has('term_id')){
 			$term_id = $request->request->get('term_id');
+			$main_term_id = $request->request->get('main_term_id');
 			$yougo_flag = $request->request->get('yougo_flag');
 			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
-			
+
 			if(count($center_point)==0){
-				if($this->saveCenterFrequency($term_id,$yougo_flag) == false){
+				if($this->saveCenterFrequency($term_id,$main_term_id,$yougo_flag) == false){
 					$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
 					return $response;
 				}
 				$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
 			}
-			
+
 			$response = new JsonResponse($center_point);
 		}else{
 			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
@@ -1225,7 +1232,7 @@ class YougoController extends BaseController {
 
 		return $response;
 	}
-	
+
 	/**
 	 * @Route("/explain/save/ajax", name="client.explain.save.ajax")
 	 * @Method("POST")
@@ -1235,9 +1242,9 @@ class YougoController extends BaseController {
 		$this->get('logger')->error(serialize($request->request->get('term_id')));
 		//$this->get('logger')->error(serialize($request->request->get('index_term')));
 		$this->get('logger')->error(serialize($request->request->get('index_add_letter')));
-		
+
 		$ret = ['result'=>'ok','error'=>''];
-	
+
 		if(!($request->request->has('index_term'))){
 			$ret = ['result'=>'ng','error'=>'parameter error'];
 			$response = new JsonResponse($ret);
@@ -1245,11 +1252,11 @@ class YougoController extends BaseController {
 		}
 
 		$return_flag = true;
-		
+
 		$idx = 0;
 		foreach($request->request->get('index_term') as $ele_expterm){
 			//$this->get('logger')->error("***exp_term_elem***".serialize($ele_expterm));
-			
+
 			$em = $this->get('doctrine.orm.entity_manager');
 			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
 					'indexTerm' => $ele_expterm,
@@ -1260,16 +1267,16 @@ class YougoController extends BaseController {
 				$entity = new ExplainIndex();
 				$update_mode = 'new';
 			}
-		
+
 			$em->getConnection()->beginTransaction();
-		
+
 			try{
 				$entity->setMainTermId($request->request->get('term_id')[$idx]);
 				$entity->setIndexTerm($ele_expterm);
 				$entity->setIndexAddLetter($request->request->get('index_add_letter')[$idx]);
 				$entity->setIndexKana($request->request->get('index_kana')[$idx]);
 				$entity->setNombre($request->request->get('nombre')[$idx]);
-				
+
 				if($update_mode == 'new'){
 					$em->persist($entity);
 				}
@@ -1278,7 +1285,7 @@ class YougoController extends BaseController {
 			} catch (\Exception $e){
 				$em->getConnection()->rollback();
 				$em->close();
-		
+
 				// log
 				$this->get('logger')->error($e->getMessage());
 				$this->get('logger')->error($e->getTraceAsString());
@@ -1293,7 +1300,7 @@ class YougoController extends BaseController {
 		$response = new JsonResponse($ret);
 		return $response;
 	}
-	
+
 	/**
 	 * @Route("/edit/confirm", name="client.yougo.edit.confirm")
 	 * @Method("POST|GET")
@@ -1331,9 +1338,9 @@ class YougoController extends BaseController {
 	public function deleteAction(Request $request, $id){
 		// get user information
 		$user = $this->getUser();
-	
+
 		$id = (int) $id;
-	
+
 		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
 				'id' =>$id,
 				'deleteFlag' => FALSE
@@ -1344,13 +1351,13 @@ class YougoController extends BaseController {
 		$entity->setDeleteFlag(true);
 		$entity->setModifyDate(new \DateTime());
 		$entity->setDeleteDate(new \DateTime());
-	
+
 		// 紐付くsubtermの検索
 		$entity_sub = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:SubTerm')->findBy(array(
 				'mainTermId' =>$entity->getTermId(),
 				'deleteFlag' => FALSE
 		));
-	
+
 		foreach($entity_sub as $entity_sub_rec){
 			$entity_sub_rec->setDeleteFlag(true);
 			$entity_sub_rec->setModifyDate(new \DateTime());
@@ -1362,29 +1369,29 @@ class YougoController extends BaseController {
 				'mainTermId' =>$entity->getTermId(),
 				'deleteFlag' => FALSE
 		));
-		
+
 		foreach($entity_syn as $entity_syn_rec){
 			$entity_syn_rec->setDeleteFlag(true);
 			$entity_syn_rec->setModifyDate(new \DateTime());
 			$entity_syn_rec->setDeleteDate(new \DateTime());
 		}
-		
+
 		// 紐付くreferの検索
 		$entity_ref = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Refer')->findBy(array(
 				'mainTermId' =>$entity->getTermId(),
 				'deleteFlag' => FALSE
 		));
-		
+
 		foreach($entity_ref as $entity_ref_rec){
 			$entity_ref_rec->setDeleteFlag(true);
 			$entity_ref_rec->setModifyDate(new \DateTime());
 			$entity_ref_rec->setDeleteDate(new \DateTime());
 		}
-		
+
 		// transaction
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
-	
+
 		try {
 			// 登録
 			$em->flush();
@@ -1394,12 +1401,12 @@ class YougoController extends BaseController {
 			// もし、DBに登録失敗した場合rollbackする
 			$em->getConnection()->rollback();
 			$em->close();
-	
+
 			// log
 			$this->get('logger')->error($e->getMessage());
 			$this->get('logger')->error($e->getTraceAsString());
 		}
-	
+
 		return $this->redirect($this->generateUrl('client.yougo.list'));
 	}
 
@@ -1418,11 +1425,11 @@ class YougoController extends BaseController {
 			$entity->setDeleteFlag(true);
 			$entity->setModifyDate(new \DateTime());
 			$entity->setDeleteDate(new \DateTime());
-			
+
 			// transaction
 			$em = $this->get('doctrine.orm.entity_manager');
 			$em->getConnection()->beginTransaction();
-			
+
 			try {
 				// 登録
 				$em->flush();
@@ -1432,20 +1439,20 @@ class YougoController extends BaseController {
 				// もし、DBに登録失敗した場合rollbackする
 				$em->getConnection()->rollback();
 				$em->close();
-			
+
 				// log
 				$this->get('logger')->error($e->getMessage());
 				$this->get('logger')->error($e->getTraceAsString());
 			}
-			
+
 			$response = new JsonResponse(JsonResponse::HTTP_OK);
 		}else{
 			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
 		}
-	
+
 		return $response;
 	}
-	
+
 	/**
 	 * @Route("/genko/yogotest", name="client.genko.yogotest")
 	 * @Method("POST|GET")
