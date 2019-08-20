@@ -126,6 +126,226 @@
 				$(target).empty().append(options);
 			}
 
+			function changeHenHeader(e,sho,dai,chu,ko,term = null){
+				var selected_ver = $('[name="version"]').val();
+				var selected_hen = e.val();
+
+				if(selected_hen == '0'){
+					$('[name="' + sho + '"]').val('0');
+				}else{
+				}
+				$('[name="' + dai + '"]').val('0');
+				$('[name="' + chu + '"]').val('0');
+				$('[name="' + ko + '"]').val('0');
+
+				var data = {
+						'version': selected_ver,
+						'hen': selected_hen
+				};
+				$.ajax({
+					url: "{{ path('client.yougo.sho.ajax') }}",
+					data: data,
+					async: false,
+					method: 'POST',
+					success: function(response){
+						var options = generateOptions(response);
+						injectOption('[name="' + sho + '"]', options);
+					},
+					error: function(response){
+					}
+				});
+
+				if(term){
+					var data = {
+							'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
+							'main_term': $('[name="main_term"]').val(),
+							'version': selected_ver,
+							'hen': selected_hen
+					};
+					$.ajax({
+						url: "{{ path('client.yougo.term.ajax') }}",
+						data: data,
+						async: false,
+						method: 'POST',
+						success: function(response){
+							var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
+							injectOption('[name="' + term + '"]', options);
+						},
+						error: function(response){
+						}
+					});
+				}
+
+			}
+
+			function changeShoHeader(e,hen,dai,chu,ko,term = null){
+				var selected_ver = $('[name="version"]').val();
+				var selected_hen = $('[name="' + hen + '"]').val();
+				var selected_sho = e.val();
+
+				if(selected_sho == '0'){
+					$('[name="' + dai + '"]').val('0');
+				}else{
+				}
+				$('[name="' + chu + '"]').val('0');
+				$('[name="' + ko + '"]').val('0');
+
+				var data = {
+						'version': selected_ver,
+						'hen': selected_hen,
+						'sho': selected_sho
+				};
+				$.ajax({
+					url: "{{ path('client.yougo.dai.ajax') }}",
+					data: data,
+					async: false,
+					method: 'POST',
+					success: function(response){
+						var options = generateOptions(response);
+						injectOption('[name="' + dai + '"]', options);
+					},
+					error: function(response){
+					}
+				});
+
+				if(term){
+					var data = {
+							'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
+							'main_term': $('[name="main_term"]').val(),
+							'version': selected_ver,
+							'hen': selected_hen,
+							'sho': selected_sho
+					};
+					$.ajax({
+						url: "{{ path('client.yougo.term.ajax') }}",
+						data: data,
+						async: false,
+						method: 'POST',
+						success: function(response){
+							var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
+							injectOption('[name="' + term + '"]', options);
+						},
+						error: function(response){
+						}
+					});
+				}
+
+			}
+
+			function changeDaiHeader(e,hen,sho,chu,ko,term = null){
+				var selected_ver = $('[name="version"]').val();
+				var selected_hen = $('[name="' + hen + '"]').val();
+				var selected_sho = $('[name="' + sho + '"]').val();
+				var selected_dai = e.val();
+
+				if(selected_dai == '0'){
+					$('[name="' + chu + '"]').val('0');
+				}else{
+				}
+				$('[name="' + ko + '"]').val('0');
+
+				var data = {
+						'version': selected_ver,
+						'hen': selected_hen,
+						'sho': selected_sho,
+						'dai': selected_dai
+				};
+				$.ajax({
+					url: "{{ path('client.yougo.chu.ajax') }}",
+					data: data,
+					async: false,
+					method: 'POST',
+					success: function(response){
+						var options = generateOptions(response);
+						injectOption('[name="' + chu + '"]', options);
+					},
+					error: function(response){
+					}
+				});
+
+				if(term){
+					var data = {
+							'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
+							'main_term': $('[name="main_term"]').val(),
+							'version': selected_ver,
+							'hen': selected_hen,
+							'sho': selected_sho,
+							'dai': selected_dai
+					};
+					$.ajax({
+						url: "{{ path('client.yougo.term.ajax') }}",
+						data: data,
+						async: false,
+						method: 'POST',
+						success: function(response){
+							var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
+							injectOption('[name="' + term + '"]', options);
+						},
+						error: function(response){
+						}
+					});
+				}
+
+			}
+
+			function changeChuHeader(e,hen,sho,dai,ko,term = null){
+				var selected_ver = $('[name="version"]').val();
+				var selected_hen = $('[name="' + hen + '"]').val();
+				var selected_sho = $('[name="' + sho + '"]').val();
+				var selected_dai = $('[name="' + dai + '"]').val();
+				var selected_chu = e.val();
+
+				if(selected_chu == '0'){
+					$('[name="' + ko + '"]').val('0');
+				}else{
+				}
+
+				var data = {
+						'version': selected_ver,
+						'hen': selected_hen,
+						'sho': selected_sho,
+						'dai': selected_dai,
+						'chu': selected_chu
+				};
+				$.ajax({
+					url: "{{ path('client.yougo.ko.ajax') }}",
+					data: data,
+					async: false,
+					method: 'POST',
+					success: function(response){
+						var options = generateOptions(response);
+						injectOption('[name="' + ko + '"]', options);
+					},
+					error: function(response){
+					}
+				});
+
+				if(term){
+					var data = {
+							'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
+							'main_term': $('[name="main_term"]').val(),
+							'version': selected_ver,
+							'hen': selected_hen,
+							'sho': selected_sho,
+							'dai': selected_dai,
+							'chu': selected_chu
+					};
+					$.ajax({
+						url: "{{ path('client.yougo.term.ajax') }}",
+						data: data,
+						async: false,
+						method: 'POST',
+						success: function(response){
+							var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
+							injectOption('[name="' + term + '"]', options);
+						},
+						error: function(response){
+						}
+					});
+				}
+
+			}
+
 			$(function(){
 				$('[name="cur"]').bind('change', function(){
 					var selected = $(this).val();
