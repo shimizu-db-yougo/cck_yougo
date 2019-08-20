@@ -161,6 +161,9 @@
 
 		// 用語登録
 		$('.js-yougo-submit').bind('click', function(e){
+			// 入力チェック
+			var err_field = RequiredCheckMainTerm();
+
 			// 主用語
 			var mainterm = {};
 			mainterm.update_mode = $('#form_mainterm [name=update_mode]').val();
@@ -201,6 +204,8 @@
 			var subterm = {sub_term_id:[],sub_term:[],red_letter:[],kana:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],delimiter_kana:[],index_add_letter:[],index_kana:[],nombre:[]};
 			var form_subterm = $('.form_subterm');
 			form_subterm.each(function(i,elem) {
+				err_field = RequiredCheckSubTerm($(elem),err_field);
+
 				subterm.sub_term_id.push($(elem).find('#sub_term_id').val());
 				subterm.sub_term.push($(elem).find('#sub_term').val());
 				subterm.red_letter.push($(elem).find('#red_letter').prop("checked"));
@@ -222,6 +227,8 @@
 			var synterm = {syn_term_id:[],synonym_id:[],term:[],red_letter:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],index_add_letter:[],index_kana:[],nombre:[]};
 			var form_synterm = $('.form_synterm');
 			form_synterm.each(function(i,elem) {
+				err_field = RequiredCheckSynTerm($(elem),err_field);
+
 				synterm.syn_term_id.push($(elem).find('#syn_term_id').val());
 				synterm.synonym_id.push($(elem).find('#synonym_id').val());
 				synterm.term.push($(elem).find('#syn_term').val());
@@ -242,6 +249,8 @@
 			var refterm = {ref_idx:[],ref_term_id:[],nombre:[]};
 			var form_refterm = $('.form_refterm');
 			form_refterm.each(function(i,elem) {
+				err_field = RequiredCheckRefTerm($(elem),err_field);
+
 				refterm.ref_idx.push($(elem).find('#ref_idx').val());
 				refterm.ref_term_id.push($(elem).find('#ref_term').val());
 				refterm.nombre.push($(elem).find('#nombre').text());
@@ -249,6 +258,12 @@
 
 			console.log(refterm);
 			mainterm.refterm = refterm;
+
+			// エラーチェック文言出力
+			if(err_field != ''){
+				alert("必須項目です。：" + err_field);
+				return false;
+			}
 
 			$.post("{{ path('client.edit.save.ajax') }}", mainterm)
 			.done(function(r,s){
@@ -260,6 +275,73 @@
 				alert('DB更新エラー');
 			});
 		});
+
+		function RequiredCheckMainTerm(){
+			var err_filed = '';
+			if($('#form_mainterm [name=curriculum]').val() == "0"){
+				err_filed += '教科,';
+			}
+			if($('#form_mainterm [name=version]').val() == "0"){
+				err_filed += '版,';
+			}
+			if($('#form_mainterm [name=hen]').val() == "0"){
+				err_filed += '編見出し,';
+			}
+			if($('#form_mainterm [name=sho]').val() == "0"){
+				err_filed += '章見出し,';
+			}
+
+			if($('#form_mainterm [name=main_term]').val() == ""){
+				err_filed += '主用語,';
+			}
+			if($('#form_mainterm [name=kana]').val() == ""){
+				err_filed += '主用語読み,';
+			}
+			if($('#form_mainterm [name=index_kana]').val() == ""){
+				err_filed += '索引用語読み,';
+			}
+			if($('#form_mainterm [name=term_explain]').val() == ""){
+				err_filed += '解説,';
+			}
+			return err_filed;
+		}
+
+		function RequiredCheckSubTerm(elem,err_filed){
+			if(elem.find('#sub_term').val() == ""){
+				err_filed += 'サブ用語,';
+			}
+			if(elem.find('#kana').val() == ""){
+				err_filed += 'サブ用語_読み仮名,';
+			}
+			if(elem.find('#index_kana').val() == ""){
+				err_filed += 'サブ用語_索引用語読み仮名,';
+			}
+			return err_filed;
+		}
+
+		function RequiredCheckSynTerm(elem,err_filed){
+			if(elem.find('#syn_term').val() == ""){
+				err_filed += '同対類用語,';
+			}
+			if(elem.find('#index_kana').val() == ""){
+				err_filed += '同対類用語_索引用語読み仮名,';
+			}
+			return err_filed;
+		}
+
+		function RequiredCheckRefTerm(elem,err_filed){
+			if(elem.find('.js-hen4').val() == "0"){
+				err_filed += '指矢印_編見出し,';
+			}
+			if(elem.find('.js-sho4').val() == "0"){
+				err_filed += '指矢印_章見出し,';
+			}
+			console.log(elem.find('.js-term').val());
+			if((elem.find('.js-term').val() == "0")||(elem.find('.js-term').val() == null)){
+				err_filed += '指矢印用語,';
+			}
+			return err_filed;
+		}
 
 		function constructSubForm(record){
 			var html =
@@ -537,215 +619,6 @@
 
 			$('#centerModal').modal();
 
-		}
-
-		function changeHenHeader(e,sho,dai,chu,ko,term){
-			var selected_ver = $('[name="version"]').val();
-			var selected_hen = e.val();
-
-			if(selected_hen == '0'){
-				$('[name="' + sho + '"]').val('0');
-			}else{
-			}
-			$('[name="' + dai + '"]').val('0');
-			$('[name="' + chu + '"]').val('0');
-			$('[name="' + ko + '"]').val('0');
-
-			var data = {
-					'version': selected_ver,
-					'hen': selected_hen
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.sho.ajax') }}",
-				data: data,
-				async: false,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response);
-					injectOption('[name="' + sho + '"]', options);
-				},
-				error: function(response){
-				}
-			});
-
-			var data = {
-					'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
-					'main_term': $('[name="main_term"]').val(),
-					'version': selected_ver,
-					'hen': selected_hen
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.term.ajax') }}",
-				data: data,
-				async: false,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
-					injectOption('[name="' + term + '"]', options);
-				},
-				error: function(response){
-				}
-			});
-
-		}
-
-		function changeShoHeader(e,hen,dai,chu,ko,term){
-			var selected_ver = $('[name="version"]').val();
-			var selected_hen = $('[name="' + hen + '"]').val();
-			var selected_sho = e.val();
-
-			if(selected_sho == '0'){
-				$('[name="' + dai + '"]').val('0');
-			}else{
-			}
-			$('[name="' + chu + '"]').val('0');
-			$('[name="' + ko + '"]').val('0');
-
-			var data = {
-					'version': selected_ver,
-					'hen': selected_hen,
-					'sho': selected_sho
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.dai.ajax') }}",
-				data: data,
-				async: false,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response);
-					injectOption('[name="' + dai + '"]', options);
-				},
-				error: function(response){
-				}
-			});
-
-			var data = {
-					'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
-					'main_term': $('[name="main_term"]').val(),
-					'version': selected_ver,
-					'hen': selected_hen,
-					'sho': selected_sho
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.term.ajax') }}",
-				data: data,
-				async: false,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
-					injectOption('[name="' + term + '"]', options);
-				},
-				error: function(response){
-				}
-			});
-		}
-
-		function changeDaiHeader(e,hen,sho,chu,ko,term){
-			var selected_ver = $('[name="version"]').val();
-			var selected_hen = $('[name="' + hen + '"]').val();
-			var selected_sho = $('[name="' + sho + '"]').val();
-			var selected_dai = e.val();
-
-			if(selected_dai == '0'){
-				$('[name="' + chu + '"]').val('0');
-			}else{
-			}
-			$('[name="' + ko + '"]').val('0');
-
-			var data = {
-					'version': selected_ver,
-					'hen': selected_hen,
-					'sho': selected_sho,
-					'dai': selected_dai
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.chu.ajax') }}",
-				data: data,
-				async: false,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response);
-					injectOption('[name="' + chu + '"]', options);
-				},
-				error: function(response){
-				}
-			});
-
-			var data = {
-					'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
-					'main_term': $('[name="main_term"]').val(),
-					'version': selected_ver,
-					'hen': selected_hen,
-					'sho': selected_sho,
-					'dai': selected_dai
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.term.ajax') }}",
-				data: data,
-				async: false,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
-					injectOption('[name="' + term + '"]', options);
-				},
-				error: function(response){
-				}
-			});
-		}
-
-		function changeChuHeader(e,hen,sho,dai,ko,term){
-			var selected_ver = $('[name="version"]').val();
-			var selected_hen = $('[name="' + hen + '"]').val();
-			var selected_sho = $('[name="' + sho + '"]').val();
-			var selected_dai = $('[name="' + dai + '"]').val();
-			var selected_chu = e.val();
-
-			if(selected_chu == '0'){
-				$('[name="' + ko + '"]').val('0');
-			}else{
-			}
-
-			var data = {
-					'version': selected_ver,
-					'hen': selected_hen,
-					'sho': selected_sho,
-					'dai': selected_dai,
-					'chu': selected_chu
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.ko.ajax') }}",
-				data: data,
-				async: false,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response);
-					injectOption('[name="' + ko + '"]', options);
-				},
-				error: function(response){
-				}
-			});
-
-			var data = {
-					'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
-					'main_term': $('[name="main_term"]').val(),
-					'version': selected_ver,
-					'hen': selected_hen,
-					'sho': selected_sho,
-					'dai': selected_dai,
-					'chu': selected_chu
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.term.ajax') }}",
-				data: data,
-				async: false,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
-					injectOption('[name="' + term + '"]', options);
-				},
-				error: function(response){
-				}
-			});
 		}
 
 		function setHeaderSelectedIdx(id,hen,sho,dai,chu,ko){
