@@ -263,6 +263,7 @@ class YougoController extends BaseController {
 		return array(
 				'pagination' => $pagination,
 				'cur_page' => $page,
+				'sum_page' => floor(count($entities) / $list_count) + 1,
 				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
