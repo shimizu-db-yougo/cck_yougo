@@ -318,6 +318,12 @@ class MainTermRepository extends EntityRepository
 			SELECT
 				Refer.id,
 				MainTerm.main_term,
+				MainTerm.header_id,
+				Header.hen,
+				Header.sho,
+				Header.dai,
+				Header.chu,
+				Header.ko,
 				Refer.refer_term_id,
 				Refer.nombre
 			FROM
@@ -326,9 +332,14 @@ class MainTermRepository extends EntityRepository
 				Refer ON (MainTerm.term_id = Refer.refer_term_id
 					AND MainTerm.delete_flag = false
 					AND Refer.delete_flag = false)
+					INNER JOIN
+				Header ON (MainTerm.header_id = Header.id
+					AND MainTerm.delete_flag = false
+					AND Header.delete_flag = false)
 			WHERE
 				MainTerm.delete_flag = false
 				AND Refer.delete_flag = false
+				AND Header.delete_flag = false
 		";
 
 		if($term_id){

@@ -117,6 +117,17 @@
 							header_ref
 						+ constructRefForm(yougo_ref_parse[i])
 					);
+
+					$('[name="ref_hen'+yougo_ref_parse[i].id + '"]').val(yougo_ref_parse[i].hen);
+					changeHenHeader($('[name="ref_hen'+yougo_ref_parse[i].id + '"]'),'ref_sho'+yougo_ref_parse[i].id,'ref_dai'+yougo_ref_parse[i].id,'ref_chu'+yougo_ref_parse[i].id,'ref_ko'+yougo_ref_parse[i].id,'ref_term'+yougo_ref_parse[i].id);
+					$('[name="ref_sho'+yougo_ref_parse[i].id + '"]').val(yougo_ref_parse[i].sho);
+					changeShoHeader($('[name="ref_sho'+yougo_ref_parse[i].id + '"]'),'ref_hen'+yougo_ref_parse[i].id,'ref_dai'+yougo_ref_parse[i].id,'ref_chu'+yougo_ref_parse[i].id,'ref_ko'+yougo_ref_parse[i].id,'ref_term'+yougo_ref_parse[i].id);
+					$('[name="ref_dai'+yougo_ref_parse[i].id + '"]').val(yougo_ref_parse[i].dai);
+					changeDaiHeader($('[name="ref_dai'+yougo_ref_parse[i].id + '"]'),'ref_hen'+yougo_ref_parse[i].id,'ref_sho'+yougo_ref_parse[i].id,'ref_chu'+yougo_ref_parse[i].id,'ref_ko'+yougo_ref_parse[i].id,'ref_term'+yougo_ref_parse[i].id);
+					$('[name="ref_chu'+yougo_ref_parse[i].id + '"]').val(yougo_ref_parse[i].chu);
+					changeChuHeader($('[name="ref_chu'+yougo_ref_parse[i].id + '"]'),'ref_hen'+yougo_ref_parse[i].id,'ref_sho'+yougo_ref_parse[i].id,'ref_dai'+yougo_ref_parse[i].id,'ref_ko'+yougo_ref_parse[i].id,'ref_term'+yougo_ref_parse[i].id);
+					$('[name="ref_ko'+yougo_ref_parse[i].id + '"]').val(yougo_ref_parse[i].ko);
+					setHeaderSelectedIdx(yougo_ref_parse[i].header_id,'ref_hen'+yougo_ref_parse[i].id,'ref_sho'+yougo_ref_parse[i].id,'ref_dai'+yougo_ref_parse[i].id,'ref_chu'+yougo_ref_parse[i].id,'ref_ko'+yougo_ref_parse[i].id);
 					$('.form_refterm:last-child #ref_term').val(yougo_ref_parse[i].refer_term_id);
 				}
 
