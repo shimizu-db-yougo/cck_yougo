@@ -545,16 +545,11 @@
 
 			if(selected_hen == '0'){
 				$('[name="' + sho + '"]').val('0');
-				//$('[name="' + sho + '"]').prop("disabled", true);
 			}else{
-				//$('[name="' + sho + '"]').prop("disabled", false);
 			}
 			$('[name="' + dai + '"]').val('0');
 			$('[name="' + chu + '"]').val('0');
 			$('[name="' + ko + '"]').val('0');
-			//$('[name="' + dai + '"]').prop("disabled", true);
-			//$('[name="' + chu + '"]').prop("disabled", true);
-			//$('[name="' + ko + '"]').prop("disabled", true);
 
 			var data = {
 					'version': selected_ver,
@@ -568,13 +563,14 @@
 				success: function(response){
 					var options = generateOptions(response);
 					injectOption('[name="' + sho + '"]', options);
-					//$('[name="' + sho + '"]').val('2'); //編に紐づく章を選択状態にする
 				},
 				error: function(response){
 				}
 			});
 
 			var data = {
+					'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
+					'main_term': $('[name="main_term"]').val(),
 					'version': selected_ver,
 					'hen': selected_hen
 			};
@@ -584,7 +580,7 @@
 				async: false,
 				method: 'POST',
 				success: function(response){
-					var options = generateOptions(response,true);
+					var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
 					injectOption('[name="' + term + '"]', options);
 				},
 				error: function(response){
@@ -600,14 +596,10 @@
 
 			if(selected_sho == '0'){
 				$('[name="' + dai + '"]').val('0');
-				//$('[name="' + dai + '"]').prop("disabled", true);
 			}else{
-				//$('[name="' + dai + '"]').prop("disabled", false);
 			}
 			$('[name="' + chu + '"]').val('0');
 			$('[name="' + ko + '"]').val('0');
-			//$('[name="' + chu + '"]').prop("disabled", true);
-			//$('[name="' + ko + '"]').prop("disabled", true);
 
 			var data = {
 					'version': selected_ver,
@@ -628,6 +620,8 @@
 			});
 
 			var data = {
+					'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
+					'main_term': $('[name="main_term"]').val(),
 					'version': selected_ver,
 					'hen': selected_hen,
 					'sho': selected_sho
@@ -638,7 +632,7 @@
 				async: false,
 				method: 'POST',
 				success: function(response){
-					var options = generateOptions(response,true);
+					var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
 					injectOption('[name="' + term + '"]', options);
 				},
 				error: function(response){
@@ -654,12 +648,9 @@
 
 			if(selected_dai == '0'){
 				$('[name="' + chu + '"]').val('0');
-				//$('[name="' + chu + '"]').prop("disabled", true);
 			}else{
-				//$('[name="' + chu + '"]').prop("disabled", false);
 			}
 			$('[name="' + ko + '"]').val('0');
-			//$('[name="' + ko + '"]').prop("disabled", true);
 
 			var data = {
 					'version': selected_ver,
@@ -681,6 +672,8 @@
 			});
 
 			var data = {
+					'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
+					'main_term': $('[name="main_term"]').val(),
 					'version': selected_ver,
 					'hen': selected_hen,
 					'sho': selected_sho,
@@ -692,7 +685,7 @@
 				async: false,
 				method: 'POST',
 				success: function(response){
-					var options = generateOptions(response,true);
+					var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
 					injectOption('[name="' + term + '"]', options);
 				},
 				error: function(response){
@@ -709,9 +702,7 @@
 
 			if(selected_chu == '0'){
 				$('[name="' + ko + '"]').val('0');
-				//$('[name="' + ko + '"]').attr("disabled", true);
 			}else{
-				//$('[name="' + ko + '"]').attr("disabled", false);
 			}
 
 			var data = {
@@ -735,6 +726,8 @@
 			});
 
 			var data = {
+					'term_id': (term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : '',
+					'main_term': $('[name="main_term"]').val(),
 					'version': selected_ver,
 					'hen': selected_hen,
 					'sho': selected_sho,
@@ -747,7 +740,7 @@
 				async: false,
 				method: 'POST',
 				success: function(response){
-					var options = generateOptions(response,true);
+					var options = generateOptions(response,true,(term.indexOf("ref_") === -1) ? $('[name="term_id"]').text() : false);
 					injectOption('[name="' + term + '"]', options);
 				},
 				error: function(response){

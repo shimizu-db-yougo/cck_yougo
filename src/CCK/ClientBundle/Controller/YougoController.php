@@ -411,6 +411,8 @@ class YougoController extends BaseController {
 	 */
 	public function getTermAjaxAction(Request $request){
 		if($request->request->has('hen')){
+			$term_id = $request->request->get('term_id');
+			$main_term = $request->request->get('main_term');
 			$ver = $request->request->get('version');
 			$hen = $request->request->get('hen');
 
@@ -430,9 +432,31 @@ class YougoController extends BaseController {
 				$list_header_id .= $header_ele->getId() . ',';
 			}
 
-			$this->get('logger')->error("***list_header_id***".$list_header_id);
 			if(strlen($list_header_id)>0){$list_header_id = substr($list_header_id, 0, strlen($list_header_id)-1);}
 			$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoListByHeader($ver, $list_header_id);
+
+			$this->get('logger')->error("***term_id***".$term_id);
+			$this->get('logger')->error("***term_list***".serialize($term));
+
+			// 見出し変更により改修対象の主用語を掲載順リストに表示できなくなるので、先頭に主用語を付与する
+			if($term_id != ''){
+				$is_meinterm_exist = false;
+				foreach ($term as $term_ele){
+					if($term_ele['id'] == $term_id){
+						$is_meinterm_exist = true;
+						break;
+					}
+				}
+				if(!$is_meinterm_exist){
+					$term_add = array();
+					array_push($term_add,array('id'=>$term_id,'name'=>$main_term));
+					foreach ($term as $term_ele){
+						array_push($term_add,$term_ele);
+					}
+					$term = $term_add;
+				}
+				$this->get('logger')->error("***term_list(tsuika)***".serialize($term_add));
+			}
 
 			$response = new JsonResponse($term);
 		}else{

@@ -93,7 +93,7 @@
 		<script src="{{ asset('bundles/cckcommon/js/docs.min.js') }}"></script>
 		<script src="{{ asset('bundles/cckcommon/js/common.js') }}?{{ 'now'|date('U') }}"></script>
 		<script>
-			function generateOptions(response,skipNotApplicable = false){
+			function generateOptions(response,skipNotApplicable = false,term_id = false){
 				var options = [];
 
 				var option;
@@ -108,6 +108,14 @@
 					option = $('<option></option>');
 					option.append(list.name);
 					option.attr('value', list.id);
+					// 掲載順リストの場合、修正対象の主用語のみ選択可能にする
+					if(term_id){
+						if(term_id == list.id){
+							option.attr('selected', true);
+						}else{
+							option.attr('disabled', true);
+						}
+					}
 					options.push(option);
 				});
 
