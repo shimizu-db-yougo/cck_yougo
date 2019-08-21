@@ -267,6 +267,13 @@
 	<script>
 
 		function search_clear(){
+
+			$('[name="hen"]').empty().append(constructDefaultOption());
+			$('[name="sho"]').empty().append(constructDefaultOption());
+			$('[name="dai"]').empty().append(constructDefaultOption());
+			$('[name="chu"]').empty().append(constructDefaultOption());
+			$('[name="ko"]').empty().append(constructDefaultOption());
+
 			$('[name="curriculum"]').val('0');
 			$('[name="version"]').val('0');
 			$('[name="hen"]').val('0');
@@ -302,21 +309,7 @@
 			});
 
 			$('.js-han').bind('change', function(){
-				var selected_ver = $(this).val();
-				var data = {
-						'version': selected_ver
-				};
-				$.ajax({
-					url: "{{ path('client.yougo.hen.ajax') }}",
-					data: data,
-					method: 'POST',
-					success: function(response){
-						var options = generateOptions(response);
-						injectOption('js-hen', options);
-					},
-					error: function(response){
-					}
-				});
+				changeHanHeader($('.js-han'),'hen');
 			});
 
 			$('.js-hen').bind('change', function(){

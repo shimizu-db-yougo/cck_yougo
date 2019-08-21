@@ -126,6 +126,33 @@
 				$(target).empty().append(options);
 			}
 
+			function changeHanHeader(e,hen){
+				var selected_ver = e.val();
+				var data = {
+						'version': selected_ver
+				};
+				$.ajax({
+					url: "{{ path('client.yougo.hen.ajax') }}",
+					data: data,
+					method: 'POST',
+					success: function(response){
+						var options = generateOptions(response);
+						injectOption('[name="' + hen + '"]', options);
+					},
+					error: function(response){
+					}
+				});
+			}
+
+			function constructDefaultOption(){
+				var options = [];
+				var option = $('<option></option>');
+				option.append('--------------');
+				option.attr('value', '0');
+				options.push(option);
+				return options;
+			}
+
 			function changeHenHeader(e,sho,dai,chu,ko,term = null){
 				var selected_ver = $('[name="version"]').val();
 				var selected_hen = e.val();
@@ -154,6 +181,10 @@
 					error: function(response){
 					}
 				});
+
+				$('[name="dai"]').empty().append(constructDefaultOption());
+				$('[name="chu"]').empty().append(constructDefaultOption());
+				$('[name="ko"]').empty().append(constructDefaultOption());
 
 				if(term){
 					var data = {
@@ -207,6 +238,10 @@
 					error: function(response){
 					}
 				});
+
+				$('[name="chu"]').empty().append(constructDefaultOption());
+				changeDaiHeader($('[name="' + dai + '"]'),hen,e.attr('name'),chu,ko); // 大見出し：なし,中見出し：ありの場合
+				$('[name="ko"]').empty().append(constructDefaultOption());
 
 				if(term){
 					var data = {
@@ -262,6 +297,8 @@
 					error: function(response){
 					}
 				});
+
+				$('[name="ko"]').empty().append(constructDefaultOption());
 
 				if(term){
 					var data = {

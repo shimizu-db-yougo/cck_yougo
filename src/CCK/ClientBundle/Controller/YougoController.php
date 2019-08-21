@@ -239,26 +239,56 @@ class YougoController extends BaseController {
 		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
 				'deleteFlag' => FALSE
 		));
-		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '1',
-				'deleteFlag' => FALSE
-		));
-		$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '2',
-				'deleteFlag' => FALSE
-		));
-		$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '3',
-				'deleteFlag' => FALSE
-		));
-		$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '4',
-				'deleteFlag' => FALSE
-		));
-		$ko_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '5',
-				'deleteFlag' => FALSE
-		));
+		$hen_list = array();
+		if(isset($version)){
+			$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+					'versionId' => $version,
+					'headerId' => '1',
+					'deleteFlag' => FALSE
+			));
+		}
+		$sho_list = array();
+		if((isset($version))&&(isset($hen))){
+			$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+					'versionId' => $version,
+					'hen' => $hen,
+					'headerId' => '2',
+					'deleteFlag' => FALSE
+			));
+		}
+		$dai_list = array();
+		if((isset($version))&&(isset($hen))&&(isset($sho))){
+			$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+					'versionId' => $version,
+					'hen' => $hen,
+					'sho' => $sho,
+					'headerId' => '3',
+					'deleteFlag' => FALSE
+			));
+		}
+		$chu_list = array();
+		if((isset($version))&&(isset($hen))&&(isset($sho))&&(isset($dai))){
+			$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+					'versionId' => $version,
+					'hen' => $hen,
+					'sho' => $sho,
+					'dai' => $dai,
+					'headerId' => '4',
+					'deleteFlag' => FALSE
+			));
+		}
+		$ko_list = array();
+		if((isset($version))&&(isset($hen))&&(isset($sho))&&(isset($dai))&&(isset($chu))){
+			$ko_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+					'versionId' => $version,
+					'hen' => $hen,
+					'sho' => $sho,
+					'dai' => $dai,
+					'chu' => $chu,
+					'headerId' => '5',
+					'deleteFlag' => FALSE
+			));
+		}
 
 		return array(
 				'pagination' => $pagination,

@@ -309,12 +309,6 @@
 			if($('#form_mainterm [name=main_term]').val() == ""){
 				err_filed += '主用語,';
 			}
-			if($('#form_mainterm [name=kana]').val() == ""){
-				err_filed += '主用語読み,';
-			}
-			if($('#form_mainterm [name=index_kana]').val() == ""){
-				err_filed += '索引用語読み,';
-			}
 			if($('#form_mainterm [name=term_explain]').val() == ""){
 				err_filed += '解説,';
 			}
@@ -325,21 +319,12 @@
 			if(elem.find('#sub_term').val() == ""){
 				err_filed += 'サブ用語,';
 			}
-			if(elem.find('#kana').val() == ""){
-				err_filed += 'サブ用語_読み仮名,';
-			}
-			if(elem.find('#index_kana').val() == ""){
-				err_filed += 'サブ用語_索引用語読み仮名,';
-			}
 			return err_filed;
 		}
 
 		function RequiredCheckSynTerm(elem,err_filed){
 			if(elem.find('#syn_term').val() == ""){
 				err_filed += '同対類用語,';
-			}
-			if(elem.find('#index_kana').val() == ""){
-				err_filed += '同対類用語_索引用語読み仮名,';
 			}
 			return err_filed;
 		}
@@ -542,12 +527,6 @@
 				error: function(response){
 				}
 			});
-			$('#removeForm').css('visibility','visible');
-		});
-
-		$('#removeForm').click(function(){
-			$('#form_subterms .form_subterm:last-child').remove();
-			if($('#form_subterms .form_subterm').length == 0){$('#removeForm').css('visibility','hidden')};
 		});
 
 		$('#addFormSyn').click(function(){
@@ -563,24 +542,12 @@
 				error: function(response){
 				}
 			});
-			$('#removeFormSyn').css('visibility','visible');
-		});
-
-		$('#removeFormSyn').click(function(){
-			$('#form_synterms .form_synterm:last-child').remove();
-			if($('#form_synterms .form_synterm').length == 0){$('#removeFormSyn').css('visibility','hidden')};
 		});
 
 		$('#addFormRef').click(function(){
 			$('#form_refterms').append(
 					constructRefForm(null)
 			);
-			$('#removeFormRef').css('visibility','visible');
-		});
-
-		$('#removeFormRef').click(function(){
-			$('#form_refterms .form_refterm:last-child').remove();
-			if($('#form_refterms .form_refterm').length == 0){$('#removeFormRef').css('visibility','hidden')};
 		});
 
 		function getTextPoint(value,term_id){
@@ -829,21 +796,7 @@
 		});
 
 		$('.js-han').bind('change', function(){
-			var selected_ver = $(this).val();
-			var data = {
-					'version': selected_ver
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.hen.ajax') }}",
-				data: data,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response);
-					injectOption('js-hen', options);
-				},
-				error: function(response){
-				}
-			});
+			changeHanHeader($('.js-han'),'hen');
 		});
 
 		$('.js-hen').bind('change', function(){
