@@ -57,6 +57,12 @@
 			for(var i in point_list){
 				console.log(point_list[i].value);
 				if(point_list[i].value !== void 0){
+					// 数値入力チェック
+					if(isNaN(point_list[i].value)){
+						alert("数字で入力して下さい。");
+						return false;
+					}
+
 					center_cnt += Number(point_list[i].value);
 
 					if(point_list[i].id.indexOf("center_main") !== -1){
@@ -94,6 +100,15 @@
 			$('#center_freq' + term_id + ' input:hidden[name="center_freq_text"]').val(center_cnt);
 
 			$('#centerModal').modal('hide');
+		});
+
+		$(".js-center-delete").bind('click', function(e){
+			var point_list = $('input[id^="center_main"],input[id^="center_sub"]');
+			for(var i in point_list){
+				if(point_list[i].value !== void 0){
+					point_list[i].value = 0;
+				}
+			}
 		});
 
 		// 解説内さくいん用語
@@ -527,10 +542,12 @@
 				error: function(response){
 				}
 			});
+			$('#removeForm').css('visibility','visible');
 		});
 
 		$('#removeForm').click(function(){
 			$('#form_subterms .form_subterm:last-child').remove();
+			if($('#form_subterms .form_subterm').length == 0){$('#removeForm').css('visibility','hidden')};
 		});
 
 		$('#addFormSyn').click(function(){
@@ -546,20 +563,24 @@
 				error: function(response){
 				}
 			});
+			$('#removeFormSyn').css('visibility','visible');
 		});
 
 		$('#removeFormSyn').click(function(){
 			$('#form_synterms .form_synterm:last-child').remove();
+			if($('#form_synterms .form_synterm').length == 0){$('#removeFormSyn').css('visibility','hidden')};
 		});
 
 		$('#addFormRef').click(function(){
 			$('#form_refterms').append(
 					constructRefForm(null)
 			);
+			$('#removeFormRef').css('visibility','visible');
 		});
 
 		$('#removeFormRef').click(function(){
 			$('#form_refterms .form_refterm:last-child').remove();
+			if($('#form_refterms .form_refterm').length == 0){$('#removeFormRef').css('visibility','hidden')};
 		});
 
 		function getTextPoint(value,term_id){
