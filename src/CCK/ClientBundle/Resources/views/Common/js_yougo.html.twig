@@ -548,6 +548,7 @@
 			$('#form_refterms').append(
 					constructRefForm(null)
 			);
+			changeHanHeader($('[name="version"]'),'ref_hen');
 		});
 
 		function getTextPoint(value,term_id){
@@ -771,28 +772,7 @@
 
 	$(function(){
 		$('.js-cur').bind('change', function(){
-			var selected_ver = $(this).val();
-			var data = {
-					'cur': selected_ver
-			};
-			$.ajax({
-				url: "{{ path('client.yougo.curriculum.ajax') }}",
-				data: data,
-				method: 'POST',
-				success: function(response){
-					var options = generateOptions(response);
-					injectOption('[name="version"]', options);
-				},
-				error: function(response){
-				}
-			});
-
-			if(selected_ver == '0'){
-				$('[name="version"]').val('0');
-				$('[name="version"]').prop("disabled", true);
-			}else{
-				$('[name="version"]').prop("disabled", false);
-			}
+			changeCurriculumHeader($('.js-cur'));
 		});
 
 		$('.js-han').bind('change', function(){

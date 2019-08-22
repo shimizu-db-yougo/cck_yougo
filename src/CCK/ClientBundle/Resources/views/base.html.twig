@@ -126,6 +126,31 @@
 				$(target).empty().append(options);
 			}
 
+			function changeCurriculumHeader(e){
+				var selected_ver = e.val();
+				var data = {
+						'cur': selected_ver
+				};
+				$.ajax({
+					url: "{{ path('client.yougo.curriculum.ajax') }}",
+					data: data,
+					method: 'POST',
+					success: function(response){
+						var options = generateOptions(response);
+						injectOption('[name="version"]', options);
+					},
+					error: function(response){
+					}
+				});
+
+				if(selected_ver == '0'){
+					$('[name="version"]').val('0');
+					$('[name="version"]').prop("disabled", true);
+				}else{
+					$('[name="version"]').prop("disabled", false);
+				}
+			}
+
 			function changeHanHeader(e,hen){
 				var selected_ver = e.val();
 				var data = {
@@ -182,9 +207,9 @@
 					}
 				});
 
-				$('[name="dai"]').empty().append(constructDefaultOption());
-				$('[name="chu"]').empty().append(constructDefaultOption());
-				$('[name="ko"]').empty().append(constructDefaultOption());
+				$('[name="' + dai + '"]').empty().append(constructDefaultOption());
+				$('[name="' + chu + '"]').empty().append(constructDefaultOption());
+				$('[name="' + ko + '"]').empty().append(constructDefaultOption());
 
 				if(term){
 					var data = {
@@ -239,9 +264,9 @@
 					}
 				});
 
-				$('[name="chu"]').empty().append(constructDefaultOption());
+				$('[name="' + chu + '"]').empty().append(constructDefaultOption());
 				changeDaiHeader($('[name="' + dai + '"]'),hen,e.attr('name'),chu,ko); // 大見出し：なし,中見出し：ありの場合
-				$('[name="ko"]').empty().append(constructDefaultOption());
+				$('[name="' + ko + '"]').empty().append(constructDefaultOption());
 
 				if(term){
 					var data = {
@@ -298,7 +323,7 @@
 					}
 				});
 
-				$('[name="ko"]').empty().append(constructDefaultOption());
+				$('[name="' + ko + '"]').empty().append(constructDefaultOption());
 
 				if(term){
 					var data = {

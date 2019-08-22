@@ -663,26 +663,6 @@ class YougoController extends BaseController {
 		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
 				'deleteFlag' => FALSE
 		));
-		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '1',
-				'deleteFlag' => FALSE
-		));
-		$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '2',
-				'deleteFlag' => FALSE
-		));
-		$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '3',
-				'deleteFlag' => FALSE
-		));
-		$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '4',
-				'deleteFlag' => FALSE
-		));
-		$ko_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'headerId' => '5',
-				'deleteFlag' => FALSE
-		));
 
 		// 掲載順に表示する用語
 		$printOrderList = $em->getRepository('CCKCommonBundle:MainTerm')->getPrintOrderList();
@@ -695,11 +675,11 @@ class YougoController extends BaseController {
 				'yougo_ref' => $entityRef,
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
-				'hen_list' => $hen_list,
-				'sho_list' => $sho_list,
-				'dai_list' => $dai_list,
-				'chu_list' => $chu_list,
-				'ko_list' => $ko_list,
+				'hen_list' => array(),
+				'sho_list' => array(),
+				'dai_list' => array(),
+				'chu_list' => array(),
+				'ko_list' => array(),
 				'curriculum' => '',
 				'version' => '',
 				'select_hen' => '',
