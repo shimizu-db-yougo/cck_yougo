@@ -129,4 +129,36 @@ class HeaderRepository extends EntityRepository
 
 		return $qb->getQuery()->getResult();
 	}
+
+	public function getNextHeaderId($version, $header_level, $header_field, $hen = null, $sho = null, $dai = null, $chu = null){
+		$sql = "
+			SELECT
+				MAX(Header." . $header_field . ") max_id
+			FROM
+				Header
+			WHERE
+				Header.version_id = " . $version . "
+				AND Header.header_id = " . $header_level;
+
+		if($hen){
+			$sql .= " AND Header.hen = ".$hen;
+		}
+		if($sho){
+			$sql .= " AND Header.sho = ".$sho;
+		}
+		if($dai){
+			$sql .= " AND Header.dai = ".$dai;
+		}
+		if($chu){
+			$sql .= " AND Header.chu = ".$chu;
+		}
+
+		$sql .= "
+				AND Header.delete_flag = FALSE
+			GROUP BY Header.version_id,Header.header_id";
+
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result;
+	}
 }

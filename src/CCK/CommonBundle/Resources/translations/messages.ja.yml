@@ -52,6 +52,7 @@ btn:
         down: 下に
         up10: 10件上に
         down10: 10件下に
+    sort.text: ソート
 
 # ソーティング
 sort:
@@ -136,6 +137,8 @@ text:
     master:
         title: マスタ管理
         user: ユーザマスタ
+        curriculum: 教科マスタ
+        header: 見出しマスタ
     csv.export:
         title: CSV出力
     csv.import:
@@ -166,6 +169,11 @@ text:
         head.dai: 大見出し
         head.chu: 中見出し
         head.ko: 小見出し
+        head.hen.add: 編
+        head.sho.add: 章
+        head.dai.add: 大
+        head.chu.add: 中
+        head.ko.add: 小
         nombre: ノンブル
         nombre.bold: ノンブル太字
         freq.text: 教科書頻度
@@ -207,6 +215,9 @@ text:
         explain.index.kana: さくいん読み仮名
         explain.index.add: さくいん時追加文字
         explain.nombre: ノンブル
+    header:
+        name: 見出し名前
+        level: 見出し種類
         
 delimiter:
     nashi: なし

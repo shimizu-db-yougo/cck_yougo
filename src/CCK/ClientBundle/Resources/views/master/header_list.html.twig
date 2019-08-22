@@ -1,0 +1,341 @@
+{% extends "CCKClientBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+	{{ parent() }}
+{% endblock %}
+
+{% block contents %}
+<div class="row">
+<blockquote class="blockquote-bottom pdr-0">
+	<p>{{ 'text.master.header'|trans }}：{{ curriculum_name~' '~version_name }}</p>
+</blockquote>
+</div>
+
+<div class="row">
+	<div class="col-lg-2">
+		{#{ return_msg }#}
+	</div>
+	<div class="col-lg-10">
+		<div class="pull-right">
+			<button class="btn btn-primary btn-sm js-header-new" version-key = "{{ version }}" data-toggle="modal" master-target="#headerNewModal">{{ 'btn.new.default'|trans }}</button>
+			<button class="btn btn-primary btn-sm js-header-sort" version-key = "{{ version }}" data-toggle="modal" master-target="#headerSortModal">{{ 'btn.sort.text'|trans }}</button>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12 text-center">
+		{{ knp_pagination_render(pagination) }}
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+		<table class="table table-responsive table-striped">
+			<tbody>
+				{% for header in pagination %}
+				<tr class="text-center">
+					<td class="text-left">{% if header.headerId == '1' %}
+											{{ 'text.yougo.head.hen.add'|trans }}
+										{% elseif header.headerId == '2' %}
+											{{ 'text.yougo.head.sho.add'|trans }}
+										{% elseif header.headerId == '3' %}
+											{{ 'text.yougo.head.dai.add'|trans }}
+										{% elseif header.headerId == '4' %}
+											{{ 'text.yougo.head.chu.add'|trans }}
+										{% elseif header.headerId == '5' %}
+											{{ 'text.yougo.head.ko.add'|trans }}
+										{% endif %}
+					</td>
+					<td class="text-left">{{ header.name }}</td>
+					<td>
+						<div class="form-inline">
+							<button class="btn btn-primary btn-sm js-header-target" header-key = "{{ header.id }}" header-name = "{{ header.name }}" version-key = "{{ version }}" data-toggle="modal" master-target="#headerModal">{{ 'btn.edit'|trans }}</button>
+						</div>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<!-- 見出しマスタ新規登録  -->
+<div class="modal fade" id="headerNewModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog header-modal" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				見出しマスタの新規登録
+			</div>
+			<div class="modal-body">
+				<div class="row master-update-row">
+					<div class="col-md-12">
+						<label class="col-md-4">{{ 'text.master.header'|trans }}</label>
+						<label class="col-md-8">{{ curriculum_name~' '~version_name }}</label>
+						<input type="hidden" class="form-control" id="version" name="version" value="{{ version }}">
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-md-12">
+						<label class="col-md-4">{{ 'text.header.level'|trans }}</label>
+						<div class="col-md-8">
+							<div id="level_n-err" class="level-err wine-red msgErr"></div>
+							<input type="radio" class="level_n js-level" id="level_n" name="level_n" value="1" >{{ 'text.yougo.head.hen'|trans }}
+							<input type="radio" class="level_n js-level" id="level_n" name="level_n" value="2" >{{ 'text.yougo.head.sho'|trans }}
+							<input type="radio" class="level_n js-level" id="level_n" name="level_n" value="3" >{{ 'text.yougo.head.dai'|trans }}
+							<input type="radio" class="level_n js-level" id="level_n" name="level_n" value="4" >{{ 'text.yougo.head.chu'|trans }}
+							<input type="radio" class="level_n js-level" id="level_n" name="level_n" value="5" >{{ 'text.yougo.head.ko'|trans }}
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-md-12">
+						<label class="col-md-4">{{ 'text.yougo.head.hen'|trans }}</label>
+						<div class="col-md-8">
+							<span id="hen_n-err" class="hen-err wine-red msgErr"></span>
+							<select class="form-control js-hen input-md" id="hen" name="hen">
+								<option value="0">--------------</option>
+								{% for hen in hen_list %}
+									<option value="{{ hen.hen }}">{{ hen.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-md-12">
+						<label class="col-md-4">{{ 'text.yougo.head.sho'|trans }}</label>
+						<div class="col-md-8">
+							<span id="sho_n-err" class="sho-err wine-red msgErr"></span>
+							<select class="form-control js-sho input-md" id="sho" name="sho">
+								<option value="0">--------------</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-md-12">
+						<label class="col-md-4">{{ 'text.yougo.head.dai'|trans }}</label>
+						<div class="col-md-8">
+							<span id="dai_n-err" class="dai-err wine-red msgErr"></span>
+							<select class="form-control js-dai input-md" id="dai" name="dai">
+								<option value="0">--------------</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-md-12">
+						<label class="col-md-4">{{ 'text.yougo.head.chu'|trans }}</label>
+						<div class="col-md-8">
+							<span id="chu_n-err" class="chu-err wine-red msgErr"></span>
+							<select class="form-control js-chu input-md" id="chu" name="chu">
+								<option value="0">--------------</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-md-12">
+						<label class="col-md-4">{{ 'text.yougo.head.ko'|trans }}</label>
+						<div class="col-md-8">
+							<span id="ko_n-err" class="ko-err wine-red msgErr"></span>
+							<select class="form-control js-ko input-md" id="ko" name="ko">
+								<option value="0">--------------</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-4">{{ 'text.header.name'|trans }}</label>
+						<div class="col-sm-8">
+							<span id="name_n-err" class="name-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="header_name_n" name="header_name_n" >
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-danger js-header-new-submit">{{ 'btn.yes'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 見出しマスタ新規登録  -->
+<!-- 見出しマスタ更新  -->
+<div class="modal fade" id="headerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog header-modal" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				見出しマスタの更新
+			</div>
+			<div class="modal-body">
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-2">{{ 'text.header.name'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="name-err" class="name-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="header_name" name="header_name" >
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-danger js-header-submit">{{ 'btn.yes'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+<!-- グループマスタ更新  -->
+
+{% endblock %}
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('bundles/gimiccommon/jquery-ui/jquery-ui.min.js') }}"></script>
+	<script>
+
+		// 見出しマスタ新規登録
+		$('.js-header-new').bind('click', function(){
+			$('#headerNewModal').modal();
+		});
+
+		// 見出しマスタ 新規登録
+		$('.js-header-new-submit').bind('click', function(e){
+
+			var version = $('#version').val();
+			var level = $('.level_n:checked').map(function() {
+				  return $(this).val();
+			}).get();
+
+			var name = $('#header_name_n').val();
+			var hen = $('#hen').val();
+			var sho = $('#sho').val();
+			var dai = $('#dai').val();
+			var chu = $('#chu').val();
+			var ko = $('#ko').val();
+
+			// 入力チェック
+			if(level == ''){
+				$('.level-err').text('必須項目です');
+				return false;
+			}
+
+			if(name == ''){
+				$('.name-err').text('必須項目です');
+				return false;
+			}
+
+			var str_html = '';
+			str_html = "<input type='hidden' name='version' value='" + version + "'>" +
+			"<input type='hidden' name='level' value='" + level + "'>" +
+			"<input type='hidden' name='name' value='" + name + "'>" +
+			"<input type='hidden' name='hen' value='" + hen + "'>" +
+			"<input type='hidden' name='sho' value='" + sho + "'>" +
+			"<input type='hidden' name='dai' value='" + dai + "'>" +
+			"<input type='hidden' name='chu' value='" + chu + "'>" +
+			"<input type='hidden' name='ko' value='" + ko + "'>";
+
+			// create form
+			$('<form>', {
+				"id": "registerHeaderForm",
+				"html": str_html,
+				"action": "{{ path('client.master.header.new') }}",
+				"method": "POST"
+			}).appendTo(document.body).submit();
+		});
+
+
+		// 見出しマスタ更新
+		var version;
+		var header_id;
+		$(".js-header-target").bind('click', function(e){
+			// get target
+			var target = $(e.currentTarget);
+
+			version = target.attr('version-key');
+			header_id = target.attr('header-key');
+			var header_name = target.attr('header-name');
+
+			// modal open
+			$('#header_id').val(header_id);
+			$('#header_name').val(header_name);
+
+			$('#headerModal').modal();
+
+		});
+
+		$('.js-header-submit').bind('click', function(e){
+			var header_name = $('#header_name').val();
+
+			var str_html = '';
+			str_html = "<input type='hidden' name='header_name' value=\"" + header_name.replace(/"/i, "&quot;") + "\">";
+
+			if(header_id !== void 0){
+				// create form
+				$('<form>', {
+					"id": "updateHeaderForm",
+					"html": "<input type='hidden' name='version' value='" + version + "'><input type='hidden' name='id' value='" + header_id + "'>" + str_html,
+					"action": "{{ path('client.master.header.update') }}",
+					"method": "POST"
+				}).appendTo(document.body).submit();
+			}
+		});
+
+		$(function(){
+			$('.js-level').bind('click', function(){
+				var level = $('.level_n:checked').map(function() {
+					  return $(this).val();
+				}).get();
+
+				$('.js-hen').prop("disabled", false);
+				$('.js-sho').prop("disabled", false);
+				$('.js-dai').prop("disabled", false);
+				$('.js-chu').prop("disabled", false);
+				$('.js-ko').prop("disabled", false);
+
+				if(level == 1){
+					$('.js-hen').prop("disabled", true);
+				}
+				if(level <= 2){
+					$('.js-sho').prop("disabled", true);
+				}
+				if(level <= 3){
+					$('.js-dai').prop("disabled", true);
+				}
+				if(level <= 4){
+					$('.js-chu').prop("disabled", true);
+				}
+				if(level <= 5){
+					$('.js-ko').prop("disabled", true);
+				}
+
+			});
+
+			$('.js-hen').bind('change', function(){
+				changeHenHeader($('.js-hen'),'sho','dai','chu','ko');
+			});
+
+			$('.js-sho').bind('change', function(){
+				changeShoHeader($('.js-sho'),'hen','dai','chu','ko');
+			});
+
+			$('.js-dai').bind('change', function(){
+				changeDaiHeader($('.js-dai'),'hen','sho','chu','ko');
+			});
+
+			$('.js-chu').bind('change', function(){
+				changeChuHeader($('.js-chu'),'hen','sho','dai','ko');
+			});
+
+		});
+	</script>
+{% endblock %}
+
