@@ -116,10 +116,7 @@ class MasterController extends BaseController {
 
 		$page = ($request->query->has('page') && $request->query->get('page') != '') ? $request->query->get('page') : 1;
 
-		$header_list = $this->getDoctrine()->getEntityManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'versionId' => $version,
-				'deleteFlag' => FALSE
-		));
+		$header_list = $this->getDoctrine()->getEntityManager()->getRepository('CCKCommonBundle:Header')->getAllMidashi($version);
 		$pagination = $this->createPagination($request, $header_list, 30, $page);
 
 		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
@@ -303,6 +300,85 @@ class MasterController extends BaseController {
 		try {
 			if($request->request->has('header_name')){
 				$entity->setName($request->request->get('header_name'));
+			}
+
+			$em->flush();
+			$em->getConnection()->commit();
+
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		}
+
+		return $this->redirect($this->generateUrl('client.master.header.list', array('version' => $version)));
+	}
+
+	/**
+	 * @Route("/master/header/sort", name="client.master.header.sort")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:master:header_list.html.twig")
+	 */
+	public function sortHeaderAction(Request $request){
+		$session = $request->getSession();
+		if(!$request->request->has('version')){
+			return $this->redirect($this->generateUrl('client.master.header'));
+		}
+
+		$version = $request->request->get('version');
+		$level = $request->request->get('level');
+		$hen = $request->request->get('hen');
+		$sho = $request->request->get('sho');
+		$dai = $request->request->get('dai');
+		$chu = $request->request->get('chu');
+		$header_order_list = $request->request->get('header_order_list');
+		$header_order_list = explode(",", $header_order_list);
+
+		$this->get('logger')->error("***header_order_list***");
+		$this->get('logger')->error(serialize($header_order_list));
+
+		$emanage = $this->getDoctrine()->getManager();
+
+		$arrHeaderIdSet = array();
+		foreach ($header_order_list as $header_order_elem){
+			$entityHeaderSet = $emanage->getRepository('CCKCommonBundle:Header')->getSortUpdateHeader($version, (int)$level, $header_order_elem, $sho, $dai, $chu);
+			if(!$entityHeaderSet){
+				return $this->redirect($this->generateUrl('client.master.header.list', array('version' => $version)));
+			}
+
+			$arrHeaderId = array();
+			foreach ($entityHeaderSet as $entityHeader){
+				array_push($arrHeaderId,$entityHeader['id']);
+			}
+
+			$this->get('logger')->error("***header_order_elem***");
+			$this->get('logger')->error($header_order_elem);
+			$this->get('logger')->error("***arrHeaderId***");
+			$this->get('logger')->error(serialize($arrHeaderId));
+
+			array_push($arrHeaderIdSet,$arrHeaderId);
+		}
+
+		$this->get('logger')->error("***arrHeaderIdSet***");
+		$this->get('logger')->error(serialize($arrHeaderIdSet));
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			$idx = 1;
+			foreach ($arrHeaderIdSet as $arrHeaderIdRec) {
+				$this->get('logger')->error("***header_order_list_IDX***");
+				$this->get('logger')->error($header_order_list[$idx-1]);
+
+				$emanage->getRepository('CCKCommonBundle:Header')->updateHeaderId($version,implode(',',$arrHeaderIdRec),'hen',$idx);
+
+				$idx++;
 			}
 
 			$em->flush();

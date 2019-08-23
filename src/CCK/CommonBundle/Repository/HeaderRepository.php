@@ -12,6 +12,44 @@ use Doctrine\ORM\EntityRepository;
  */
 class HeaderRepository extends EntityRepository
 {
+	public function getAllMidashi($ver = null){
+		if($ver != '0'){
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->addSelect('c.headerId')
+			->addSelect('c.hen id')
+			->where('c.deleteFlag = :deleteFlag')
+			->andWhere('c.versionId = :version_id')
+			->addOrderBy('c.hen')
+			->addOrderBy('c.sho')
+			->addOrderBy('c.dai')
+			->addOrderBy('c.chu')
+			->addOrderBy('c.ko')
+			->addOrderBy('c.sort')
+			->setParameters(array(
+					'deleteFlag' => false,
+					'version_id' => $ver
+			));
+		}else{
+			$qb = $this->createQueryBuilder('c')
+			->select('c.name')
+			->select('c.headerId')
+			->addSelect('c.hen id')
+			->where('c.deleteFlag = :deleteFlag')
+			->addOrderBy('c.hen')
+			->addOrderBy('c.sho')
+			->addOrderBy('c.dai')
+			->addOrderBy('c.chu')
+			->addOrderBy('c.ko')
+			->addOrderBy('c.sort')
+			->setParameters(array(
+					'deleteFlag' => false
+			));
+		}
+
+		return $qb->getQuery()->getResult();
+	}
+
 	public function getHenMidashi($ver = null){
 		if($ver != '0'){
 			$qb = $this->createQueryBuilder('c')
@@ -20,7 +58,7 @@ class HeaderRepository extends EntityRepository
 			->where('c.deleteFlag = :deleteFlag')
 			->andWhere('c.versionId = :version_id')
 			->andWhere('c.headerId = :header_id')
-			->addOrderBy('c.id')
+			->addOrderBy('c.sort')
 			->setParameters(array(
 					'deleteFlag' => false,
 					'version_id' => $ver,
@@ -32,7 +70,7 @@ class HeaderRepository extends EntityRepository
 			->addSelect('c.hen id')
 			->where('c.deleteFlag = :deleteFlag')
 			->andWhere('c.headerId = :header_id')
-			->addOrderBy('c.id')
+			->addOrderBy('c.sort')
 			->setParameters(array(
 					'deleteFlag' => false,
 					'header_id' => '1'
@@ -50,7 +88,7 @@ class HeaderRepository extends EntityRepository
 		->andWhere('c.versionId = :version_id')
 		->andWhere('c.headerId = :header_id')
 		->andWhere('c.hen = :hen')
-		->addOrderBy('c.id')
+		->addOrderBy('c.sort')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'version_id' => $ver,
@@ -70,7 +108,7 @@ class HeaderRepository extends EntityRepository
 		->andWhere('c.headerId = :header_id')
 		->andWhere('c.hen = :hen')
 		->andWhere('c.sho = :sho')
-		->addOrderBy('c.id')
+		->addOrderBy('c.sort')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'version_id' => $ver,
@@ -92,7 +130,7 @@ class HeaderRepository extends EntityRepository
 		->andWhere('c.hen = :hen')
 		->andWhere('c.sho = :sho')
 		->andWhere('c.dai = :dai')
-		->addOrderBy('c.id')
+		->addOrderBy('c.sort')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'version_id' => $ver,
@@ -116,7 +154,7 @@ class HeaderRepository extends EntityRepository
 		->andWhere('c.sho = :sho')
 		->andWhere('c.dai = :dai')
 		->andWhere('c.chu = :chu')
-		->addOrderBy('c.id')
+		->addOrderBy('c.sort')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'version_id' => $ver,
@@ -161,4 +199,33 @@ class HeaderRepository extends EntityRepository
 
 		return $result;
 	}
+
+	public function getSortUpdateHeader($version, $header_level, $hen, $sho, $dai, $chu){
+		$sql = "
+			SELECT
+				*
+			FROM
+				Header
+			WHERE
+				Header.version_id = " . $version ;
+
+
+		if($header_level == 1){
+			$sql .= " AND Header.hen = ".$hen;
+		}
+
+		$sql .= "
+				AND Header.delete_flag = FALSE";
+
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result;
+	}
+
+	public function updateHeaderId($version,$arrHeaderId,$filed,$idx){
+		$sql = "UPDATE Header SET Header." . $filed . "=" . $idx . " WHERE Header.id IN (" . $arrHeaderId . ") AND Header.version_id = " . $version;
+		$count = $this->getEntityManager()->getConnection()->executeUpdate($sql);
+		return $count;
+	}
+
 }

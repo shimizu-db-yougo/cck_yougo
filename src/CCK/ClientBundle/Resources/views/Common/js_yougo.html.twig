@@ -1,41 +1,4 @@
 <script>
-		// 掲載順リスト
-		function buttonStyle(O){
-			var UpButton = document.getElementById('UPBUTTON');
-			var DownButton = document.getElementById('DOWNBUTTON');
-			var UpButton10 = document.getElementById('UPBUTTON10');
-			var DownButton10 = document.getElementById('DOWNBUTTON10');
-			for(var i=0;i<O.options.length;i++){
-				if(O.options[i].selected){
-					if(i!=0) UpButton.disabled = false;
-					else UpButton.disabled = true;
-					if(i!=(O.options.length-1)) DownButton.disabled = false;
-					else DownButton.disabled = true;
-
-					if(O.options.selectedIndex+10<O.options.length){
-						DownButton10.disabled = false;
-					}else{
-						DownButton10.disabled = true;
-					}
-
-					if(O.options.selectedIndex+1-10>0){
-						UpButton10.disabled = false;
-					}else{
-						UpButton10.disabled = true;
-					}
-				}
-			}
-		}
-		function optionMove(MODE,idx) {
-			var O = document.getElementById('print_order'+idx);
-			for(var i=0;i<O.options.length;i++)
-			if(O.options[i].selected) break;
-			var tmpOption = O.removeChild(O.options[i]);
-			O.insertBefore(tmpOption,O.options[i+MODE])
-
-			buttonStyle(O);
-		}
-
 		// 教科書頻度
 		$('.js-text-freq').bind('keydown keyup keypress change', function () {
 
