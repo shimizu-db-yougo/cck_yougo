@@ -58,7 +58,7 @@ class HeaderRepository extends EntityRepository
 			->where('c.deleteFlag = :deleteFlag')
 			->andWhere('c.versionId = :version_id')
 			->andWhere('c.headerId = :header_id')
-			->addOrderBy('c.sort')
+			->addOrderBy('c.hen')
 			->setParameters(array(
 					'deleteFlag' => false,
 					'version_id' => $ver,
@@ -70,7 +70,7 @@ class HeaderRepository extends EntityRepository
 			->addSelect('c.hen id')
 			->where('c.deleteFlag = :deleteFlag')
 			->andWhere('c.headerId = :header_id')
-			->addOrderBy('c.sort')
+			->addOrderBy('c.hen')
 			->setParameters(array(
 					'deleteFlag' => false,
 					'header_id' => '1'
@@ -88,7 +88,8 @@ class HeaderRepository extends EntityRepository
 		->andWhere('c.versionId = :version_id')
 		->andWhere('c.headerId = :header_id')
 		->andWhere('c.hen = :hen')
-		->addOrderBy('c.sort')
+		->addOrderBy('c.hen')
+		->addOrderBy('c.sho')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'version_id' => $ver,
@@ -108,7 +109,9 @@ class HeaderRepository extends EntityRepository
 		->andWhere('c.headerId = :header_id')
 		->andWhere('c.hen = :hen')
 		->andWhere('c.sho = :sho')
-		->addOrderBy('c.sort')
+		->addOrderBy('c.hen')
+		->addOrderBy('c.sho')
+		->addOrderBy('c.dai')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'version_id' => $ver,
@@ -130,7 +133,10 @@ class HeaderRepository extends EntityRepository
 		->andWhere('c.hen = :hen')
 		->andWhere('c.sho = :sho')
 		->andWhere('c.dai = :dai')
-		->addOrderBy('c.sort')
+		->addOrderBy('c.hen')
+		->addOrderBy('c.sho')
+		->addOrderBy('c.dai')
+		->addOrderBy('c.chu')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'version_id' => $ver,
@@ -154,7 +160,11 @@ class HeaderRepository extends EntityRepository
 		->andWhere('c.sho = :sho')
 		->andWhere('c.dai = :dai')
 		->andWhere('c.chu = :chu')
-		->addOrderBy('c.sort')
+		->addOrderBy('c.hen')
+		->addOrderBy('c.sho')
+		->addOrderBy('c.dai')
+		->addOrderBy('c.chu')
+		->addOrderBy('c.ko')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'version_id' => $ver,
@@ -200,7 +210,7 @@ class HeaderRepository extends EntityRepository
 		return $result;
 	}
 
-	public function getSortUpdateHeader($version, $header_level, $hen, $sho, $dai, $chu){
+	public function getSortUpdateHeader($version, $header_level, $hen, $sho, $dai, $chu, $ko){
 		$sql = "
 			SELECT
 				*
@@ -209,11 +219,22 @@ class HeaderRepository extends EntityRepository
 			WHERE
 				Header.version_id = " . $version ;
 
-
-		if($header_level == 1){
+		if($header_level > 0){
 			$sql .= " AND Header.hen = ".$hen;
 		}
-
+		if($header_level > 1){
+			$sql .= " AND Header.sho = ".$sho;
+		}
+		if($header_level > 2){
+			$sql .= " AND Header.dai = ".$dai;
+		}
+		if($header_level > 3){
+			$sql .= " AND Header.chu = ".$chu;
+		}
+		if($header_level > 4){
+			$sql .= " AND Header.ko = ".$ko;
+		}
+		
 		$sql .= "
 				AND Header.delete_flag = FALSE";
 
@@ -223,7 +244,7 @@ class HeaderRepository extends EntityRepository
 	}
 
 	public function updateHeaderId($version,$arrHeaderId,$filed,$idx){
-		$sql = "UPDATE Header SET Header." . $filed . "=" . $idx . " WHERE Header.id IN (" . $arrHeaderId . ") AND Header.version_id = " . $version;
+		$sql = "UPDATE Header SET Header." . $filed . "=" . $idx . " ,Header.modify_date='". date("Y-m-d H:i:s") ."' WHERE Header.id IN (" . $arrHeaderId . ") AND Header.version_id = " . $version;
 		$count = $this->getEntityManager()->getConnection()->executeUpdate($sql);
 		return $count;
 	}

@@ -335,6 +335,7 @@ class MasterController extends BaseController {
 		$sho = $request->request->get('sho');
 		$dai = $request->request->get('dai');
 		$chu = $request->request->get('chu');
+		$ko = $request->request->get('ko');
 		$header_order_list = $request->request->get('header_order_list');
 		$header_order_list = explode(",", $header_order_list);
 
@@ -345,7 +346,18 @@ class MasterController extends BaseController {
 
 		$arrHeaderIdSet = array();
 		foreach ($header_order_list as $header_order_elem){
-			$entityHeaderSet = $emanage->getRepository('CCKCommonBundle:Header')->getSortUpdateHeader($version, (int)$level, $header_order_elem, $sho, $dai, $chu);
+			if($level == '1'){
+				$entityHeaderSet = $emanage->getRepository('CCKCommonBundle:Header')->getSortUpdateHeader($version, (int)$level, $header_order_elem, $sho, $dai, $chu, $ko);
+			}elseif ($level == '2'){
+				$entityHeaderSet = $emanage->getRepository('CCKCommonBundle:Header')->getSortUpdateHeader($version, (int)$level, $hen, $header_order_elem, $dai, $chu, $ko);
+			}elseif ($level == '3'){
+				$entityHeaderSet = $emanage->getRepository('CCKCommonBundle:Header')->getSortUpdateHeader($version, (int)$level, $hen, $sho, $header_order_elem, $chu, $ko);
+			}elseif ($level == '4'){
+				$entityHeaderSet = $emanage->getRepository('CCKCommonBundle:Header')->getSortUpdateHeader($version, (int)$level, $hen, $sho, $dai, $header_order_elem, $ko);
+			}elseif ($level == '5'){
+				$entityHeaderSet = $emanage->getRepository('CCKCommonBundle:Header')->getSortUpdateHeader($version, (int)$level, $hen, $sho, $dai, $chu, $header_order_elem);
+			}
+
 			if(!$entityHeaderSet){
 				return $this->redirect($this->generateUrl('client.master.header.list', array('version' => $version)));
 			}
@@ -376,7 +388,18 @@ class MasterController extends BaseController {
 				$this->get('logger')->error("***header_order_list_IDX***");
 				$this->get('logger')->error($header_order_list[$idx-1]);
 
-				$emanage->getRepository('CCKCommonBundle:Header')->updateHeaderId($version,implode(',',$arrHeaderIdRec),'hen',$idx);
+				if($level == '1'){
+					$field_name = "hen";
+				}elseif($level == '2'){
+					$field_name = "sho";
+				}elseif($level == '3'){
+					$field_name = "dai";
+				}elseif($level == '4'){
+					$field_name = "chu";
+				}elseif($level == '5'){
+					$field_name = "ko";
+				}
+				$emanage->getRepository('CCKCommonBundle:Header')->updateHeaderId($version,implode(',',$arrHeaderIdRec),$field_name,$idx);
 
 				$idx++;
 			}
