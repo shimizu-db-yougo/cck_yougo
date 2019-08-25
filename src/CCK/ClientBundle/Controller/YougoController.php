@@ -1197,6 +1197,8 @@ class YougoController extends BaseController {
 				'headerId' => '3',
 				'deleteFlag' => FALSE
 		));
+		$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getDaiMidashi($entityMain->getCurriculumId(), $entityHeader->getHen(), $entityHeader->getSho());
+		
 		$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
 				'versionId' => $entityMain->getCurriculumId(),
 				'hen' => $entityHeader->getHen(),

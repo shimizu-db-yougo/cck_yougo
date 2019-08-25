@@ -50,7 +50,7 @@
 								<select class="form-control js-dai input-sm" name="dai">
 									<option value="0">--------------</option>
 									{% for dai in dai_list %}
-										<option value="{{ dai.dai }}" {{ dai.dai == select_dai ? " selected " : '' }}">{{ dai.name }}</option>
+										<option value="{{ dai.id }}" {{ dai.id == select_dai ? " selected " : '' }}">{{ dai.name }}</option>
 									{% endfor %}
 								</select>
 							</div>
