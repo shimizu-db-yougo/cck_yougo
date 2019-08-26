@@ -32,7 +32,7 @@
 								<select class="form-control js-hen input-sm" name="hen">
 									<option value="0">--------------</option>
 									{% for hen in hen_list %}
-										<option value="{{ hen.hen }}" {{ hen.hen == select_hen ? " selected " : '' }}">{{ hen.name }}</option>
+										<option value="{{ hen.id }}" {{ hen.id == select_hen ? " selected " : '' }}">{{ hen.name }}</option>
 									{% endfor %}
 								</select>
 							</div>
@@ -41,7 +41,7 @@
 								<select class="form-control js-sho input-sm" name="sho">
 									<option value="0">--------------</option>
 									{% for sho in sho_list %}
-										<option value="{{ sho.sho }}" {{ sho.sho == select_sho ? " selected " : '' }}">{{ sho.name }}</option>
+										<option value="{{ sho.id }}" {{ sho.id == select_sho ? " selected " : '' }}">{{ sho.name }}</option>
 									{% endfor %}
 								</select>
 							</div>
@@ -64,7 +64,7 @@
 								<select class="form-control js-chu input-sm" name="chu">
 									<option value="0">--------------</option>
 									{% for chu in chu_list %}
-										<option value="{{ chu.chu }}" {{ chu.chu == select_chu ? " selected " : '' }}">{{ chu.name }}</option>
+										<option value="{{ chu.id }}" {{ chu.id == select_chu ? " selected " : '' }}">{{ chu.name }}</option>
 									{% endfor %}
 								</select>
 							</div>
@@ -73,7 +73,7 @@
 								<select class="form-control js-ko input-sm" name="ko">
 									<option value="0">--------------</option>
 									{% for ko in ko_list %}
-										<option value="{{ ko.ko }}" {{ ko.ko == select_ko ? " selected " : '' }}">{{ ko.name }}</option>
+										<option value="{{ ko.id }}" {{ ko.id == select_ko ? " selected " : '' }}">{{ ko.name }}</option>
 									{% endfor %}
 								</select>
 							</div>

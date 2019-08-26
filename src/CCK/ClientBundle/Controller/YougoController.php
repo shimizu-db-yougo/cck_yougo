@@ -1179,43 +1179,15 @@ class YougoController extends BaseController {
 				'deleteFlag' => FALSE
 		));
 
-		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'versionId' => $entityMain->getCurriculumId(),
-				'headerId' => '1',
-				'deleteFlag' => FALSE
-		));
-		$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'versionId' => $entityMain->getCurriculumId(),
-				'hen' => $entityHeader->getHen(),
-				'headerId' => '2',
-				'deleteFlag' => FALSE
-		));
-		$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'versionId' => $entityMain->getCurriculumId(),
-				'hen' => $entityHeader->getHen(),
-				'sho' => $entityHeader->getSho(),
-				'headerId' => '3',
-				'deleteFlag' => FALSE
-		));
+		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getHenMidashi($entityMain->getCurriculumId());
+
+		$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getShoMidashi($entityMain->getCurriculumId(), $entityHeader->getHen());
+
 		$dai_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getDaiMidashi($entityMain->getCurriculumId(), $entityHeader->getHen(), $entityHeader->getSho());
-		
-		$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'versionId' => $entityMain->getCurriculumId(),
-				'hen' => $entityHeader->getHen(),
-				'sho' => $entityHeader->getSho(),
-				'dai' => $entityHeader->getDai(),
-				'headerId' => '4',
-				'deleteFlag' => FALSE
-		));
-		$ko_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'versionId' => $entityMain->getCurriculumId(),
-				'hen' => $entityHeader->getHen(),
-				'sho' => $entityHeader->getSho(),
-				'dai' => $entityHeader->getDai(),
-				'chu' => $entityHeader->getChu(),
-				'headerId' => '5',
-				'deleteFlag' => FALSE
-		));
+
+		$chu_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getChuMidashi($entityMain->getCurriculumId(), $entityHeader->getHen(), $entityHeader->getSho(), $entityHeader->getDai());
+
+		$ko_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getKoMidashi($entityMain->getCurriculumId(), $entityHeader->getHen(), $entityHeader->getSho(), $entityHeader->getDai(), $entityHeader->getChu());
 
 		// 選択する教科
 		$entityVersion = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
