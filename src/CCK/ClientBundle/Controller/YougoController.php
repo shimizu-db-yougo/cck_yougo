@@ -1345,6 +1345,22 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/yougo/explain/ajax", name="client.yougo.explain.ajax")
+	 */
+	public function getExplainAjaxAction(Request $request){
+		if($request->request->has('term_id')){
+			$term_id = $request->request->get('term_id');
+			$explain = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($term_id);
+
+			$response = new JsonResponse($explain);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * @Route("/explain/save/ajax", name="client.explain.save.ajax")
 	 * @Method("POST")
 	 */

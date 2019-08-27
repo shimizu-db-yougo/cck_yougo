@@ -80,6 +80,25 @@
 			var target = $(e.currentTarget);
 			var main_term_id = target.attr('main-term-id');
 
+			var explain_list = [];
+			// 解説内索引用語の取得
+			var data = {
+				'term_id': main_term_id,
+			};
+			$.ajax({
+				url: "{{ path('client.yougo.explain.ajax') }}",
+				data: data,
+				async: false,
+				method: 'POST',
+				success: function(response){
+					$.each(response, function(key, list){
+						explain_list.push(list);
+					});
+				},
+				error: function(response){
+				}
+			});
+
 			$('#form_explains').empty();
 			// さくいん用語タグで囲まれた用語を抽出
 			var match_regex = /(?<=\《c_SAK》).*?(?=\《\/c_SAK》)/g;
@@ -87,19 +106,43 @@
 			var term_explain = $('#term_explain').val();
 
 			match_chr = term_explain.match(match_regex);
+
 			if(match_chr){
-				console.log(match_chr);
+				// DBに登録されていないがWEBに入力された用語をマッチングして追加する
+				var is_saved = false;
 
 				for(var i=0; i<match_chr.length; i++){
+
+					for(idx in explain_list){
+						console.log(explain_list[idx].indexTerm);
+
+						if(match_chr[i] == explain_list[idx].indexTerm){
+							is_saved = true;
+							break;
+						}
+					}
+
+					if(is_saved == false){
+						var explain = {indexTerm:match_chr[i],indexAddLetter:'',indexKana:'',nombre:0};
+						explain_list.push(explain);
+					}
+				}
+			}
+
+
+			if(explain_list){
+				console.log(explain_list);
+
+				for(var i=0; i<explain_list.length; i++){
 					$('#form_explains').append(
 							'<div class="col-lg-12 form_index">'
 							+'<input class="form-control input-sm" type="hidden" id="explain_main_term_id" name="explain_main_term_id" value="' + main_term_id + '">'
-							+'<input class="form-control input-sm" type="hidden" id="explain_index_term" name="explain_index_term" value="' + match_chr[i] + '">'
-							+'<input class="form-control input-sm" type="hidden" id="explain_nombre" name="explain_nombre" value="0">'
-							+'<label class="col-sm-2">'+ match_chr[i] + '</label>'
-							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value=""></div>'
-							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value=""></div>'
-							+'<label class="col-sm-2">0</label>'
+							+'<input class="form-control input-sm" type="hidden" id="explain_index_term" name="explain_index_term" value="' + explain_list[i].indexTerm + '">'
+							+'<input class="form-control input-sm" type="hidden" id="explain_nombre" name="explain_nombre" value="'+ explain_list[i].nombre + '">'
+							+'<label class="col-sm-2">'+ explain_list[i].indexTerm + '</label>'
+							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
+							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
+							+'<label class="col-sm-2">'+ explain_list[i].nombre + '</label>'
 							+'</div>');
 				}
 
