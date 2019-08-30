@@ -15,7 +15,7 @@ class CurriculumRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
-	public function getCurriculumVersionList(){
+	public function getCurriculumVersionList($version_id = null){
 		$sql = "
 			SELECT
 				Curriculum.id cur_id,
@@ -28,8 +28,15 @@ class CurriculumRepository extends EntityRepository
 				Version ON (Curriculum.id = Version.curriculum_id)
 			WHERE
 				Curriculum.delete_flag = FALSE
-				AND Version.delete_flag = FALSE
-			ORDER BY Version.curriculum_id,Version.create_date";
+				AND Version.delete_flag = FALSE";
+
+		if($version_id){
+			$sql .= " AND Version.id = " . $version_id;
+		}
+
+		$sql .= " ORDER BY Version.curriculum_id,Version.create_date";
+
+
 
 		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
 

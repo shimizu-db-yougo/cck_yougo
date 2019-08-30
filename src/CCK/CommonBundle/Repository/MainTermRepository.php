@@ -239,6 +239,75 @@ class MainTermRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
+	public function getMainTermList($cur_id,$term_id,$hen,$sho){
+		$sql = "
+			SELECT
+				Curriculum.id cur_id,
+				Curriculum.name cur_name,
+				Version.id ver_id,
+				Version.name var_name,
+				MainTerm.id,
+				MainTerm.term_id,
+				MainTerm.header_id,
+				MainTerm.print_order,
+				MainTerm.main_term,
+				MainTerm.red_letter,
+				MainTerm.text_frequency,
+				MainTerm.center_frequency,
+				MainTerm.news_exam,
+				MainTerm.kana,
+				MainTerm.index_kana,
+				MainTerm.index_add_letter,
+				MainTerm.index_original,
+				MainTerm.index_original_kana,
+				MainTerm.index_abbreviation,
+				MainTerm.handover,
+				MainTerm.modify_date,
+				MainTerm.delimiter,
+				MainTerm.western_language,
+				MainTerm.birth_year,
+				MainTerm.nombre,
+				MainTerm.illust_filename,
+				MainTerm.illust_caption,
+				MainTerm.illust_kana,
+				MainTerm.illust_nombre,
+				MainTerm.handover,
+				MainTerm.term_explain
+			FROM
+				MainTerm
+					INNER JOIN
+				Version ON (MainTerm.curriculum_id = Version.id
+					AND MainTerm.delete_flag = false
+					AND Version.delete_flag = false)
+					INNER JOIN
+				Curriculum ON (Version.curriculum_id = Curriculum.id
+					AND Curriculum.delete_flag = false
+					AND Version.delete_flag = false)
+			WHERE
+				MainTerm.delete_flag = false
+		";
+
+		if($cur_id){
+			$sql .= " AND MainTerm.curriculum_id = " . $cur_id;
+		}
+		if($term_id){
+			$sql .= " AND MainTerm.term_id = " . $term_id;
+		}
+		if($hen){
+			$sql .= " AND Header.hen = '" . str_replace("'", "''", $hen) . "'";
+		}
+		if($sho){
+			$sql .= " AND Header.sho = '" . str_replace("'", "''", $sho) . "'";
+		}
+
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result;
+	}
+
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
 	public function getYougoDetailOfSubterm($term_id,$is_getId=false){
 		$sql = "
 			SELECT
@@ -319,6 +388,7 @@ class MainTermRepository extends EntityRepository
 				Refer.id,
 				MainTerm.main_term,
 				MainTerm.header_id,
+				MainTerm.curriculum_id ver_id,
 				Header.hen,
 				Header.sho,
 				Header.dai,
