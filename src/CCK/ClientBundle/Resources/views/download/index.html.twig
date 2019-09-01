@@ -1,0 +1,133 @@
+{% extends "CCKClientBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+	{{ parent() }}
+{% endblock %}
+
+{% block contents %}
+<div class="row">
+<blockquote class="blockquote-bottom pdr-0">
+	<p>{{ 'text.csv.export.title'|trans|raw }}</p>
+</blockquote>
+</div>
+
+<form action="{{ path('client.typesetting.download') }}" class="form-horizontal" method="GET">
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-primary">
+			<div class="panel-body">
+				<div class="row">
+					<div class="form-horizontal">
+						<div class="">
+							<div class="col-lg-12">
+								<label class="col-sm-1">{{ 'text.csv.export.honmon'|trans }}</label>
+								<div class="col-sm-2">
+									<select class="form-control js-cur input-sm" name="curriculum">
+										<option value="0">--------------</option>
+										{% for cur in cur_list %}
+											<option value="{{ cur.id }}">{{ cur.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<select class="form-control js-han input-sm" name="version" disabled>
+										<option value="0">--------------</option>
+										{% for ver in ver_list %}
+											<option value="{{ ver.id }}">{{ ver.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<select class="form-control js-hen input-sm" name="hen">
+										<option value="0">--------------</option>
+										{% for hen in hen_list %}
+											<option value="{{ hen.hen }}">{{ hen.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<select class="form-control js-sho input-sm" name="sho">
+										<option value="0">--------------</option>
+										{% for sho in sho_list %}
+											<option value="{{ sho.sho }}">{{ sho.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-sm-1">
+									<input type="hidden" name="type" value="0"/>
+									<button class="btn btn-primary button_text_align input-sm" type="submit">{{ 'btn.download'|trans }}</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+
+<form action="{{ path('client.typesetting.download') }}" class="form-horizontal" method="GET">
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-primary">
+			<div class="panel-body">
+				<div class="row">
+					<div class="form-horizontal">
+						<div class="">
+							<div class="col-lg-12">
+								<label class="col-sm-1">{{ 'text.csv.export.index'|trans }}</label>
+								<div class="col-sm-2">
+									<select class="form-control js-cur2 input-sm" name="curriculum">
+										<option value="0">--------------</option>
+										{% for cur in cur_list %}
+											<option value="{{ cur.id }}">{{ cur.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<select class="form-control js-han2 input-sm" name="version" disabled>
+										<option value="0">--------------</option>
+										{% for ver in ver_list %}
+											<option value="{{ ver.id }}">{{ ver.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-sm-1">
+									<input type="hidden" name="type" value="1"/>
+									<button class="btn btn-primary button_text_align input-sm" type="submit">{{ 'btn.download'|trans }}</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+	$(function(){
+		$('.js-cur').bind('change', function(){
+			changeCurriculumHeader($('.js-cur'));
+		});
+
+		$('.js-han').bind('change', function(){
+			changeHanHeader($('.js-han'),'hen');
+		});
+
+		$('.js-hen').bind('change', function(){
+			changeHenHeader($('.js-hen'),'sho','dai','chu','ko','print_order');
+		});
+
+		$('.js-cur2').bind('change', function(){
+			changeCurriculumHeader($('.js-cur2'));
+		});
+	});
+
+	</script>
+{% endblock %}
