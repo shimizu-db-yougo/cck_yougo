@@ -48,7 +48,7 @@ class DownloadController extends BaseController {
 			'index_abbreviation',
 			'nombre',
 			'term_explain',
-			'exp_term_id',
+			'exp_term',
 			'exp_index_kana',
 			'exp_index_add_letter',
 			'exp_nombre',
@@ -92,6 +92,50 @@ class DownloadController extends BaseController {
 	];
 
 	/**
+	 * @Route("/csv/download/index", name="client.csv.export")
+	 * @Template()
+	 */
+	public function indexAction(Request $request) {
+		// session
+		$session = $request->getSession();
+	
+		// get user information
+		$user = $this->getUser();
+	
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$hen_list = array();
+		if(isset($version)){
+			$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+					'versionId' => $version,
+					'headerId' => '1',
+					'deleteFlag' => FALSE
+			));
+		}
+		$sho_list = array();
+		if((isset($version))&&(isset($hen))){
+			$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+					'versionId' => $version,
+					'hen' => $hen,
+					'headerId' => '2',
+					'deleteFlag' => FALSE
+			));
+		}
+	
+		return array(
+				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
+				'cur_list' => $cur_list,
+				'ver_list' => $ver_list,
+				'hen_list' => $hen_list,
+				'sho_list' => $sho_list,
+		);
+	}
+	
+	/**
 	 * @Route("/typesetting/download", name="client.typesetting.download")
 	 * @Method("POST|GET")
 	 */
@@ -114,8 +158,9 @@ class DownloadController extends BaseController {
 		$em = $this->getDoctrine()->getManager();
 		// 教科名の取得
 		$curriculumId = $request->query->get('curriculum');
+		$versionId = $request->query->get('version');
 
-		$entityCurriculum = $em->getRepository('CCKCommonBundle:Curriculum')->getCurriculumVersionList($curriculumId);
+		$entityCurriculum = $em->getRepository('CCKCommonBundle:Curriculum')->getCurriculumVersionList($versionId);
 
 		$cur_name = '';
 		if($entityCurriculum){
@@ -138,13 +183,20 @@ class DownloadController extends BaseController {
 		$term_id = $request->query->get('term_id');
 
 		// ファイル名の生成
-		$outFileName = $cur_name . '_' . $type_name . '_' . date('Ymdhis') . ".csv";
+		$outFileName = $cur_name . '_' . $type_name . '_' . date('YmdHis') . ".csv";
 
 		$path = $this->container->getParameter('archive')['dir_path'];
 		$webpath = $request->getSchemeAndHttpHost() . '/' . $this->container->getParameter('archive')['link'];
 
-
-		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($curriculumId,$term_id,$hen,$sho);
+		/*print("curriculumId".$curriculumId);
+		print("versionId".$versionId);
+		print("type:".$type);
+		print("hen:".$hen);
+		print("sho:".$sho);
+		print("term_id:".$term_id);
+		exit();*/
+		
+		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($versionId,$term_id,$hen,$sho);
 
 		// 原稿データCSV生成
 		if($entity){
@@ -217,6 +269,8 @@ class DownloadController extends BaseController {
 	private function constructManuscriptCSV($genkoId, $request, $entity, $outFileName) {
 		$em = $this->getDoctrine()->getManager();
 
+		$type = $request->query->get('type');
+		
 		$body_list = [];
 		foreach($entity as $mainTermRec){
 
@@ -226,7 +280,7 @@ class DownloadController extends BaseController {
 			$entity_ref = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($mainTermRec['term_id']);
 
 			// body
-			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref), $request);
+			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref, $type), $request);
 			array_push($body_list,$body);
 		}
 
@@ -325,7 +379,7 @@ class DownloadController extends BaseController {
 	 * @param  array $coupons
 	 * @return array $body
 	 */
-	private function generateBody($main, $expterm, $subterm, $synterm, $refterm){
+	private function generateBody($main, $expterm, $subterm, $synterm, $refterm, $type){
 		$body = [];
 		$result = [];
 
@@ -336,7 +390,32 @@ class DownloadController extends BaseController {
 
 		// 主用語
 		$this->replaceMainField($main);
+		
+		$main['nombre'] = (($type == '1') ? $main['nombre'] : '');
 
+		// 解説内索引用語
+		$exp = [];
+		$exp['exp_term_id'] = "";
+		$exp['exp_term'] = "";
+		$exp['exp_index_kana'] = "";
+		$exp['exp_index_add_letter'] = "";
+		$exp['exp_nombre'] = "";
+
+		if($expterm){
+			foreach ($expterm as $exptermRec) {
+				$exptermRec['id'] = 'K'.str_pad($exptermRec['id'], 5, 0, STR_PAD_LEFT);
+				
+				$exp['exp_term_id'] .= $exptermRec['id'] . '\v';
+				$exp['exp_term'] .= $exptermRec['indexTerm'] . '\v';
+				$exp['exp_index_kana'] .= $exptermRec['indexKana'] . '\v';
+				$exp['exp_index_add_letter'] .= $exptermRec['indexAddLetter'] . '\v';
+				$exp['exp_nombre'] .= (($type == '1') ? $exptermRec['nombre'] : '') . '\v';
+			}
+			foreach ($exp as $key => $val) {
+				$exp[$key] = mb_substr($val,0,mb_strlen($val)-2);
+			}
+		}
+		
 		// サブ用語
 		$sub = [];
 		$sub['sub_id'] = "";
@@ -367,7 +446,7 @@ class DownloadController extends BaseController {
 				$sub['sub_delimiter_kana'] .= $subtermRec['delimiter_kana'] . '\v';
 				$sub['sub_index_add_letter'] .= $subtermRec['index_add_letter'] . '\v';
 				$sub['sub_index_kana'] .= $subtermRec['index_kana'] . '\v';
-				$sub['sub_nombre'] .= $subtermRec['nombre'] . '\v';
+				$sub['sub_nombre'] .= (($type == '1') ? $subtermRec['nombre'] : '') . '\v';
 			}
 			foreach ($sub as $key => $val) {
 				$sub[$key] = mb_substr($val,0,mb_strlen($val)-2);
@@ -404,7 +483,7 @@ class DownloadController extends BaseController {
 				$syn['syn_delimiter'] .= $syntermRec['delimiter'] . '\v';
 				$syn['syn_index_add_letter'] .= $syntermRec['index_add_letter'] . '\v';
 				$syn['syn_index_kana'] .= $syntermRec['index_kana'] . '\v';
-				$syn['syn_nombre'] .= $syntermRec['nombre'] . '\v';
+				$syn['syn_nombre'] .= (($type == '1') ? $syntermRec['nombre'] : '') . '\v';
 			}
 			foreach ($syn as $key => $val) {
 				$syn[$key] = mb_substr($val,0,mb_strlen($val)-2);
@@ -434,14 +513,14 @@ class DownloadController extends BaseController {
 				$ref['ref_ko'] .= $reftermRec['ko'] . '\v';
 				$ref['ref_refer_term_id'] .= $reftermRec['refer_term_id'] . '\v';
 				$ref['ref_main_term'] .= $reftermRec['main_term'] . '\v';
-				$ref['ref_nombre'] .= $reftermRec['nombre'] . '\v';
+				$ref['ref_nombre'] .= (($type == '1') ? $reftermRec['nombre'] : '') . '\v';
 			}
 			foreach ($ref as $key => $val) {
 				$ref[$key] = mb_substr($val,0,mb_strlen($val)-2);
 			}
 		}
 
-		$result = array_merge($main,$sub,$syn,$ref);
+		$result = array_merge($main,$exp,$sub,$syn,$ref);
 
 		// 順番を決める
 		$trans = [];
@@ -451,7 +530,7 @@ class DownloadController extends BaseController {
 		}
 		//$body[] = $trans;
 
-		//print_r($body);
+		//print_r($trans);
 		//exit();
 
 		return $trans;
@@ -476,8 +555,14 @@ class DownloadController extends BaseController {
 			$main['text_frequency'] = 'B';
 		}elseif(($main['text_frequency'] >= 1)&&($main['text_frequency'] <= 2)){
 			$main['text_frequency'] = 'C';
+		}else{
+			$main['text_frequency'] = '';
 		}
 
+		if($main['center_frequency'] == 0){
+			$main['center_frequency'] = '';
+		}
+		
 		if($main['news_exam'] == '1'){
 			$main['news_exam'] = 'N';
 		}else{
@@ -516,8 +601,14 @@ class DownloadController extends BaseController {
 			$sub['text_frequency'] = 'B';
 		}elseif(($sub['text_frequency'] >= 1)&&($sub['text_frequency'] <= 2)){
 			$sub['text_frequency'] = 'C';
+		}else{
+			$sub['text_frequency'] = '';
 		}
 
+		if($sub['center_frequency'] == 0){
+			$sub['center_frequency'] = '';
+		}
+		
 		if($sub['news_exam'] == '1'){
 			$sub['news_exam'] = 'N';
 		}else{
@@ -582,8 +673,14 @@ class DownloadController extends BaseController {
 			$syn['text_frequency'] = 'B';
 		}elseif(($syn['text_frequency'] >= 1)&&($syn['text_frequency'] <= 2)){
 			$syn['text_frequency'] = 'C';
+		}else{
+			$syn['text_frequency'] = '';
 		}
-
+		
+		if($syn['center_frequency'] == 0){
+			$syn['center_frequency'] = '';
+		}
+		
 		if($syn['news_exam'] == '1'){
 			$syn['news_exam'] = 'N';
 		}else{

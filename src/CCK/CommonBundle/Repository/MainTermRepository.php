@@ -283,7 +283,11 @@ class MainTermRepository extends EntityRepository
 				Curriculum ON (Version.curriculum_id = Curriculum.id
 					AND Curriculum.delete_flag = false
 					AND Version.delete_flag = false)
-			WHERE
+					INNER JOIN
+				Header ON (MainTerm.header_id = Header.id
+					AND MainTerm.delete_flag = false
+					AND Header.delete_flag = false)
+				WHERE
 				MainTerm.delete_flag = false
 		";
 
@@ -297,6 +301,7 @@ class MainTermRepository extends EntityRepository
 			$sql .= " AND Header.hen = '" . str_replace("'", "''", $hen) . "'";
 		}
 		if($sho){
+			$sql .= " AND Header.hen = '" . str_replace("'", "''", $hen) . "'";
 			$sql .= " AND Header.sho = '" . str_replace("'", "''", $sho) . "'";
 		}
 

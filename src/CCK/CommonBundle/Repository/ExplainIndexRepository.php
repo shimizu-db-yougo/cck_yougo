@@ -15,6 +15,7 @@ class ExplainIndexRepository extends EntityRepository
 	public function getExplainTerms($term_id){
 		$qb = $this->createQueryBuilder('c')
 		->select('c.indexTerm')
+		->addSelect('c.id')
 		->addSelect('c.indexAddLetter')
 		->addSelect('c.indexKana')
 		->addSelect('c.nombre')
