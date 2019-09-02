@@ -177,6 +177,7 @@
 					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.main_term"}) }}">{{ 'text.yougo.term'|trans }}{% if sort_field == "MainTerm.main_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="120px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.kana"}) }}">{{ 'text.yougo.kana'|trans }}{% if sort_field == "MainTerm.kana" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="120px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.index_kana"}) }}">{{ 'text.yougo.index_kana'|trans }}{% if sort_field == "MainTerm.index_kana" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
+					<th width="120px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "ExplainIndex.index_term"}) }}">{{ 'text.yougo.explain_term'|trans }}{% if sort_field == "ExplainIndex.index_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "SubTerm.sub_term"}) }}">{{ 'text.yougo.sub_term'|trans }}{% if sort_field == "SubTerm.sub_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="120px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "SubTerm.kana"}) }}">{{ 'text.yougo.sub_kana'|trans }}{% if sort_field == "SubTerm.kana" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="124px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "SubTerm.index_kana"}) }}">{{ 'text.yougo.sub_index_kana'|trans }}{% if sort_field == "SubTerm.index_kana" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
@@ -200,6 +201,7 @@
 					<td width="100px" class="text-left">{{ yougo.main_term }}</td>
 					<td width="120px" class="text-left">{{ yougo.kana }}</td>
 					<td width="120px" class="text-left">{{ yougo.index_kana }}</td>
+					<td width="120px" class="text-left">{{ yougo.index_term }}</td>
 					<td width="100px" class="text-left">{{ yougo.sub_term }}</td>
 					<td width="120px" class="text-left">{{ yougo.sub_kana }}</td>
 					<td width="124px" class="text-left">{{ yougo.sub_index_kana }}</td>

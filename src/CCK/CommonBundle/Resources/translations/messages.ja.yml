@@ -217,6 +217,7 @@ text:
         explain.index.kana: さくいん読み仮名
         explain.index.add: さくいん時追加文字
         explain.nombre: ノンブル
+        explain_term: 解説内索引用語
     header:
         name: 見出し名前
         level: 見出し種類
