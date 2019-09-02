@@ -49,7 +49,8 @@ class ClientExtension extends \Twig_Extension
 			new \Twig_SimpleFunction('getCenterFreqIcon', array($this, 'getCenterFreqIcon')),
 			new \Twig_SimpleFunction('getSynonymIcon', array($this, 'getSynonymIcon')),
 			new \Twig_SimpleFunction('getNewsExamIcon', array($this, 'getNewsExamIcon')),
-			new \Twig_SimpleFunction('replaceTag', array($this, 'replaceTag'))
+			new \Twig_SimpleFunction('replaceTag', array($this, 'replaceTag')),
+			new \Twig_SimpleFunction('getDelimiter', array($this, 'getDelimiter'))
 		);
 	}
 
@@ -148,6 +149,29 @@ class ClientExtension extends \Twig_Extension
 		$term_explain = preg_replace('/《c_SAK》(.*?)《\/c_SAK》/u', '$1', $term_explain);
 
 		return $term_explain;
+	}
+
+	/**
+	 * [getDelimiter description]
+	 * @param  [type] $delimiter     [description]
+	 * @return [type]               [description]
+	 */
+	public function getDelimiter($delimiter){
+		if($delimiter == "1"){
+			return "delimiter.to";
+		}elseif($delimiter == "2"){
+			return "delimiter.comma";
+		}elseif($delimiter == "3"){
+			return "delimiter.nakaguro";
+		}elseif($delimiter == "4"){
+			return "delimiter.slash";
+		}elseif($delimiter == "5"){
+			return "delimiter.paren_start";
+		}elseif($delimiter == "6"){
+			return "delimiter.paren_end";
+		}else{
+			return "";
+		}
 	}
 
 	public function twigFileExists($filename){
