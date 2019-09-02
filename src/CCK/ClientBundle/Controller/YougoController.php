@@ -1381,10 +1381,10 @@ class YougoController extends BaseController {
 		$return_flag = true;
 
 		$idx = 0;
+		$em = $this->get('doctrine.orm.entity_manager');
 		foreach($request->request->get('index_term') as $ele_expterm){
 			//$this->get('logger')->error("***exp_term_elem***".serialize($ele_expterm));
 
-			$em = $this->get('doctrine.orm.entity_manager');
 			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
 					'indexTerm' => $ele_expterm,
 					'deleteFlag' => FALSE
@@ -1422,6 +1422,47 @@ class YougoController extends BaseController {
 				return $response;
 			}
 			$idx++;
+		}
+
+		// WEBに入力されなかった用語は削除
+		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
+				'mainTermId' => $request->request->get('term_id')[0],
+				'deleteFlag' => FALSE
+		));
+
+		foreach($entity as $entity_rec){
+			$index_term = $entity_rec->getIndexTerm();
+			$this->get('logger')->error("***DB:yougo***".$index_term);
+
+			if(!in_array($index_term, $request->request->get('index_term'))){
+				$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+						'indexTerm' => $index_term,
+						'deleteFlag' => FALSE
+				));
+
+				$em->getConnection()->beginTransaction();
+
+				try{
+					$entity->setDeleteFlag(true);
+					$entity->setModifyDate(new \DateTime());
+					$entity->setDeleteDate(new \DateTime());
+
+					$em->flush();
+					$em->getConnection()->commit();
+				} catch (\Exception $e){
+					$em->getConnection()->rollback();
+					$em->close();
+
+					// log
+					$this->get('logger')->error($e->getMessage());
+					$this->get('logger')->error($e->getTraceAsString());
+
+					$ret = ['result'=>'ng','error'=>'ExplainDB error id:'.$index_term];
+					$response = new JsonResponse($ret);
+					return $response;
+				}
+			}
+
 		}
 
 		$response = new JsonResponse($ret);

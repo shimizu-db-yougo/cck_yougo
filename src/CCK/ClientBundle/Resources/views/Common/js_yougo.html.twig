@@ -133,19 +133,28 @@
 			if(explain_list){
 				console.log(explain_list);
 
-				for(var i=0; i<explain_list.length; i++){
-					$('#form_explains').append(
-							'<div class="col-lg-12 form_index">'
-							+'<input class="form-control input-sm" type="hidden" id="explain_main_term_id" name="explain_main_term_id" value="' + main_term_id + '">'
-							+'<input class="form-control input-sm" type="hidden" id="explain_index_term" name="explain_index_term" value="' + explain_list[i].indexTerm + '">'
-							+'<input class="form-control input-sm" type="hidden" id="explain_nombre" name="explain_nombre" value="'+ explain_list[i].nombre + '">'
-							+'<label class="col-sm-2">'+ explain_list[i].indexTerm + '</label>'
-							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
-							+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
-							+'<label class="col-sm-2">'+ explain_list[i].nombre + '</label>'
-							+'</div>');
-				}
+				if(match_chr){
+					for(var i=0; i<explain_list.length; i++){
+						// DBに登録されてWEBに入力されていない用語は表示しない
+						console.log(explain_list[i].indexTerm);
+						console.log(match_chr.indexOf(explain_list[i].indexTerm));
 
+						if(match_chr.indexOf(explain_list[i].indexTerm) == -1){
+							continue;
+						}
+
+						$('#form_explains').append(
+								'<div class="col-lg-12 form_index">'
+								+'<input class="form-control input-sm" type="hidden" id="explain_main_term_id" name="explain_main_term_id" value="' + main_term_id + '">'
+								+'<input class="form-control input-sm" type="hidden" id="explain_index_term" name="explain_index_term" value="' + explain_list[i].indexTerm + '">'
+								+'<input class="form-control input-sm" type="hidden" id="explain_nombre" name="explain_nombre" value="'+ explain_list[i].nombre + '">'
+								+'<label class="col-sm-2">'+ explain_list[i].indexTerm + '</label>'
+								+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
+								+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
+								+'<label class="col-sm-2">'+ explain_list[i].nombre + '</label>'
+								+'</div>');
+					}
+				}
 
 			}
 
@@ -170,6 +179,9 @@
 				console.log('savePost:fail',s,e.status);
 				alert('DB更新エラー');
 			});
+
+			$('#explainModal').modal('hide');
+
 		});
 
 		function setExplainList(field,explain_attr){
