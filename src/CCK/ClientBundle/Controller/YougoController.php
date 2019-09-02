@@ -154,6 +154,7 @@ class YougoController extends BaseController {
 		if($request->query->has('news_exam')){
 			$news_exam = $request->query->get('news_exam');
 		}else{
+			$session->remove(self::SES_SEARCH_NEWS_EXAM_KEY);
 			$news_exam = $session->get(self::SES_SEARCH_NEWS_EXAM_KEY);
 		}
 

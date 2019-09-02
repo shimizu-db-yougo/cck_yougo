@@ -113,7 +113,7 @@
 								</div>
 								<label class="col-sm-1">{{ 'text.yougo.news.exam'|trans }}</label>
 								<div class="col-sm-1">
-									<input type="checkbox" name="news_exam[]">
+									<input type="checkbox" name="news_exam[]" {{ news_exam == true ? " checked" : '' }}>
 								</div>
 							</div>
 						</div>
