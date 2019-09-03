@@ -140,7 +140,7 @@ class MainTermRepository extends EntityRepository
 		if($sort_field){
 			$sql .= " ORDER BY " . $sort_field . " " . $sort_order . " ";
 		}else{
-			$sql .= " ORDER BY MainTerm.print_order ";
+			$sql .= " ORDER BY MainTerm.print_order,MainTerm.id ";
 		}
 
 		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();

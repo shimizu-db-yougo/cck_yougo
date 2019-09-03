@@ -1466,6 +1466,32 @@ class YougoController extends BaseController {
 
 		}
 
+		// 主用語DBの用語解説の更新
+		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+				'termId' => $request->request->get('term_id')[0],
+				'deleteFlag' => FALSE
+		));
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			$entity->setTermExplain($request->request->get('mainterm_explain'));
+
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$ret = ['result'=>'ng','error'=>'MainTermDB error id:'.$entity->getMainTerm()];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
 		$response = new JsonResponse($ret);
 		return $response;
 	}

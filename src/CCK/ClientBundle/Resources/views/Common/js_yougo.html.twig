@@ -163,12 +163,13 @@
 
 		$('.js-explain-submit').bind('click', function(e){
 			console.log($('#form_mainterm [id=term_explain]').val());
-			var explain = {term_id:[],index_term:[],index_add_letter:[],index_kana:[],nombre:[]};
+			var explain = {term_id:[],index_term:[],index_add_letter:[],index_kana:[],nombre:[],mainterm_explain:''};
 			explain.term_id = setExplainList('explain_main_term_id',explain.term_id);
 			explain.index_term = setExplainList('explain_index_term',explain.index_term);
 			explain.index_kana = setExplainList('explain_index_kana',explain.index_kana);
 			explain.index_add_letter = setExplainList('explain_index_add_letter',explain.index_add_letter);
 			explain.nombre = setExplainList('explain_nombre',explain.nombre);
+			explain.mainterm_explain = $('#form_mainterm [id=term_explain]').val();
 			console.log(explain);
 
 			$.post("{{ path('client.explain.save.ajax') }}", explain)
