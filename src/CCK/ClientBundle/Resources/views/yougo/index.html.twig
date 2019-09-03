@@ -192,6 +192,7 @@
 					<th width="60px" class="text-left"></th>
 					<th width="60px" class="text-left"></th>
 					<th width="60px" class="text-left"></th>
+					<th width="20px" class="text-left"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -238,6 +239,13 @@
 						<div class="form-inline">
 							<div class="form-group">
 								<a href="{{ path('client.typesetting.download', {'curriculum': curriculum,'version':version,'type':'0','term_id':yougo.term_id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.csv'|trans }}</button></a>
+							</div>
+						</div>
+					</td>
+					<td width="20px">
+						<div class="form-inline">
+							<div class="form-group">
+								<a href="{{ path('client.yougo.copy', {'term_id': yougo.term_id}) }}"><button class="btn btn-link" name="id" value="{{ yougo.id }}" ><i class="fa fa-plus-square-o"></i></button></a>
 							</div>
 						</div>
 					</td>

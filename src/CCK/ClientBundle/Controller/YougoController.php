@@ -1649,6 +1649,212 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/copy/{term_id}", name="client.yougo.copy")
+	 * @Method("POST|GET")
+	 */
+	public function copyAction(Request $request, $term_id){
+		$session = $request->getSession();
+
+		// get user information
+		$user = $this->getUser();
+
+		$id = (int) $term_id;
+
+		$em = $this->getDoctrine()->getManager();
+
+		$entityMain = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+				'termId' => $id,
+				'deleteFlag' => false
+		));
+
+		if(!$entityMain){
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+
+		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($id);
+		$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($id);
+		$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($id);
+
+		// 用語データの複製
+		$newTermId = $this->copyMainTerm($em, $entityMain);
+		$this->copySubTerm($em, $entitySub, $newTermId);
+		$this->copySynTerm($em, $entitySyn, $newTermId);
+		$this->copyRefTerm($em, $entityRef, $newTermId);
+
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+
+		return $this->redirect($this->generateUrl('client.yougo.list'));
+	}
+
+	private function copyMainTerm($em, $entityMain){
+
+		$entityNewMain = new MainTerm();
+
+		// 用語IDの発番
+		$maxTermIDRec = $em->getRepository('CCKCommonBundle:MainTerm')->getNewTermID();
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			$newTermId = (int)$maxTermIDRec[0]['term_id'] + 1;
+
+			$entityNewMain->setTermId($newTermId);
+			$entityNewMain->setCurriculumId($entityMain->getCurriculumId());
+			$entityNewMain->setHeaderId($entityMain->getHeaderId());
+			$entityNewMain->setPrintOrder($entityMain->getPrintOrder());
+			$entityNewMain->setMainTerm($entityMain->getMainTerm());
+			$entityNewMain->setRedLetter($entityMain->getRedLetter());
+			$entityNewMain->setTextFrequency($entityMain->getTextFrequency());
+			$entityNewMain->setCenterFrequency($entityMain->getCenterFrequency());
+			$entityNewMain->setNewsExam($entityMain->getNewsExam());
+			$entityNewMain->setDelimiter($entityMain->getDelimiter());
+			$entityNewMain->setWesternLanguage($entityMain->getWesternLanguage());
+			$entityNewMain->setBirthYear($entityMain->getBirthYear());
+			$entityNewMain->setKana($entityMain->getKana());
+			$entityNewMain->setIndexAddLetter($entityMain->getIndexAddLetter());
+			$entityNewMain->setIndexKana($entityMain->getIndexKana());
+			$entityNewMain->setIndexOriginal($entityMain->getIndexOriginal());
+			$entityNewMain->setIndexOriginalKana($entityMain->getIndexOriginalKana());
+			$entityNewMain->setIndexAbbreviation($entityMain->getIndexAbbreviation());
+			$entityNewMain->setNombre($entityMain->getNombre());
+			$entityNewMain->setTermExplain($entityMain->getTermExplain());
+			$entityNewMain->setHandover($entityMain->getHandover());
+			$entityNewMain->setIllustFilename($entityMain->getIllustFilename());
+			$entityNewMain->setIllustCaption($entityMain->getIllustCaption());
+			$entityNewMain->setIllustKana($entityMain->getIllustKana());
+			$entityNewMain->setIllustNombre($entityMain->getIllustNombre());
+			$entityNewMain->setUserId($entityMain->getUserId());
+			$entityNewMain->setDeleteFlag(false);
+
+			$em->persist($entityNewMain);
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+		return $newTermId;
+	}
+
+	private function copySubTerm($em, $entitySub, $newTermId){
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			foreach($entitySub as $entitySubRec){
+				$entityNewSub = new SubTerm();
+
+				$entityNewSub->setMainTermId($newTermId);
+				$entityNewSub->setSubTerm($entitySubRec['sub_term']);
+				$entityNewSub->setRedLetter($entitySubRec['red_letter']);
+				$entityNewSub->setTextFrequency($entitySubRec['text_frequency']);
+				$entityNewSub->setCenterFrequency($entitySubRec['center_frequency']);
+				$entityNewSub->setNewsExam($entitySubRec['news_exam']);
+				$entityNewSub->setDelimiter($entitySubRec['delimiter']);
+				$entityNewSub->setKana($entitySubRec['kana']);
+				$entityNewSub->setDelimiterKana($entitySubRec['delimiter_kana']);
+				$entityNewSub->setIndexAddLetter($entitySubRec['index_add_letter']);
+				$entityNewSub->setIndexKana($entitySubRec['index_kana']);
+				$entityNewSub->setNombre($entitySubRec['nombre']);
+				$entityNewSub->setDeleteFlag(false);
+
+				$em->persist($entityNewSub);
+				$em->flush();
+			}
+
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	private function copySynTerm($em, $entitySyn, $newTermId){
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			foreach($entitySyn as $entitySynRec){
+				$entityNewSyn = new Synonym();
+
+				$entityNewSyn->setMainTermId($newTermId);
+				$entityNewSyn->setTerm($entitySynRec['term']);
+				$entityNewSyn->setRedLetter($entitySynRec['red_letter']);
+				$entityNewSyn->setSynonymId($entitySynRec['synonym_id']);
+				$entityNewSyn->setTextFrequency($entitySynRec['text_frequency']);
+				$entityNewSyn->setCenterFrequency($entitySynRec['center_frequency']);
+				$entityNewSyn->setNewsExam($entitySynRec['news_exam']);
+				$entityNewSyn->setDelimiter($entitySynRec['delimiter']);
+				$entityNewSyn->setIndexAddLetter($entitySynRec['index_add_letter']);
+				$entityNewSyn->setIndexKana($entitySynRec['index_kana']);
+				$entityNewSyn->setNombre($entitySynRec['nombre']);
+				$entityNewSyn->setDeleteFlag(false);
+
+				$em->persist($entityNewSyn);
+				$em->flush();
+			}
+
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	private function copyRefTerm($em, $entityRef, $newTermId){
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			foreach($entityRef as $entityRefRec){
+				$entityNewRef = new Refer();
+
+				$entityNewRef->setMainTermId($newTermId);
+				$entityNewRef->setReferTermId($entityRefRec['refer_term_id']);
+				$entityNewRef->setNombre($entityRefRec['nombre']);
+				$entityNewRef->setDeleteFlag(false);
+
+				$em->persist($entityNewRef);
+				$em->flush();
+			}
+
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	/**
 	 * @Route("/genko/yogotest", name="client.genko.yogotest")
 	 * @Method("POST|GET")
 	 * @Template()
