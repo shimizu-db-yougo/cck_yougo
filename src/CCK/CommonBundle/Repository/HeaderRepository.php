@@ -17,7 +17,7 @@ class HeaderRepository extends EntityRepository
 			$qb = $this->createQueryBuilder('c')
 			->select('c.name')
 			->addSelect('c.headerId')
-			->addSelect('c.hen id')
+			->addSelect('c.id')
 			->where('c.deleteFlag = :deleteFlag')
 			->andWhere('c.versionId = :version_id')
 			->addOrderBy('c.hen')
@@ -34,7 +34,7 @@ class HeaderRepository extends EntityRepository
 			$qb = $this->createQueryBuilder('c')
 			->select('c.name')
 			->select('c.headerId')
-			->addSelect('c.hen id')
+			->addSelect('c.id')
 			->where('c.deleteFlag = :deleteFlag')
 			->addOrderBy('c.hen')
 			->addOrderBy('c.sho')
@@ -234,7 +234,7 @@ class HeaderRepository extends EntityRepository
 		if($header_level > 4){
 			$sql .= " AND Header.ko = ".$ko;
 		}
-		
+
 		$sql .= "
 				AND Header.delete_flag = FALSE";
 
