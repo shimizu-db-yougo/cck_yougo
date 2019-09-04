@@ -665,6 +665,7 @@ class YougoController extends BaseController {
 				'deleteFlag' => FALSE
 		));
 
+
 		// 掲載順に表示する用語
 		$printOrderList = $em->getRepository('CCKCommonBundle:MainTerm')->getPrintOrderList();
 
@@ -1671,12 +1672,14 @@ class YougoController extends BaseController {
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
 
+		$entityExp = $em->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($id);
 		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($id);
 		$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($id);
 		$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($id);
 
 		// 用語データの複製
 		$newTermId = $this->copyMainTerm($em, $entityMain);
+		$this->copyExpTerm($em, $entityExp, $newTermId);
 		$this->copySubTerm($em, $entitySub, $newTermId);
 		$this->copySynTerm($em, $entitySyn, $newTermId);
 		$this->copyRefTerm($em, $entityRef, $newTermId);
@@ -1745,6 +1748,38 @@ class YougoController extends BaseController {
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
 		return $newTermId;
+	}
+
+	private function copyExpTerm($em, $entityExp, $newTermId){
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			foreach($entityExp as $entityExpRec){
+				$entityNewExp = new ExplainIndex();
+
+				$entityNewExp->setMainTermId($newTermId);
+				$entityNewExp->setIndexTerm($entityExpRec['indexTerm']);
+				$entityNewExp->setIndexAddLetter($entityExpRec['indexAddLetter']);
+				$entityNewExp->setIndexKana($entityExpRec['indexKana']);
+				$entityNewExp->setNombre($entityExpRec['nombre']);
+				$entityNewExp->setDeleteFlag(false);
+
+				$em->persist($entityNewExp);
+				$em->flush();
+			}
+
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
 	}
 
 	private function copySubTerm($em, $entitySub, $newTermId){
