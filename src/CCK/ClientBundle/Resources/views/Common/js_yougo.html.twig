@@ -303,7 +303,7 @@
 			$.post("{{ path('client.edit.save.ajax') }}", mainterm)
 			.done(function(r,s){
 				console.log('savePost:done',s,r);
-				window.location.href = "{{ path('client.yougo.list') }}";
+				window.location.href = "{{ path('client.yougo.index') }}";
 			})
 			.fail(function(e,s){
 				console.log('savePost:fail',s,e.status);
@@ -332,6 +332,9 @@
 			if($('#form_mainterm [name=term_explain]').val() == ""){
 				err_filed += '解説,';
 			}
+			if($('#form_mainterm [name=index_kana]').val() == ""){
+				err_filed += '主用語_索引用語読み,';
+			}
 			return err_filed;
 		}
 
@@ -339,12 +342,18 @@
 			if(elem.find('#sub_term').val() == ""){
 				err_filed += 'サブ用語,';
 			}
+			if(elem.find('#index_kana').val() == ""){
+				err_filed += 'サブ用語_索引用語読み,';
+			}
 			return err_filed;
 		}
 
 		function RequiredCheckSynTerm(elem,err_filed){
 			if(elem.find('#syn_term').val() == ""){
 				err_filed += '同対類用語,';
+			}
+			if(elem.find('#index_kana').val() == ""){
+				err_filed += '同対類用語_索引用語読み,';
 			}
 			return err_filed;
 		}
@@ -526,8 +535,6 @@
 			+'{% endfor %}'
 			+'</select></div></div></div>'
 			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-			+'<label class="col-sm-1" id="nombre">{{ "' + ((record) ? record.nombre : '') + '" }}</label>'
 			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-ref-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.refterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="ref_idx" name="ref_idx" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
