@@ -665,6 +665,12 @@ class YougoController extends BaseController {
 				'deleteFlag' => FALSE
 		));
 
+		if(empty($session->get(self::SES_SEARCH_VERSION_KEY))){
+			$ver = '0';
+		}else{
+			$ver = $session->get(self::SES_SEARCH_VERSION_KEY);
+		}
+		$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getHenMidashi($ver);
 
 		// 掲載順に表示する用語
 		$printOrderList = $em->getRepository('CCKCommonBundle:MainTerm')->getPrintOrderList();
@@ -677,7 +683,7 @@ class YougoController extends BaseController {
 				'yougo_ref' => $entityRef,
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
-				'hen_list' => array(),
+				'hen_list' => $hen_list,
 				'sho_list' => array(),
 				'dai_list' => array(),
 				'chu_list' => array(),
