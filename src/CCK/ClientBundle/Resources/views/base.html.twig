@@ -467,6 +467,12 @@
 						}
 					});
 				});
+
+				$('[name="ver"]').bind('change', function(){
+					var ver = $(this).val();
+					var cur = $('[name="cur"]').val();
+					window.location.href = "{{ path('client.yougo.index') }}" + "?curriculum=" + cur + "&version=" + ver;
+				});
 			});
 		</script>
 
