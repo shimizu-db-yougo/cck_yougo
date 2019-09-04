@@ -736,25 +736,25 @@
 			});
 
 			// 指矢印用語　見出しイベント設定
-			$(document).on("click", ".js-hen4", function (e) {
+			$(document).on("change", ".js-hen4", function (e) {
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
 				changeHenHeader($(e.currentTarget),'ref_sho'+term_id,'ref_dai'+term_id,'ref_chu'+term_id,'ref_ko'+term_id,'ref_term'+term_id);
 			});
 
-			$(document).on("click", ".js-sho4", function (e) {
+			$(document).on("change", ".js-sho4", function (e) {
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
 				changeShoHeader($(e.currentTarget),'ref_hen'+term_id,'ref_dai'+term_id,'ref_chu'+term_id,'ref_ko'+term_id,'ref_term'+term_id);
 			});
 
-			$(document).on("click", ".js-dai4", function (e) {
+			$(document).on("change", ".js-dai4", function (e) {
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
 				changeDaiHeader($(e.currentTarget),'ref_hen'+term_id,'ref_sho'+term_id,'ref_chu'+term_id,'ref_ko'+term_id,'ref_term'+term_id);
 			});
 
-			$(document).on("click", ".js-chu4", function (e) {
+			$(document).on("change", ".js-chu4", function (e) {
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
 				changeChuHeader($(e.currentTarget),'ref_hen'+term_id,'ref_sho'+term_id,'ref_dai'+term_id,'ref_ko'+term_id,'ref_term'+term_id);
