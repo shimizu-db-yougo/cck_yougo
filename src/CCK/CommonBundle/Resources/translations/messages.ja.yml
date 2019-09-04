@@ -236,8 +236,79 @@ icon:
     nashi: 無
 
 csv:
-    genko:
-        format: フォーマット区分
+    term:
+        cur_id: 教科ID
+        cur_name: 教科
+        ver_id: 版ID
+        var_name: 教科
+        hen: 編見出し
+        sho: 章見出し
+        dai: 大見出し
+        chu: 中見出し
+        ko: 小見出し
+        header_position: 見出し位置
+        id: ID
+        term_id: 用語ID
+        header_id: 見出しID
+        print_order: 掲載順
+        main_term: 主用語
+        red_letter: 主用語_赤文字
+        text_frequency: 主用語_教科書頻度
+        center_frequency: 主用語_センター頻度
+        news_exam: 主用語_検定出題
+        kana: 主用語_読み仮名
+        index_kana: 主用語_さくいん用語読み仮名
+        index_add_letter: 主用語_さくいん時追加文字
+        index_original: 原典資料さくいん
+        index_original_kana: 原典資料さくいんよみ
+        index_abbreviation: 欧文略語さくいん
+        modify_date: 
+        delimiter: 主用語_区切り文字
+        western_language: 主用語_欧文
+        birth_year: 主用語_年月日
+        nombre: 主用語_ノンブル
+        illust_filename: 図版ファイル名
+        illust_caption: 図版キャプション
+        illust_kana: 図版キャプション読み仮名
+        illust_nombre: 図版キャプションノンブル
+        handover: 組版処理コメント
+        term_explain: 主用語_解説
+        exp_term: 主用語_解説内さくいん用語
+        exp_index_kana: 解説内用語_さくいん読み仮名
+        exp_index_add_letter: 解説内用語_さくいん時追加文字
+        exp_nombre: 解説内用語_ノンブル
+        sub_id: サブ用語ID
+        sub_term: サブ用語
+        sub_red_letter: サブ用語_赤文字
+        sub_kana: サブ用語_読み仮名
+        sub_text_frequency: サブ用語_教科書頻度
+        sub_center_frequency: サブ用語_センター頻度
+        sub_news_exam: サブ用語_検定出題
+        sub_delimiter: サブ用語_区切り文字
+        sub_delimiter_kana: サブ用語_読み区切り文字
+        sub_index_add_letter: サブ用語_さくいん時追加文字
+        sub_index_kana: サブ用語_さくいん用語読み仮名
+        sub_nombre: サブ用語_ノンブル
+        syn_id: 同対類用語ID
+        syn_synonym_id: 同対類用語_アイコン
+        syn_term: 同対類用語
+        syn_red_letter: 同対類用語_赤文字
+        syn_kana: 同対類用語_読み仮名
+        syn_text_frequency: 同対類用語_教科書頻度
+        syn_center_frequency: 同対類用語_センター頻度
+        syn_news_exam: 同対類用語_検定出題
+        syn_delimiter: 同対類用語_区切り文字
+        syn_index_add_letter: 同対類用語_さくいん時追加文字
+        syn_index_kana: 同対類用語_さくいん用語読み仮名
+        syn_nombre: 同対類用語_ノンブル
+        ref_hen: 指矢印_編見出し
+        ref_sho: 指矢印_章見出し
+        ref_dai: 指矢印_大見出し
+        ref_chu: 指矢印_中見出し
+        ref_ko: 指矢印_小見出し
+        ref_refer_term_id: 指矢印参照先ID
+        ref_main_term: 指矢印_用語
+        ref_nombre: 指矢印_ノンブル
 
 error:
     information: 入力した情報をもう一度確認してください。

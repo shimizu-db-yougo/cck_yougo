@@ -43,8 +43,8 @@ class DownloadController extends BaseController {
 			'kana',
 			'index_add_letter',
 			'index_kana',
-			'index_original',
 			'index_original_kana',
+			'index_original',
 			'index_abbreviation',
 			'nombre',
 			'term_explain',
@@ -98,10 +98,10 @@ class DownloadController extends BaseController {
 	public function indexAction(Request $request) {
 		// session
 		$session = $request->getSession();
-	
+
 		// get user information
 		$user = $this->getUser();
-	
+
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE
 		));
@@ -125,7 +125,7 @@ class DownloadController extends BaseController {
 					'deleteFlag' => FALSE
 			));
 		}
-	
+
 		return array(
 				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
 				'cur_list' => $cur_list,
@@ -134,7 +134,7 @@ class DownloadController extends BaseController {
 				'sho_list' => $sho_list,
 		);
 	}
-	
+
 	/**
 	 * @Route("/typesetting/download", name="client.typesetting.download")
 	 * @Method("POST|GET")
@@ -195,8 +195,10 @@ class DownloadController extends BaseController {
 		print("sho:".$sho);
 		print("term_id:".$term_id);
 		exit();*/
-		
+
 		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($versionId,$term_id,$hen,$sho);
+
+		$header = $this->encoding($this->generateHeader($entity[0]), $request);
 
 		// 原稿データCSV生成
 		if($entity){
@@ -211,8 +213,9 @@ class DownloadController extends BaseController {
 		}
 
 		// response
-		$response = new StreamedResponse(function() use($body_list) {
+		$response = new StreamedResponse(function() use($body_list,$header) {
 			$handle = fopen('php://output', 'w+');
+			fputcsv($handle, $header, '	');
 
 			foreach ($body_list as $value) {
 				$value = str_replace("\n", chr(10), $value);
@@ -270,7 +273,7 @@ class DownloadController extends BaseController {
 		$em = $this->getDoctrine()->getManager();
 
 		$type = $request->query->get('type');
-		
+
 		$body_list = [];
 		foreach($entity as $mainTermRec){
 
@@ -292,84 +295,72 @@ class DownloadController extends BaseController {
 	 * @param  array $header
 	 * @return array $trans
 	 */
-	private function generateHeader($header_base, $header_content, $kikaku_id, $page){
+	private function generateHeader($header_main){
 		// trans service
 		$translator = $this->get('translator');
 
-		// データを一つにまとめないといけないものは別で作業する
-		// それ以外は翻訳する
 		$result = [];
-		// 基本情報
-		foreach ($header_base as $key => $value) {
-			$result[$key] = $translator->trans('csv.genko.' . $key);
+		// 主用語
+		foreach ($header_main as $key => $value) {
+			$result[$key] = $translator->trans('csv.term.' . $key);
 		}
 
-		// 本文情報
-		foreach ($header_content as $key => $value) {
-			$result[$key] = $translator->trans('csv.genko.' . $key);
-		}
+		$result['hen'] = $translator->trans('csv.term.hen');
+		$result['sho'] = $translator->trans('csv.term.sho');
+		$result['dai'] = $translator->trans('csv.term.dai');
+		$result['chu'] = $translator->trans('csv.term.chu');
+		$result['ko'] = $translator->trans('csv.term.ko');
+		$result['header_position'] = $translator->trans('csv.term.header_position');
 
-		//TODO:台割情報　要検討
-		$result['lr'] = $translator->trans('csv.genko.lr');
-		$result['master_page'] = $translator->trans('csv.genko.master_page');
-		// 診療科目などはデータを結合しないといけないので別で生成する
-		$result['shinryo_kamoku'] = $translator->trans('csv.genko.shinryo_kamoku');
-		$result['shinryo_naiyo'] = $translator->trans('csv.genko.shinryo_naiyo');
+		// 解説内索引用語
+		$result['exp_term'] = $translator->trans('csv.term.exp_term');
+		$result['exp_index_kana'] = $translator->trans('csv.term.exp_index_kana');
+		$result['exp_index_add_letter'] = $translator->trans('csv.term.exp_index_add_letter');
+		$result['exp_nombre'] = $translator->trans('csv.term.exp_nombre');
 
-		for($idx=1;$idx<=4;$idx++){
-			$result['doctor_name' . $idx] = $translator->trans('csv.genko.doctor_name' . $idx);
-			$result['doctor_post' . $idx] = $translator->trans('csv.genko.doctor_post' . $idx);
-			$result['doctor_roma' . $idx] = $translator->trans('csv.genko.doctor_roma' . $idx);
-		}
+		// サブ用語
+		$result['sub_id'] = $translator->trans('csv.term.sub_id');
+		$result['sub_term'] = $translator->trans('csv.term.sub_term');
+		$result['sub_red_letter'] = $translator->trans('csv.term.sub_red_letter');
+		$result['sub_kana'] = $translator->trans('csv.term.sub_kana');
+		$result['sub_text_frequency'] = $translator->trans('csv.term.sub_text_frequency');
+		$result['sub_center_frequency'] = $translator->trans('csv.term.sub_center_frequency');
+		$result['sub_news_exam'] = $translator->trans('csv.term.sub_news_exam');
+		$result['sub_delimiter'] = $translator->trans('csv.term.sub_delimiter');
+		$result['sub_delimiter_kana'] = $translator->trans('csv.term.sub_delimiter_kana');
+		$result['sub_index_add_letter'] = $translator->trans('csv.term.sub_index_add_letter');
+		$result['sub_index_kana'] = $translator->trans('csv.term.sub_index_kana');
+		$result['sub_nombre'] = $translator->trans('csv.term.sub_nombre');
 
-		$result['telno'] = $translator->trans('csv.genko.telno');
-		$result['adress'] = $translator->trans('csv.genko.adress');
-		$result['parking'] = $translator->trans('csv.genko.parking');
-		$result['kyushinbi'] = $translator->trans('csv.genko.kyushinbi');
+		// 同対類用語
+		$result['syn_id'] = $translator->trans('csv.term.syn_id');
+		$result['syn_synonym_id'] = $translator->trans('csv.term.syn_synonym_id');
+		$result['syn_term'] = $translator->trans('csv.term.syn_term');
+		$result['syn_red_letter'] = $translator->trans('csv.term.syn_red_letter');
+		$result['syn_kana'] = $translator->trans('csv.term.syn_kana');
+		$result['syn_text_frequency'] = $translator->trans('csv.term.syn_text_frequency');
+		$result['syn_center_frequency'] = $translator->trans('csv.term.syn_center_frequency');
+		$result['syn_news_exam'] = $translator->trans('csv.term.syn_news_exam');
+		$result['syn_delimiter'] = $translator->trans('csv.term.syn_delimiter');
+		$result['syn_index_add_letter'] = $translator->trans('csv.term.syn_index_add_letter');
+		$result['syn_index_kana'] = $translator->trans('csv.term.syn_index_kana');
+		$result['syn_nombre'] = $translator->trans('csv.term.syn_nombre');
 
-		for($idx=1;$idx<=3;$idx++){
-			$result['shinryo_jikan' . $idx] = $translator->trans('csv.genko.shinryo_jikan' . $idx);
-			foreach ($this->dayOfWeek as $youbi){
-				$result['shinryo_jikan' . '_' . $youbi . $idx] = $translator->trans('csv.genko.shinryo_jikancsv.genko.' . $youbi . $idx);
-			}
-		}
-
-		for($idx=1;$idx<=7;$idx++){
-			$result['icon' . $idx] = $translator->trans('csv.genko.icon' . $idx);
-		}
-
-		$result['image_main'] = $translator->trans('csv.genko.image_main');
-		$result['image_data'] = $translator->trans('csv.genko.image_data');
-
-		$result['honmon_text'] = $translator->trans('csv.genko.honmon_text');
-		$result['station'] = $translator->trans('csv.genko.station');
-
-		$result['map'] = $translator->trans('csv.genko.map');
-		$result['link'] = $translator->trans('csv.genko.link');
-		$result['han'] = $translator->trans('csv.genko.han');
-		$result['year'] = $translator->trans('csv.genko.year');
-
-		// 企画、ページ数に応じて出力項目を変える
-		if($kikaku_id == 'kikaku.area'){
-			if($page == '2'){
-				$kikaku_page = 1;
-			}else{
-				$kikaku_page = 2;
-			}
-		}else{
-			if($page == '2'){
-				$kikaku_page = 3;
-			}else{
-				$kikaku_page = 4;
-			}
-		}
+		// 指矢印用語
+		$result['ref_hen'] = $translator->trans('csv.term.ref_hen');
+		$result['ref_sho'] = $translator->trans('csv.term.ref_sho');
+		$result['ref_dai'] = $translator->trans('csv.term.ref_dai');
+		$result['ref_chu'] = $translator->trans('csv.term.ref_chu');
+		$result['ref_ko'] = $translator->trans('csv.term.ref_ko');
+		$result['ref_refer_term_id'] = $translator->trans('csv.term.ref_refer_term_id');
+		$result['ref_main_term'] = $translator->trans('csv.term.ref_main_term');
+		$result['ref_nombre'] = $translator->trans('csv.term.ref_nombre');
 
 		// 順番を決める
 		$trans = [];
-		foreach($this->area_featureCsvHeaderSorting as $sort){
-			if(!isset($result[$sort[0]])) continue;
-			if($sort[$kikaku_page] == false) continue;
-			$trans[] = $result[$sort[0]];
+		foreach($this->termCsvHeaderSorting as $sort){
+			if(!isset($result[$sort])) continue;
+			$trans[] = $result[$sort];
 		}
 
 		return $trans;
@@ -390,8 +381,9 @@ class DownloadController extends BaseController {
 
 		// 主用語
 		$this->replaceMainField($main);
-		
+
 		$main['nombre'] = (($type == '1') ? $main['nombre'] : '');
+		$main['illust_nombre'] = (($type == '1') ? $main['illust_nombre'] : '');
 
 		// 解説内索引用語
 		$exp = [];
@@ -404,7 +396,7 @@ class DownloadController extends BaseController {
 		if($expterm){
 			foreach ($expterm as $exptermRec) {
 				$exptermRec['id'] = 'K'.str_pad($exptermRec['id'], 5, 0, STR_PAD_LEFT);
-				
+
 				$exp['exp_term_id'] .= $exptermRec['id'] . '\v';
 				$exp['exp_term'] .= $exptermRec['indexTerm'] . '\v';
 				$exp['exp_index_kana'] .= $exptermRec['indexKana'] . '\v';
@@ -415,7 +407,7 @@ class DownloadController extends BaseController {
 				$exp[$key] = mb_substr($val,0,mb_strlen($val)-2);
 			}
 		}
-		
+
 		// サブ用語
 		$sub = [];
 		$sub['sub_id'] = "";
@@ -562,7 +554,7 @@ class DownloadController extends BaseController {
 		if($main['center_frequency'] == 0){
 			$main['center_frequency'] = '';
 		}
-		
+
 		if($main['news_exam'] == '1'){
 			$main['news_exam'] = 'N';
 		}else{
@@ -608,7 +600,7 @@ class DownloadController extends BaseController {
 		if($sub['center_frequency'] == 0){
 			$sub['center_frequency'] = '';
 		}
-		
+
 		if($sub['news_exam'] == '1'){
 			$sub['news_exam'] = 'N';
 		}else{
@@ -676,11 +668,11 @@ class DownloadController extends BaseController {
 		}else{
 			$syn['text_frequency'] = '';
 		}
-		
+
 		if($syn['center_frequency'] == 0){
 			$syn['center_frequency'] = '';
 		}
-		
+
 		if($syn['news_exam'] == '1'){
 			$syn['news_exam'] = 'N';
 		}else{
