@@ -88,6 +88,12 @@ class YougoController extends BaseController {
 		}
 
 		// 版
+		if($curriculum == '0'){
+			// 検索条件のクリアボタン押下時に
+			// ・版IDのsessionが残る事
+			// ・版プルダウンがdisabledで値が送信されない事により版IDだけで検索される状態を避ける
+			$session->remove(self::SES_SEARCH_VERSION_KEY);
+		}
 		if($request->query->has('version')){
 			$version = $request->query->get('version');
 		}else{
