@@ -86,7 +86,7 @@
 									</select>
 								</div>
 								<div class="col-sm-2">
-									<select class="form-control js-han2 input-sm" name="version" disabled>
+									<select class="form-control js-han2 input-sm" name="version2" disabled>
 										<option value="0">--------------</option>
 										{% for ver in ver_list %}
 											<option value="{{ ver.id }}">{{ ver.name }}</option>
@@ -106,6 +106,75 @@
 	</div>
 </div>
 </form>
+<hr>
+
+<div class="row">
+<blockquote class="blockquote-bottom pdr-0">
+	<p>{{ 'text.csv.export.field.title'|trans|raw }}</p>
+</blockquote>
+</div>
+
+<form class="form-horizontal" method="GET">
+	<div class="row">
+		<div class="form-group">
+			<div class="col-lg-12">
+				<div class="col-sm-2">
+					<select class="form-control js-cur3 input-sm" name="curriculum" id="curriculum">
+						<option value="0">--------------</option>
+						{% for cur in cur_list %}
+							<option value="{{ cur.id }}">{{ cur.name }}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="col-sm-2">
+					<select class="form-control js-han3 input-sm" name="version3" id="version" disabled>
+						<option value="0">--------------</option>
+						{% for ver in ver_list %}
+							<option value="{{ ver.id }}">{{ ver.name }}</option>
+						{% endfor %}
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-lg-12">
+				<div class="col-lg-6">
+					<table class="table table-responsive">
+						<tr>
+							<td>
+								<select class="form-control" name="s1" size="5" multiple="multiple">
+									{% for key,val in field_list %}
+										<option value="{{ key }}">{{ val }}</option>
+									{% endfor %}
+								</select>
+							</td>
+							<td>
+								<input class="form-control" type="button" name="right" value="≫" /><br /><br />
+								<input class="form-control" type="button" name="left" value="≪" />
+							</td>
+							<td>
+								<div id="formarea">
+									<select class="form-control" name="s2" size="5" multiple="multiple" onchange="buttonStyle(this,'')" id="SEL">
+									</select>
+								</div>
+								</p><p>
+								<input type="button" value="上に" id="UPBUTTON" disabled onclick="optionMove(-1,'')">
+								<input type="button" value="下に" id="DOWNBUTTON" disabled onclick="optionMove(1,'')">
+								<button class="btn btn-primary button_text_align input-sm js-generic-submit" type="button">{{ 'btn.download'|trans }}</button>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<div class="text-center">
+			<button type="button" class="btn btn-primary js-generic-submit">{{ 'btn.submit'|trans }}</button>
+		</div>
+	</div>
+</form>
+
 {% endblock %}
 
 {% block javascripts %}
@@ -125,8 +194,75 @@
 		});
 
 		$('.js-cur2').bind('change', function(){
-			changeCurriculumHeader($('.js-cur2'));
+			changeCurriculumHeader($('.js-cur2'),'version2');
 		});
+
+		$('.js-cur3').bind('change', function(){
+			changeCurriculumHeader($('.js-cur3'),'version3');
+		});
+	});
+
+	$(document).ready(function() {
+	    $('input[name=right]').on('click', function() {
+	        move('s1', 's2');
+	    });
+
+	    $('input[name=left]').on('click', function() {
+	        move('s2', 's1');
+	    });
+
+	    var move = function(_this, target) {
+	        $('select[name=' + _this + '] option:selected').each(function() {
+	            $('select[name=' + target + ']').append($(this).clone());
+	            $(this).remove();
+	        });
+	    };
+	});
+
+	function buttonStyle(O,idx){
+		var UpButton = document.getElementById('UPBUTTON'+idx);
+		var DownButton = document.getElementById('DOWNBUTTON'+idx);
+		for(var i=0;i<O.options.length;i++){
+			if(O.options[i].selected){
+			if(i!=0) UpButton.disabled = false;
+			else UpButton.disabled = true;
+			if(i!=(O.options.length-1)) DownButton.disabled = false;
+			else DownButton.disabled = true;
+			}
+		}
+	}
+	function optionMove(MODE,idx) {
+		var O = document.getElementById('SEL'+idx);
+		for(var i=0;i<O.options.length;i++)
+		if(O.options[i].selected) break;
+		var tmpOption = O.removeChild(O.options[i]);
+		O.insertBefore(tmpOption,O.options[i+MODE])
+
+		buttonStyle(O,idx);
+	}
+
+	$('.js-generic-submit').bind('click', function(e){
+
+		var generic_field = [];
+		var generic_value = [];
+		var dwlist = document.getElementById('SEL');
+		for(var i=0;i<dwlist.options.length;i++){
+			generic_field.push(dwlist.options[i].text);
+			generic_value.push(dwlist.options[i].value);
+		}
+
+		var str_html = "<input type='hidden' name='curriculum' value='" + document.getElementById('curriculum').value + "'>";
+		str_html += "<input type='hidden' name='version' value='" + document.getElementById('version').value + "'>";
+		str_html += "<input type='hidden' name='type' value='2'>";
+		str_html += "<input type='hidden' name='generic_field' value='" + generic_field + "'><input type='hidden' name='generic_value' value='" + generic_value + "'>";
+
+		// create form
+		$('<form>', {
+			"id": "areaForm",
+			"html":  str_html,
+			"action": "{{ path('client.typesetting.download') }}",
+			"method": "GET"
+		}).appendTo(document.body).submit();
 	});
 
 	</script>

@@ -108,30 +108,19 @@ class DownloadController extends BaseController {
 		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
 				'deleteFlag' => FALSE
 		));
-		$hen_list = array();
-		if(isset($version)){
-			$hen_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-					'versionId' => $version,
-					'headerId' => '1',
-					'deleteFlag' => FALSE
-			));
-		}
-		$sho_list = array();
-		if((isset($version))&&(isset($hen))){
-			$sho_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
-					'versionId' => $version,
-					'hen' => $hen,
-					'headerId' => '2',
-					'deleteFlag' => FALSE
-			));
-		}
+
+		$em = $this->getDoctrine()->getManager();
+		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList('','','','','0');
+		$header = $this->generateHeader($entity[0]);
+
 
 		return array(
 				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
-				'hen_list' => $hen_list,
-				'sho_list' => $sho_list,
+				'hen_list' => array(),
+				'sho_list' => array(),
+				'field_list' => $header,
 		);
 	}
 
@@ -148,6 +137,7 @@ class DownloadController extends BaseController {
 		}
 
 		$em = $this->getDoctrine()->getManager();
+
 		// 教科名の取得
 		$curriculumId = $request->query->get('curriculum');
 		$versionId = $request->query->get('version');
@@ -163,8 +153,10 @@ class DownloadController extends BaseController {
 		$type = $request->query->get('type');
 		if($type == '0'){
 			$type_name = '本文';
-		}else{
+		}elseif($type == '1'){
 			$type_name = '索引';
+		}else{
+			$type_name = 'preset';
 		}
 
 		// 見出しID(編、章)
@@ -182,7 +174,14 @@ class DownloadController extends BaseController {
 
 		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($versionId,$term_id,$hen,$sho,$type);
 
-		$header = $this->encoding($this->generateHeader($entity[0]), $request);
+		// ヘッダー
+		if($type == '2'){
+			// 汎用CSV
+			$header = $this->encoding(explode(",", $request->query->get('generic_field')), $request);
+		}else{
+			// 本文・索引組版
+			$header = $this->encoding($this->generateHeader($entity[0]), $request);
+		}
 
 		// 原稿データCSV生成
 		if($entity){
@@ -239,6 +238,7 @@ class DownloadController extends BaseController {
 		$em = $this->getDoctrine()->getManager();
 
 		$type = $request->query->get('type');
+		$generic_value = explode(",", $request->query->get('generic_value'));
 
 		$body_list = [];
 		foreach($entity as $mainTermRec){
@@ -249,7 +249,7 @@ class DownloadController extends BaseController {
 			$entity_ref = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($mainTermRec['term_id']);
 
 			// body
-			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref, $type), $request);
+			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref, $type, $generic_value), $request);
 			array_push($body_list,$body);
 		}
 
@@ -326,7 +326,7 @@ class DownloadController extends BaseController {
 		$trans = [];
 		foreach($this->termCsvHeaderSorting as $sort){
 			if(!isset($result[$sort])) continue;
-			$trans[] = $result[$sort];
+			$trans[$sort] = $result[$sort];
 		}
 
 		return $trans;
@@ -336,7 +336,7 @@ class DownloadController extends BaseController {
 	 * @param  array $coupons
 	 * @return array $body
 	 */
-	private function generateBody($main, $expterm, $subterm, $synterm, $refterm, $type){
+	private function generateBody($main, $expterm, $subterm, $synterm, $refterm, $type, $generic){
 		$body = [];
 		$result = [];
 
@@ -481,8 +481,16 @@ class DownloadController extends BaseController {
 		$result = array_merge($main,$exp,$sub,$syn,$ref);
 
 		// 順番を決める
+		if($type == '2'){
+			// 汎用
+			$field_list = $generic;
+		}else{
+			// 本文・索引組版
+			$field_list = $this->termCsvHeaderSorting;
+		}
+
 		$trans = [];
-		foreach($this->termCsvHeaderSorting as $sort){
+		foreach($field_list as $sort){
 			if(!array_key_exists($sort, $result)) continue;
 			$trans[] = trim($result[$sort]);
 		}

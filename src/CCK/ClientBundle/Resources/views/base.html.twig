@@ -126,7 +126,7 @@
 				$(target).empty().append(options);
 			}
 
-			function changeCurriculumHeader(e){
+			function changeCurriculumHeader(e,version='version'){
 				var selected_ver = e.val();
 				var data = {
 						'cur': selected_ver
@@ -137,17 +137,17 @@
 					method: 'POST',
 					success: function(response){
 						var options = generateOptions(response);
-						injectOption('[name="version"]', options);
+						injectOption('[name="' + version + '"]', options);
 					},
 					error: function(response){
 					}
 				});
 
 				if(selected_ver == '0'){
-					$('[name="version"]').val('0');
-					$('[name="version"]').prop("disabled", true);
+					$('[name="' + version + '"]').val('0');
+					$('[name="' + version + '"]').prop("disabled", true);
 				}else{
-					$('[name="version"]').prop("disabled", false);
+					$('[name="' + version + '"]').prop("disabled", false);
 				}
 			}
 

@@ -143,6 +143,7 @@ text:
         title: CSV出力
         honmon: 本文組版
         index: 索引組版
+        field.title: フィールド選択出力
     csv.import:
         title: データ取り込み
     csv.import:
