@@ -240,6 +240,8 @@ class MainTermRepository extends EntityRepository
 			$sql .= " AND MainTerm.term_id = " . $term_id;
 		}
 
+		$sql .= " ORDER BY MainTerm.term_id";
+
 		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
 
 		return $result[0];
@@ -248,7 +250,7 @@ class MainTermRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
-	public function getMainTermList($cur_id,$term_id,$hen,$sho){
+	public function getMainTermList($cur_id,$term_id,$hen,$sho,$type){
 		$sql = "
 			SELECT
 				Curriculum.id cur_id,
@@ -314,6 +316,15 @@ class MainTermRepository extends EntityRepository
 			$sql .= " AND Header.sho = '" . str_replace("'", "''", $sho) . "'";
 		}
 
+		if($type == '0'){
+			// 本文
+			$sql .= " ORDER BY Header.hen,Header.sho,Header.dai,Header.chu,Header.ko,MainTerm.print_order,MainTerm.term_id";
+		}else{
+			// 索引
+			$sql .= " ORDER BY MainTerm.index_kana,MainTerm.term_id";
+		}
+
+
 		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
 
 		return $result;
@@ -322,7 +333,7 @@ class MainTermRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
-	public function getYougoDetailOfSubterm($term_id,$is_getId=false){
+	public function getYougoDetailOfSubterm($term_id,$is_getId=false,$is_index='0'){
 		$sql = "
 			SELECT
 				SubTerm.id,
@@ -352,6 +363,13 @@ class MainTermRepository extends EntityRepository
 			}
 		}
 
+		if($is_index == '0'){
+			$sql .= " ORDER BY SubTerm.id";
+		}else{
+			// 索引
+			$sql .= " ORDER BY SubTerm.index_kana,SubTerm.id";
+		}
+
 		$result_sub = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
 
 		return $result_sub;
@@ -360,7 +378,7 @@ class MainTermRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
-	public function getYougoDetailOfSynonym($term_id,$is_getId=false){
+	public function getYougoDetailOfSynonym($term_id,$is_getId=false,$is_index='0'){
 		$sql = "
 			SELECT
 				Synonym.id,
@@ -386,6 +404,13 @@ class MainTermRepository extends EntityRepository
 			if($term_id){
 				$sql .= " AND Synonym.main_term_id = " . $term_id;
 			}
+		}
+
+		if($is_index == '0'){
+			$sql .= " ORDER BY Synonym.id";
+		}else{
+			// 索引
+			$sql .= " ORDER BY Synonym.index_kana,Synonym.id";
 		}
 
 		$result_syn = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
@@ -429,6 +454,8 @@ class MainTermRepository extends EntityRepository
 		if($term_id){
 			$sql .= " AND Refer.main_term_id = " . $term_id;
 		}
+
+		$sql .= " ORDER BY Refer.id";
 
 		$result_ref = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
 

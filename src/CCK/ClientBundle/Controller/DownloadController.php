@@ -180,7 +180,7 @@ class DownloadController extends BaseController {
 		$path = $this->container->getParameter('archive')['dir_path'];
 		$webpath = $request->getSchemeAndHttpHost() . '/' . $this->container->getParameter('archive')['link'];
 
-		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($versionId,$term_id,$hen,$sho);
+		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($versionId,$term_id,$hen,$sho,$type);
 
 		$header = $this->encoding($this->generateHeader($entity[0]), $request);
 
@@ -244,8 +244,8 @@ class DownloadController extends BaseController {
 		foreach($entity as $mainTermRec){
 
 			$entity_exp = $em->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($mainTermRec['term_id']);
-			$entity_sub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($mainTermRec['term_id']);
-			$entity_syn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($mainTermRec['term_id']);
+			$entity_sub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($mainTermRec['term_id'],false,$type);
+			$entity_syn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($mainTermRec['term_id'],false,$type);
 			$entity_ref = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($mainTermRec['term_id']);
 
 			// body

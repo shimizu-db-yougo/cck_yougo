@@ -21,6 +21,7 @@ class ExplainIndexRepository extends EntityRepository
 		->addSelect('c.nombre')
 		->where('c.deleteFlag = :deleteFlag')
 		->andWhere('c.mainTermId = :term_id')
+		->addOrderBy('c.indexKana')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'term_id' => $term_id
