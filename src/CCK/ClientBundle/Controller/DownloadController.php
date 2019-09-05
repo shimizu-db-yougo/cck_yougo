@@ -114,6 +114,11 @@ class DownloadController extends BaseController {
 		$header = $this->generateHeader($entity[0]);
 
 
+		$preset = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CSVPreset')->findBy(array(
+				'user_id' => $this->getUser()->getUserId(),
+				'deleteFlag' => FALSE
+		));
+
 		return array(
 				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
 				'cur_list' => $cur_list,
@@ -121,6 +126,7 @@ class DownloadController extends BaseController {
 				'hen_list' => array(),
 				'sho_list' => array(),
 				'field_list' => $header,
+				'preset_list' => $preset,
 		);
 	}
 
@@ -741,4 +747,49 @@ class DownloadController extends BaseController {
 
 	}
 
+	/**
+	 * @Route("/csv/preset/update", name="client.csv.preset.update")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:download:index.html.twig")
+	 */
+	public function updatePresetAction(Request $request){
+		$session = $request->getSession();
+		if(!$request->request->has('id')){
+			return $this->redirect($this->generateUrl('client.master.header'));
+		}
+
+		$version = $request->request->get('version');
+		$id = (int) $request->request->get('id');
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findOneBy(array(
+				'id' =>$id,
+				'deleteFlag' => FALSE
+		));
+		if(!$entity){
+			return $this->redirect($this->generateUrl('client.master.header.list', array('version' => $version)));
+		}
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			if($request->request->has('header_name')){
+				$entity->setName($request->request->get('header_name'));
+			}
+
+			$em->flush();
+			$em->getConnection()->commit();
+
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		}
+
+		return $this->redirect($this->generateUrl('client.master.header.list', array('version' => $version)));
+	}
 }

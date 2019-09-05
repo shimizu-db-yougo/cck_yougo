@@ -53,6 +53,7 @@ btn:
         up10: 10件上に
         down10: 10件下に
     sort.text: ソート
+    preset: プリセット
 
 # ソーティング
 sort:
@@ -222,6 +223,8 @@ text:
     header:
         name: 見出し名前
         level: 見出し種類
+    preset:
+        name: プリセット名
         
 delimiter:
     nashi: なし

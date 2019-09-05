@@ -134,6 +134,17 @@
 						{% endfor %}
 					</select>
 				</div>
+				<div class="col-sm-1">
+					{{ 'text.preset.name'|trans }}
+				</div>
+				<div class="col-sm-2">
+					<select class="form-control js-preset input-sm" name="preset" id="preset">
+						<option value="0">--------------</option>
+						{% for preset in preset_list %}
+							<option value="{{ preset.id }}" id="{{ preset.fieldName }}">{{ preset.presetName }}</option>
+						{% endfor %}
+					</select>
+				</div>
 			</div>
 		</div>
 		<div class="form-group">
@@ -161,6 +172,7 @@
 								<input type="button" value="上に" id="UPBUTTON" disabled onclick="optionMove(-1,'')">
 								<input type="button" value="下に" id="DOWNBUTTON" disabled onclick="optionMove(1,'')">
 								<button class="btn btn-primary button_text_align input-sm js-generic-submit" type="button">{{ 'btn.download'|trans }}</button>
+								<button class="btn btn-primary button_text_align input-sm js-preset-target" type="button" preset-target="#headerModal">{{ 'btn.preset'|trans }}</button>
 							</td>
 						</tr>
 					</table>
@@ -174,6 +186,33 @@
 		</div>
 	</div>
 </form>
+
+<div class="modal fade" id="presetModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog header-modal" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				プリセット名の登録
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-sm-12">
+						<label class="col-sm-2">{{ 'text.preset.name'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="name-err" class="name-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="preset_name" name="preset_name" >
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-danger js-preset-submit">{{ 'btn.yes'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 {% endblock %}
 
@@ -199,6 +238,10 @@
 
 		$('.js-cur3').bind('change', function(){
 			changeCurriculumHeader($('.js-cur3'),'version3');
+		});
+
+		$('.js-preset').bind('change', function(){
+			console.log($(this).prop("id"));
 		});
 	});
 
@@ -263,6 +306,32 @@
 			"action": "{{ path('client.typesetting.download') }}",
 			"method": "GET"
 		}).appendTo(document.body).submit();
+	});
+
+	$(".js-preset-target").bind('click', function(e){
+		// get target
+		var target = $(e.currentTarget);
+
+		// modal open
+		$('#presetModal').modal();
+
+	});
+
+	$('.js-preset-submit').bind('click', function(e){
+		var preset_name = $('#preset_name').val();
+
+		var str_html = '';
+		str_html = "<input type='hidden' name='preset_name' value=\"" + preset_name.replace(/"/i, "&quot;") + "\">";
+
+		if(header_id !== void 0){
+			// create form
+			$('<form>', {
+				"id": "updatePresetForm",
+				"html": str_html,
+				"action": "{{ path('client.csv.preset.update') }}",
+				"method": "POST"
+			}).appendTo(document.body).submit();
+		}
 	});
 
 	</script>
