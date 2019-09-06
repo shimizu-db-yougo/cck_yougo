@@ -1400,6 +1400,7 @@ class YougoController extends BaseController {
 			//$this->get('logger')->error("***exp_term_elem***".serialize($ele_expterm));
 
 			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+					'mainTermId' => $request->request->get('term_id')[$idx],
 					'indexTerm' => $ele_expterm,
 					'deleteFlag' => FALSE
 			));
