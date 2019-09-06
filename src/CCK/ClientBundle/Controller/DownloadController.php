@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use ZipArchive;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use CCK\CommonBundle\Entity\CSVPreset;
 
 /**
  * download controller.
@@ -754,18 +755,20 @@ class DownloadController extends BaseController {
 	 */
 	public function updatePresetAction(Request $request){
 		$session = $request->getSession();
-		if(!$request->request->has('id')){
-			return $this->redirect($this->generateUrl('client.master.header'));
+		if(!$request->request->has('preset_name')){
+			return $this->redirect($this->generateUrl('client.csv.export'));
 		}
 
-		$version = $request->request->get('version');
-		$id = (int) $request->request->get('id');
-		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findOneBy(array(
-				'id' =>$id,
+		$preset_name = $request->request->get('preset_name');
+		$preset_field = $request->request->get('preset_field');
+
+		// 件数チェック
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CSVPreset')->findBy(array(
+				'userId' => $this->getUser()->getUserId(),
 				'deleteFlag' => FALSE
 		));
-		if(!$entity){
-			return $this->redirect($this->generateUrl('client.master.header.list', array('version' => $version)));
+		if(count($entity) > 9){
+			return $this->redirect($this->generateUrl('client.csv.export'));
 		}
 
 		// transaction
@@ -773,10 +776,13 @@ class DownloadController extends BaseController {
 		$em->getConnection()->beginTransaction();
 
 		try {
-			if($request->request->has('header_name')){
-				$entity->setName($request->request->get('header_name'));
-			}
+			$preset = new CSVPreset();
 
+			$preset->setUserId($this->getUser()->getUserId());
+			$preset->setPresetName($preset_name);
+			$preset->setFieldName($preset_field);
+
+			$em->persist($preset);
 			$em->flush();
 			$em->getConnection()->commit();
 
@@ -790,6 +796,6 @@ class DownloadController extends BaseController {
 			$this->get('logger')->error($e->getTraceAsString());
 		}
 
-		return $this->redirect($this->generateUrl('client.master.header.list', array('version' => $version)));
+		return $this->redirect($this->generateUrl('client.csv.export'));
 	}
 }

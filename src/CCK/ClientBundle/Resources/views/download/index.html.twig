@@ -145,6 +145,9 @@
 						{% endfor %}
 					</select>
 				</div>
+				<div class="col-sm-1">
+					<button class="btn btn-danger button_text_align input-sm js-preset-delete" type="button"  onClick="return checkDelete(this.form)">{{ 'btn.delete'|trans }}</button>
+				</div>
 			</div>
 		</div>
 		<div class="form-group">
@@ -219,6 +222,7 @@
 {% block javascripts %}
 	{{ parent() }}
 	<script>
+
 	$(function(){
 		$('.js-cur').bind('change', function(){
 			changeCurriculumHeader($('.js-cur'));
@@ -242,6 +246,31 @@
 
 		$('.js-preset').bind('change', function(){
 			console.log($(this).prop("id"));
+
+			// フィールド一覧(左)の初期化
+			var options = [];
+			var option;
+			{% for key,val in field_list %}
+				console.log("{{ key }}"+":"+"{{ val }}");
+
+				option = $('<option></option>');
+				option.append("{{ val }}");
+				option.attr('value', "{{ key }}");
+				options.push(option);
+			{% endfor %}
+
+			injectOption('[name="s1"]', options);
+
+			// フィールド選択(右)の初期化
+			$('[name="s2"]').empty();
+
+			var txt_preset_field = $('[name=preset] option:selected').prop("id");
+			var arr_preset_field = txt_preset_field.split(',');
+
+			for(idx in arr_preset_field){
+				$('select[name=s2]').append($('select[name=s1] option[value=' + arr_preset_field[idx] + ']').clone());
+				$('select[name=s1] option[value=' + arr_preset_field[idx] + ']').remove();
+			}
 		});
 	});
 
@@ -284,6 +313,14 @@
 		buttonStyle(O,idx);
 	}
 
+	function checkDelete(form){
+		if(window.confirm('プリセットを削除します。よろしいですか。')){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
 	$('.js-generic-submit').bind('click', function(e){
 
 		var generic_field = [];
@@ -320,18 +357,24 @@
 	$('.js-preset-submit').bind('click', function(e){
 		var preset_name = $('#preset_name').val();
 
+		var field_list = $('select[name=s2]').children();
+		var field_str = '';
+		for (var i=0; i<field_list.length; i++) {
+			console.log(field_list.eq(i).val());
+			field_str += field_list.eq(i).val();
+		}
+
 		var str_html = '';
 		str_html = "<input type='hidden' name='preset_name' value=\"" + preset_name.replace(/"/i, "&quot;") + "\">";
+		str_html += "<input type='hidden' name='preset_field' value=\"" + field_str + "\">";
 
-		if(header_id !== void 0){
-			// create form
-			$('<form>', {
-				"id": "updatePresetForm",
-				"html": str_html,
-				"action": "{{ path('client.csv.preset.update') }}",
-				"method": "POST"
-			}).appendTo(document.body).submit();
-		}
+		// create form
+		$('<form>', {
+			"id": "updatePresetForm",
+			"html": str_html,
+			"action": "{{ path('client.csv.preset.update') }}",
+			"method": "POST"
+		}).appendTo(document.body).submit();
 	});
 
 	</script>
