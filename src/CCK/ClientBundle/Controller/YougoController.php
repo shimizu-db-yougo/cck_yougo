@@ -185,18 +185,16 @@ class YougoController extends BaseController {
 
 		$sort_field = '';
 		$sort_order = '';
-		if($request->request->has('sort_up')){
-			$sort_field = $request->request->get('field');
+		$sort_order_link = $session->get(self::SES_SORT_ORDER_KEY);
+		$sort_field = $session->get(self::SES_SORT_FIELD_KEY);
+
+		if($sort_order_link == 'up'){
 			$sort_order = ' ASC';
-		}
-		if($request->request->has('sort_down')){
-			$sort_field = $request->request->get('field');
+		}else{
 			$sort_order = ' DESC';
 		}
 
-		$sort_order_link = $session->get(self::SES_SORT_ORDER_KEY);
-		$sort_field = $session->get(self::SES_SORT_FIELD_KEY);
-		if($request->query->has('field')){
+		if(($request->query->has('field'))&&(!$request->query->has('page'))){
 			if(($sort_order_link == '')||($sort_order_link == 'down')){
 				$sort_order_link = 'up';
 				$sort_field = $request->query->get('field');
