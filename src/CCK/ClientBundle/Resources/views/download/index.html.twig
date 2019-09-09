@@ -146,7 +146,7 @@
 					</select>
 				</div>
 				<div class="col-sm-1">
-					<button class="btn btn-danger button_text_align input-sm js-preset-delete" type="button"  onClick="return checkDelete(this.form)">{{ 'btn.delete'|trans }}</button>
+					<button class="btn btn-danger button_text_align input-sm js-preset-delete" type="button">{{ 'btn.delete'|trans }}</button>
 				</div>
 			</div>
 		</div>
@@ -314,7 +314,8 @@
 	}
 
 	function checkDelete(form){
-		if(window.confirm('プリセットを削除します。よろしいですか。')){
+		var preset_name = $('[name=preset] option:selected').text();
+		if(window.confirm('プリセット「' + preset_name + '」を削除します。よろしいですか。')){
 			return true;
 		}else{
 			return false;
@@ -361,21 +362,65 @@
 		var field_str = '';
 		for (var i=0; i<field_list.length; i++) {
 			console.log(field_list.eq(i).val());
-			field_str += field_list.eq(i).val();
+			field_str += field_list.eq(i).val() + ',';
+		}
+		if(field_str != ''){
+			field_str = field_str.slice(0,-1);
 		}
 
-		var str_html = '';
-		str_html = "<input type='hidden' name='preset_name' value=\"" + preset_name.replace(/"/i, "&quot;") + "\">";
-		str_html += "<input type='hidden' name='preset_field' value=\"" + field_str + "\">";
-
-		// create form
-		$('<form>', {
-			"id": "updatePresetForm",
-			"html": str_html,
-			"action": "{{ path('client.csv.preset.update') }}",
-			"method": "POST"
-		}).appendTo(document.body).submit();
+		var data = {
+				'preset_name': preset_name.replace(/"/i, "&quot;"),
+				'preset_field': field_str
+		};
+		$.ajax({
+			url: "{{ path('client.csv.preset.update') }}",
+			data: data,
+			method: 'POST',
+			success: function(response){
+				return_cd = response.return_cd;
+				if (return_cd == true) {
+					$('#presetModal').modal('hide');
+				} else {
+					if(response.name == 'preset saved count over'){
+						alert('プリセット件数が10件を超えています。');
+					}else if(response.name == 'parameter err'){
+						alert('パラメータエラー。');
+					}else{
+						alert('DBエラー。');
+					}
+				}
+			},
+			error: function(response){
+				alert("DBエラー");
+			}
+		});
 	});
 
+	$('.js-preset-delete').bind('click', function(e){
+		var preset_name = $('[name=preset] option:selected').text();
+		if(!window.confirm('プリセット「' + preset_name + '」を削除します。よろしいですか。')){
+			return false;
+		}
+
+		var preset_id = $('[name=preset]').val();
+		console.log(preset_id);
+
+		var data = {
+				'id': preset_id
+		};
+		$.ajax({
+			url: "{{ path('client.csv.preset.delete') }}",
+			data: data,
+			async: false,
+			method: 'POST',
+			success: function(response){
+				alert('プリセットを削除しました。');
+				location.reload();
+			},
+			error: function(response){
+				alert('DB更新エラー');
+			}
+		});
+	});
 	</script>
 {% endblock %}

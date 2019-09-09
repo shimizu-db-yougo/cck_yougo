@@ -756,7 +756,8 @@ class DownloadController extends BaseController {
 	public function updatePresetAction(Request $request){
 		$session = $request->getSession();
 		if(!$request->request->has('preset_name')){
-			return $this->redirect($this->generateUrl('client.csv.export'));
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'parameter err'));
+			return $response;
 		}
 
 		$preset_name = $request->request->get('preset_name');
@@ -764,11 +765,12 @@ class DownloadController extends BaseController {
 
 		// 件数チェック
 		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CSVPreset')->findBy(array(
-				'userId' => $this->getUser()->getUserId(),
+				'user_id' => $this->getUser()->getUserId(),
 				'deleteFlag' => FALSE
 		));
 		if(count($entity) > 9){
-			return $this->redirect($this->generateUrl('client.csv.export'));
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'preset saved count over'));
+			return $response;
 		}
 
 		// transaction
@@ -794,8 +796,65 @@ class DownloadController extends BaseController {
 			// log
 			$this->get('logger')->error($e->getMessage());
 			$this->get('logger')->error($e->getTraceAsString());
+
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'DB error'));
+			return $response;
 		}
 
-		return $this->redirect($this->generateUrl('client.csv.export'));
+		$response = new JsonResponse(array("return_cd" => true, "name" => ''));
+		return $response;
+	}
+
+	/**
+	 * @Route("/csv/preset/delete", name="client.csv.preset.delete")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:download:index.html.twig")
+	 */
+	public function deletePresetAction(Request $request){
+		$session = $request->getSession();
+		if(!$request->request->has('id')){
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'parameter err'));
+			return $response;
+		}
+
+		$id = $request->request->get('id');
+
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CSVPreset')->findOneBy(array(
+				'id' =>$id,
+				'deleteFlag' => FALSE
+		));
+
+		if(!$entity){
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'exist err'));
+			return $response;
+		}
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			$entity->setDeleteFlag(true);
+			$entity->setModifyDate(new \DateTime());
+			$entity->setDeleteDate(new \DateTime());
+
+			$em->flush();
+			$em->getConnection()->commit();
+
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'DB error'));
+			return $response;
+		}
+
+		$response = new JsonResponse(array("return_cd" => true, "name" => ''));
+		return $response;
 	}
 }
