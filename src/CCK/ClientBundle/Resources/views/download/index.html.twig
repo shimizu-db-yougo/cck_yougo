@@ -176,6 +176,7 @@
 								<input type="button" value="下に" id="DOWNBUTTON" disabled onclick="optionMove(1,'')">
 								<button class="btn btn-primary button_text_align input-sm js-generic-submit" type="button">{{ 'btn.download'|trans }}</button>
 								<button class="btn btn-primary button_text_align input-sm js-preset-target" type="button" preset-target="#headerModal">{{ 'btn.preset'|trans }}</button>
+								<button class="btn btn-default button_text_align input-sm js-clear" type="button">{{ 'btn.clear'|trans }}</button>
 							</td>
 						</tr>
 					</table>
@@ -247,22 +248,7 @@
 		$('.js-preset').bind('change', function(){
 			console.log($(this).prop("id"));
 
-			// フィールド一覧(左)の初期化
-			var options = [];
-			var option;
-			{% for key,val in field_list %}
-				console.log("{{ key }}"+":"+"{{ val }}");
-
-				option = $('<option></option>');
-				option.append("{{ val }}");
-				option.attr('value', "{{ key }}");
-				options.push(option);
-			{% endfor %}
-
-			injectOption('[name="s1"]', options);
-
-			// フィールド選択(右)の初期化
-			$('[name="s2"]').empty();
+			clearField();
 
 			var txt_preset_field = $('[name=preset] option:selected').prop("id");
 			var arr_preset_field = txt_preset_field.split(',');
@@ -271,6 +257,10 @@
 				$('select[name=s2]').append($('select[name=s1] option[value=' + arr_preset_field[idx] + ']').clone());
 				$('select[name=s1] option[value=' + arr_preset_field[idx] + ']').remove();
 			}
+		});
+
+		$('.js-clear').bind('click', function(){
+			clearField();
 		});
 	});
 
@@ -290,6 +280,25 @@
 	        });
 	    };
 	});
+
+	function clearField(){
+		// フィールド一覧(左)の初期化
+		var options = [];
+		var option;
+		{% for key,val in field_list %}
+			console.log("{{ key }}"+":"+"{{ val }}");
+
+			option = $('<option></option>');
+			option.append("{{ val }}");
+			option.attr('value', "{{ key }}");
+			options.push(option);
+		{% endfor %}
+
+		injectOption('[name="s1"]', options);
+
+		// フィールド選択(右)の初期化
+		$('[name="s2"]').empty();
+	}
 
 	function buttonStyle(O,idx){
 		var UpButton = document.getElementById('UPBUTTON'+idx);
