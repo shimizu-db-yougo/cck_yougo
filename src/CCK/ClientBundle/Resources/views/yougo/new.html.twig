@@ -58,6 +58,11 @@
 				// サブ用語・同対類用語・指矢印用語フォームのイベント設定
 				assignSubFormEvent();
 			});
+
+			$('.js-han').bind('change', function(){
+				// 版選択後に指矢印用語の見出し設定し直す
+				changeHanHeader($('[name="version"]'),'.js-hen4',true);
+			});
 		});
 
 	</script>

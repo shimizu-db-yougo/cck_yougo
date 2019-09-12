@@ -51,7 +51,7 @@ class HeaderRepository extends EntityRepository
 	}
 
 	public function getHenMidashi($ver = null){
-		if($ver != '0'){
+		//if($ver != '0'){
 			$qb = $this->createQueryBuilder('c')
 			->select('c.name')
 			->addSelect('c.hen id')
@@ -64,7 +64,7 @@ class HeaderRepository extends EntityRepository
 					'version_id' => $ver,
 					'header_id' => '1'
 			));
-		}else{
+		/*}else{
 			$qb = $this->createQueryBuilder('c')
 			->select('c.name')
 			->addSelect('c.hen id')
@@ -75,7 +75,7 @@ class HeaderRepository extends EntityRepository
 					'deleteFlag' => false,
 					'header_id' => '1'
 			));
-		}
+		}*/
 
 		return $qb->getQuery()->getResult();
 	}

@@ -151,7 +151,7 @@
 				}
 			}
 
-			function changeHanHeader(e,hen){
+			function changeHanHeader(e,hen,is_class=false){
 				var selected_ver = e.val();
 				var data = {
 						'version': selected_ver
@@ -162,7 +162,12 @@
 					method: 'POST',
 					success: function(response){
 						var options = generateOptions(response);
-						injectOption('[name="' + hen + '"]', options);
+						if(!is_class){
+							injectOption('[name="' + hen + '"]', options);
+						}else{
+							injectOption(hen, options);
+						}
+
 					},
 					error: function(response){
 					}

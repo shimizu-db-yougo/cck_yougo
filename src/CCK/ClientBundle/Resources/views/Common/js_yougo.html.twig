@@ -571,11 +571,17 @@
 			});
 		});
 
+		var append_cnt = 0;
 		$('#addFormRef').click(function(){
+			append_cnt++;
+			var obj = [];
+			obj.id = 'new' + append_cnt;
+
 			$('#form_refterms').append(
-					constructRefForm(null)
+					constructRefForm(obj)
 			);
-			//changeHanHeader($('[name="version"]'),'ref_hen');
+			// 版選択後に指矢印用語の見出し設定し直す
+			changeHanHeader($('[name="version"]'),'ref_hennew'+append_cnt);
 		});
 
 		function getTextPoint(value,term_id){
