@@ -1,0 +1,186 @@
+<?php
+namespace CCK\ClientBundle\Controller;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Doctrine\ORM\NoResultException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use ZipArchive;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+
+/**
+ * upload controller.
+ * アップロードコントローラー
+ *
+ */
+class UploadController extends BaseController {
+
+	/**
+	 * @Route("/csv/upload/index/{status}", name="client.csv.import")
+	 * @Template()
+	 */
+	public function indexAction(Request $request, $status) {
+		// session
+		$session = $request->getSession();
+
+		// get user information
+		$user = $this->getUser();
+
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+
+		if($status == 200){
+			$status_message = "csvファイルの取込みが完了しました。";
+		}elseif($status == 'default'){
+			$status_message = "";
+		}elseif($status == 454){
+			$status_message = "テキストファイルのエンコード形式を確認してください。取込可能な形式はUTF-8です。";
+		}else{
+			$status_message = "csvファイルの取込みに失敗しました。ファイルを確認して下さい。";
+		}
+
+		return array(
+				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
+				'cur_list' => $cur_list,
+				'ver_list' => $ver_list,
+				'return_message' => $status_message,
+		);
+	}
+
+	/**
+	 * @Route("/nombre/upload", name="client.nombre.upload")
+	 * @Method("POST|GET")
+	 */
+	public function nombreUploadAction(Request $request){
+		// postでもらうべきのリストを取得
+		$targets = $this->container->getParameter('api.upload.nombre');
+
+		// postで来たデータの中にあるべきものが全部あるか確認
+		$params = $this->checkParams($targets,$request);
+
+		// real path
+		$archivePath = $this->container->getParameter('archive')['dir_path'];
+		$webpath = $request->getSchemeAndHttpHost() . '/' . $this->container->getParameter('archive')['link'];
+		$tempPath = $this->container->getParameter('temp');
+		$images = array();
+		$arr_response = array();
+
+		foreach ($params['image'] as $key => $file){
+			if($file == '') continue;
+			$images[$key] = $this->tempUploads($file, $archivePath, $tempPath);
+		}
+
+		//localeの変更
+		setlocale(LC_ALL, 'ja_JP.UTF-8');
+
+		//実際のフォルダーにアップロードする。
+		$files = array();
+		$files = $this->openDir($tempPath, '', $files);
+
+		// localeを戻す
+		setlocale(LC_ALL, 'C');
+
+		if(count($files) == 0){
+			return $this->redirect($this->generateUrl('client.csv.import', array('status' => 451)));
+		}
+
+		try {
+			// 初期化
+			$this->clearDirectory($archivePath . $params['curriculum'] . '_' . $params['version']);
+
+			foreach ($files as $el_file_list){
+				$this->uploads($el_file_list['name'], $archivePath . $params['curriculum'] . '_' . $params['version'] . '/', $tempPath . '/');
+			}
+		} catch(\Exception $e){
+			return $this->redirect($this->generateUrl('client.csv.import', array('status' => 452)));
+		}
+
+		// テンポラリフォルダ内のファイルを削除
+		$this->clearDirectory($tempPath);
+
+		// ノンブル更新
+		$updatefile = array();
+		$updatefile = $this->openDir($archivePath . $params['curriculum'] . '_' . $params['version'], '', $updatefile);
+		foreach ($updatefile as $el_file_list){
+			if(strcasecmp(pathinfo($el_file_list['name'], PATHINFO_EXTENSION), 'csv') == 0){
+				$filePointer = fopen($el_file_list['realpath'], 'r');
+
+				$lineCnt = 0;
+
+				while($line = fgets($filePointer)){
+					$lineCnt++;
+
+					// 改行コード削除
+					$line = str_replace("\n","",$line);
+					$line = str_replace("\r","",$line);
+					$line = str_replace("\r\n","",$line);
+
+					// 項目ごとの"xxx"からダブルクォーテーション削除
+					$line = str_replace('"','',$line);
+
+					$data = explode("	",$line);
+
+					// 項目名を保存
+					if($lineCnt == 1) {
+						//エンコードチェック
+						if (mb_detect_encoding($line, "UTF-8") === false){
+							fclose($filePointer);
+							return $this->redirect($this->generateUrl('client.csv.import', array('status' => 454)));
+						}
+
+						continue;
+					}
+
+					// db connect and Transaction start
+					$em = $this->get('doctrine.orm.entity_manager');
+					$em->getConnection()->beginTransaction();
+
+					try {
+
+						// 用語ID存在チェック
+						$termID = $data[3];
+
+						$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+								'termId' => $termID,
+								'deleteFlag' => FALSE
+						));
+
+						if($term){
+							$term->setNombre($data[0]);
+						}
+
+						$em->flush();
+						$em->getConnection()->commit();
+
+					} catch (\Exception $e){
+						// もし、DBに登録失敗した場合rollbackする
+						$em->getConnection()->rollback();
+						$em->close();
+
+						// log
+						$this->get('logger')->error($e->getMessage());
+						$this->get('logger')->error($e->getTraceAsString());
+
+						return $this->redirect($this->generateUrl('client.csv.import', array('status' => 453)));
+					}
+				}
+				// ファイルをクローズする
+				fclose($filePointer);
+			}
+		}
+
+		return $this->redirect($this->generateUrl('client.csv.import', array('status' => 200)));
+
+	}
+}

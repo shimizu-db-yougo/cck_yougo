@@ -1,0 +1,89 @@
+{% extends "CCKClientBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+	{{ parent() }}
+{% endblock %}
+
+{% block contents %}
+<div class="row">
+<blockquote class="blockquote-bottom pdr-0">
+	<p>{{ 'text.csv.import.title'|trans|raw }}</p>
+</blockquote>
+</div>
+
+<form action="{{ path('client.nombre.upload') }}" class="form-horizontal" enctype='multipart/form-data' method='POST' novalidate>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-primary">
+			<div class="panel-body">
+				<div class="row">
+					<div class="form-horizontal">
+						<div class="">
+							<div class="col-lg-12">
+								<label class="col-sm-1">{{ 'text.csv.import'|trans }}</label>
+								<div class="col-sm-2">
+									<select class="form-control js-cur input-sm" name="curriculum">
+										<option value="0">--------------</option>
+										{% for cur in cur_list %}
+											<option value="{{ cur.id }}">{{ cur.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<select class="form-control js-han input-sm" name="version" disabled>
+										<option value="0">--------------</option>
+										{% for ver in ver_list %}
+											<option value="{{ ver.id }}">{{ ver.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-horizontal">
+						<div class="">
+							<div class="col-lg-12">
+								<div class="col-sm-4">
+									<input type="file" id="up_file" name="image">
+								</div>
+								<div class="col-sm-5">
+									{{ return_message }}
+								</div>
+								<div class="col-sm-2"><button id="up_submit" class="btn btn-primary btn-block" type="submit" disabled>{{ 'btn.upload'|trans }}</button></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+
+	$(function(){
+		$('.js-cur').bind('change', function(){
+			changeCurriculumHeader($('.js-cur'));
+		});
+
+		$('.js-han').bind('change', function(){
+			changeHanHeader($('.js-han'),'hen');
+		});
+
+	});
+
+	// アップロード csv ボタンactive化
+	$('#up_file').bind('change', function(){
+		if(this.files && this.files[0]){
+			$('#up_submit').attr('disabled', false);
+		}
+	});
+	</script>
+{% endblock %}
