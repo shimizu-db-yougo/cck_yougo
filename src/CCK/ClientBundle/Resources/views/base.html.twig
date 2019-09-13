@@ -471,6 +471,12 @@
 						error: function(response){
 						}
 					});
+
+					if(selected == '0'){
+						$('[name="ver"]').prop("disabled", true);
+					}else{
+						$('[name="ver"]').prop("disabled", false);
+					}
 				});
 
 				$('[name="ver"]').bind('change', function(){
