@@ -341,13 +341,33 @@
 			var ko = $('#ko').val();
 
 			// 入力チェック
+			var is_checked = true;
 			if(level == ''){
 				$('.level-err').text('必須項目です');
-				return false;
+				is_checked = false;
+			}
+
+			if((level > 1)&&(hen == 0)){
+				$('.hen-err').text('必須項目です');
+				is_checked = false;
+			}
+
+			if((level > 2)&&(sho == 0)){
+				$('.sho-err').text('必須項目です');
+				is_checked = false;
+			}
+
+			if((level == 5)&&(chu == 0)){
+				$('.chu-err').text('必須項目です');
+				is_checked = false;
 			}
 
 			if(name == ''){
 				$('.name-err').text('必須項目です');
+				is_checked = false;
+			}
+
+			if(!is_checked){
 				return false;
 			}
 
