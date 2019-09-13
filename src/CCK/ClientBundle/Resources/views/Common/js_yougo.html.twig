@@ -582,6 +582,12 @@
 			);
 			// 版選択後に指矢印用語の見出し設定し直す
 			changeHanHeader($('[name="version"]'),'ref_hennew'+append_cnt);
+			$('[name="ref_shonew' + append_cnt + '"]').empty();
+			$('[name="ref_dainew' + append_cnt + '"]').empty();
+			$('[name="ref_chunew' + append_cnt + '"]').empty();
+			$('[name="ref_konew' + append_cnt + '"]').empty();
+			$('[name="ref_termnew' + append_cnt + '"]').empty();
+
 		});
 
 		function getTextPoint(value,term_id){
@@ -782,7 +788,7 @@
 				var term_id = target.attr('term-id');
 				console.log(term_id);
 
-				if(term_id != ''){
+				if((term_id != '')&&(term_id.indexOf('new') == -1)){
 					var data = {
 							'id': term_id,
 							'table': 'Refer'
