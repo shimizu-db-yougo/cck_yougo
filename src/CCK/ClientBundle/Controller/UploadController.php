@@ -150,14 +150,52 @@ class UploadController extends BaseController {
 
 						// 用語ID存在チェック
 						$termID = $data[3];
+						$is_term = true;
+						$term = false;
+						if(substr($termID, 0, 1) == 'M'){
+							$termID = ltrim(substr($termID, 1), '0');
 
-						$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
-								'termId' => $termID,
-								'deleteFlag' => FALSE
-						));
+							$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+									'termId' => $termID,
+									'deleteFlag' => FALSE
+							));
+						}elseif(substr($termID, 0, 1) == 'S'){
+							$termID = ltrim(substr($termID, 1), '0');
+
+							$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
+									'id' => $termID,
+									'deleteFlag' => FALSE
+							));
+						}elseif(substr($termID, 0, 1) == 'D'){
+							$termID = ltrim(substr($termID, 1), '0');
+
+							$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
+									'id' => $termID,
+									'deleteFlag' => FALSE
+							));
+						}elseif(substr($termID, 0, 1) == 'K'){
+							$termID = ltrim(substr($termID, 1), '0');
+
+							$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+									'id' => $termID,
+									'deleteFlag' => FALSE
+							));
+						}elseif(strpos($termID, '.') !== false){
+							// 画像ファイル名
+							$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+									'illustFilename' => $termID,
+									'deleteFlag' => FALSE
+							));
+
+							$is_term = false;
+						}
 
 						if($term){
-							$term->setNombre($data[0]);
+							if($is_term){
+								$term->setNombre($data[0]);
+							}else{
+								$term->setIllustNombre($data[0]);
+							}
 						}
 
 						$em->flush();

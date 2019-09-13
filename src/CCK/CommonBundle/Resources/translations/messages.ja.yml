@@ -147,8 +147,7 @@ text:
         field.title: フィールド選択出力
     csv.import:
         title: データ取り込み
-    csv.import:
-        map: MAPデータ登録
+        nombre: ノンブル取り込み
     optional: (任意)
     mail:
         alert:
