@@ -55,7 +55,7 @@
 								</div>
 								<div class="col-sm-1">
 									<input type="hidden" name="type" value="0"/>
-									<button class="btn btn-primary button_text_align input-sm" type="submit">{{ 'btn.download'|trans }}</button>
+									<button class="btn btn-primary button_text_align input-sm" type="submit" onClick="return checkDownload('js-cur','js-han')">{{ 'btn.download'|trans }}</button>
 								</div>
 							</div>
 						</div>
@@ -95,7 +95,7 @@
 								</div>
 								<div class="col-sm-1">
 									<input type="hidden" name="type" value="1"/>
-									<button class="btn btn-primary button_text_align input-sm" type="submit">{{ 'btn.download'|trans }}</button>
+									<button class="btn btn-primary button_text_align input-sm" type="submit" onClick="return checkDownload('js-cur2','js-han2')">{{ 'btn.download'|trans }}</button>
 								</div>
 							</div>
 						</div>
@@ -276,6 +276,15 @@
 	    };
 	});
 
+	function checkDownload(cur,han){
+		if(($('.'+cur).val() == 0)||($('.'+han).val() == 0)){
+			alert("教科・版を選択してください。");
+			return false;
+		}else{
+			return true;
+		}
+	}
+
 	function clearField(){
 		// フィールド一覧(左)の初期化
 		var options = [];
@@ -327,6 +336,10 @@
 	}
 
 	$('.js-generic-submit').bind('click', function(e){
+		// 教科・版選択チェック
+		if(!checkDownload('js-cur3','js-han3')){
+			return false;
+		}
 
 		var generic_field = [];
 		var generic_value = [];
@@ -334,6 +347,12 @@
 		for(var i=0;i<dwlist.options.length;i++){
 			generic_field.push(dwlist.options[i].text);
 			generic_value.push(dwlist.options[i].value);
+		}
+
+		// フィールド選択チェック
+		if(dwlist.options.length == 0){
+			alert("フィールドを選択してください。");
+			return false;
 		}
 
 		var str_html = "<input type='hidden' name='curriculum' value='" + document.getElementById('curriculum').value + "'>";
