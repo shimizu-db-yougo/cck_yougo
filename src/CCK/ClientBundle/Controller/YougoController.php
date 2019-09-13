@@ -1712,7 +1712,7 @@ class YougoController extends BaseController {
 			$page = $request->query->get('page');
 		}
 
-		return $this->redirect($this->generateUrl('client.yougo.index', array('page' => $page)));
+		return $this->redirect($this->generateUrl('client.yougo.edit', array('term_id' => $newTermId)));
 	}
 
 	private function copyMainTerm($em, $entityMain){
