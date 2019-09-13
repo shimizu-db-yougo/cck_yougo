@@ -1614,7 +1614,12 @@ class YougoController extends BaseController {
 			$this->get('logger')->error($e->getTraceAsString());
 		}
 
-		return $this->redirect($this->generateUrl('client.yougo.list'));
+		$page = 1;
+		if($request->query->has('page')){
+			$page = $request->query->get('page');
+		}
+
+		return $this->redirect($this->generateUrl('client.yougo.index', array('page' => $page)));
 	}
 
 	/**
@@ -1702,7 +1707,12 @@ class YougoController extends BaseController {
 				'deleteFlag' => FALSE
 		));
 
-		return $this->redirect($this->generateUrl('client.yougo.list'));
+		$page = 1;
+		if($request->query->has('page')){
+			$page = $request->query->get('page');
+		}
+
+		return $this->redirect($this->generateUrl('client.yougo.index', array('page' => $page)));
 	}
 
 	private function copyMainTerm($em, $entityMain){
