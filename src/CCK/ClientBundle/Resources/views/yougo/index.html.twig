@@ -198,7 +198,7 @@
 			<tbody>
 				{% for yougo in pagination %}
 				<tr class="text-center">
-					<td width="68px" class="text-left">{{ yougo.term_id }}</td>
+					<td width="68px" class="text-left">{{ 'M%05s'|format(yougo.term_id) }}</td>
 					<td width="100px" class="text-left">{{ yougo.main_term }}</td>
 					<td width="120px" class="text-left">{{ yougo.kana }}</td>
 					<td width="120px" class="text-left">{{ yougo.index_kana }}</td>
