@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use ZipArchive;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 /**
  * upload controller.
@@ -46,6 +47,12 @@ class UploadController extends BaseController {
 			$status_message = "";
 		}elseif($status == 454){
 			$status_message = "テキストファイルのエンコード形式を確認してください。取込可能な形式はUTF-8です。";
+		}elseif($status == 455){
+			$status_message = "ファイル形式を確認してください。CSVファイルのみ取込可能です。";
+		}elseif(strpos($status,'456') !== false){
+			$status_message = "用語IDがマッチしていません。:" . explode(':',$status)[1];
+		}elseif($status == 457){
+			$status_message = "CSVファイルの項目数が異なっています。項目数：5";
 		}else{
 			$status_message = "csvファイルの取込みに失敗しました。ファイルを確認して下さい。";
 		}
@@ -100,14 +107,24 @@ class UploadController extends BaseController {
 			$this->clearDirectory($archivePath . $params['curriculum'] . '_' . $params['version']);
 
 			foreach ($files as $el_file_list){
-				$this->uploads($el_file_list['name'], $archivePath . $params['curriculum'] . '_' . $params['version'] . '/', $tempPath . '/');
+				$filename = $this->uploads($el_file_list['name'], $archivePath . $params['curriculum'] . '_' . $params['version'] . '/', $tempPath . '/');
 			}
+
+			if(!$this->checkFileType($archivePath . $params['curriculum'] . '_' . $params['version'] . '/' . $filename)){
+				return $this->redirect($this->generateUrl('client.csv.import', array('status' => 455)));
+			}
+
 		} catch(\Exception $e){
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
 			return $this->redirect($this->generateUrl('client.csv.import', array('status' => 452)));
 		}
 
 		// テンポラリフォルダ内のファイルを削除
 		$this->clearDirectory($tempPath);
+
+
+		$em = $this->get('doctrine.orm.entity_manager');
 
 		// ノンブル更新
 		$updatefile = array();
@@ -142,8 +159,12 @@ class UploadController extends BaseController {
 						continue;
 					}
 
+					// 項目数チェック
+					if(count($data) != 5){
+						return $this->redirect($this->generateUrl('client.csv.import', array('status' => 457)));
+					}
+
 					// db connect and Transaction start
-					$em = $this->get('doctrine.orm.entity_manager');
 					$em->getConnection()->beginTransaction();
 
 					try {
@@ -196,6 +217,11 @@ class UploadController extends BaseController {
 							}else{
 								$term->setIllustNombre($data[0]);
 							}
+						}else{
+							$em->getConnection()->rollback();
+							$em->close();
+
+							return $this->redirect($this->generateUrl('client.csv.import', array('status' => '456:'.$data[3])));
 						}
 
 						$em->flush();
@@ -218,7 +244,24 @@ class UploadController extends BaseController {
 			}
 		}
 
+		$em->close();
+
 		return $this->redirect($this->generateUrl('client.csv.import', array('status' => 200)));
 
+	}
+
+	private function checkFileType($filename){
+		$this->get('logger')->error("ファイル名：".$filename);
+		//ファイル形式チェック
+		$file_data = file_get_contents($filename);
+		//MIMEタイプの取得
+		$finfo = finfo_open(FILEINFO_MIME_TYPE);
+		$mime_type = finfo_buffer($finfo, $file_data);
+		finfo_close($finfo);
+
+		if ($mime_type != 'text/plain'){
+			return false;
+		}
+		return true;
 	}
 }

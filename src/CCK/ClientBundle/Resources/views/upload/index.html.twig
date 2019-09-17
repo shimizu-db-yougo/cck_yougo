@@ -51,7 +51,7 @@
 								<div class="col-sm-5">
 									{{ return_message }}
 								</div>
-								<div class="col-sm-2"><button id="up_submit" class="btn btn-primary btn-block" type="submit" disabled>{{ 'btn.upload'|trans }}</button></div>
+								<div class="col-sm-2"><button id="up_submit" class="btn btn-primary btn-block" type="submit" onClick="return checkUpload()" disabled>{{ 'btn.upload'|trans }}</button></div>
 							</div>
 						</div>
 					</div>
@@ -78,6 +78,15 @@
 		});
 
 	});
+
+	function checkUpload(){
+		if(($('.js-cur').val() == 0)||($('.js-han').val() == 0)){
+			alert("教科・版を選択してください。");
+			return false;
+		}else{
+			return true;
+		}
+	}
 
 	// アップロード csv ボタンactive化
 	$('#up_file').bind('change', function(){
