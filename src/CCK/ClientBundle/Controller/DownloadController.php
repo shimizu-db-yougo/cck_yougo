@@ -665,11 +665,11 @@ class DownloadController extends BaseController {
 		}elseif($syn['delimiter'] == '3'){
 			$syn['delimiter'] = '）';
 		}elseif($syn['delimiter'] == '4'){
-			$syn['delimiter'] = '改行';
+			$syn['delimiter'] = '《rtn》';
 		}elseif($syn['delimiter'] == '5'){
-			$syn['delimiter'] = '改行＋（';
+			$syn['delimiter'] = '《rtn》（';
 		}elseif($syn['delimiter'] == '6'){
-			$syn['delimiter'] = '）＋改行';
+			$syn['delimiter'] = '）《rtn》';
 		}
 	}
 
