@@ -201,7 +201,7 @@ class MainTerm
     /**
      * @var string
      *
-     * @ORM\Column(name="user_id", type="string", length=6, nullable=true)
+     * @ORM\Column(name="user_id", type="string", length=100, nullable=true)
      */
     private $user_id;
 
