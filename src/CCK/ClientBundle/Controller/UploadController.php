@@ -173,6 +173,7 @@ class UploadController extends BaseController {
 						$termID = $data[3];
 						$is_term = true;
 						$term = false;
+
 						if(substr($termID, 0, 1) == 'M'){
 							$termID = ltrim(substr($termID, 1), '0');
 
@@ -241,6 +242,8 @@ class UploadController extends BaseController {
 				}
 				// ファイルをクローズする
 				fclose($filePointer);
+			}else{
+				return $this->redirect($this->generateUrl('client.csv.import', array('status' => 455)));
 			}
 		}
 
@@ -251,7 +254,6 @@ class UploadController extends BaseController {
 	}
 
 	private function checkFileType($filename){
-		$this->get('logger')->error("ファイル名：".$filename);
 		//ファイル形式チェック
 		$file_data = file_get_contents($filename);
 		//MIMEタイプの取得
