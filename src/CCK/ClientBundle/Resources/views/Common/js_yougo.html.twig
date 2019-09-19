@@ -213,7 +213,7 @@
 			console.log(print_order_list);
 			mainterm.print_order_list = print_order_list;
 
-			mainterm.term_id = $('#form_mainterm [name=term_id]').text();
+			mainterm.term_id = parseInt($('#form_mainterm [name=term_id]').text().slice(1));
 			mainterm.main_term = $('#form_mainterm [name=main_term]').val();
 			mainterm.red_letter = $('#form_mainterm [name=red_letter]').prop("checked");
 			mainterm.kana = $('#form_mainterm [name=kana]').val();
