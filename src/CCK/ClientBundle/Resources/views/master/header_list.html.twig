@@ -53,6 +53,11 @@
 							<button class="btn btn-primary btn-sm js-header-target" header-key = "{{ header.id }}" header-name = "{{ header.name }}" version-key = "{{ version }}" data-toggle="modal" master-target="#headerModal">{{ 'btn.edit'|trans }}</button>
 						</div>
 					</td>
+					<td>
+						<div class="form-inline">
+							<button class="btn btn-danger btn-sm js-header-delete" header-key = "{{ header.id }}" version-key = "{{ version }}" header-kubun = "{{ header.headerId }}">{{ 'btn.delete'|trans }}</button>
+						</div>
+					</td>
 				</tr>
 				{% endfor %}
 			</tbody>
@@ -497,6 +502,44 @@
 				"action": "{{ path('client.master.header.sort') }}",
 				"method": "POST"
 			}).appendTo(document.body).submit();
+		});
+
+		$('.js-header-delete').bind('click', function(e){
+			if(!window.confirm('見出しを削除します。よろしいですか。')){
+				return false;
+			}
+
+			// get target
+			var target = $(e.currentTarget);
+			version = target.attr('version-key');
+			header_id = target.attr('header-key');
+			header_kubun = target.attr('header-kubun');
+
+			var data = {
+					'version': version,
+					'header_id': header_id,
+					'header_kubun': header_kubun
+			};
+			$.ajax({
+				url: "{{ path('client.master.header.delete') }}",
+				data: data,
+				async: false,
+				method: 'POST',
+				success: function(response){
+					console.log(response);
+					if(response.return_cd == false){
+						if(response.name == 'data exist err'){
+							alert('この見出しは用語DBに使用されているので削除できません。');
+						}
+					}else{
+						alert('見出しを削除しました。');
+					}
+					location.reload();
+				},
+				error: function(response){
+					alert('DB更新エラー');
+				}
+			});
 		});
 
 		function clearInputField(){

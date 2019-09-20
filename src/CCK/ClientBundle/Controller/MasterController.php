@@ -421,6 +421,68 @@ class MasterController extends BaseController {
 	}
 
 	/**
+	 * @Route("/master/header/delete", name="client.master.header.delete")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:master:header_list.html.twig")
+	 */
+	public function deleteHeaderAction(Request $request){
+		$session = $request->getSession();
+		if(!$request->request->has('version')){
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'parameter err'));
+			return $response;
+		}
+
+		$version = $request->request->get('version');
+		$header_id = $request->request->get('header_id');
+
+		// 用語DBが登録された見出しは削除しない
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
+				'curriculumId' => $version,
+				'headerId' => $header_id,
+				'deleteFlag' => FALSE
+		));
+
+		if($entity){
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'data exist err'));
+			return $response;
+		}
+
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findOneBy(array(
+				'versionId' => $version,
+				'id' => $header_id,
+				'deleteFlag' => FALSE
+		));
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			$entity->setDeleteFlag(true);
+			$entity->setModifyDate(new \DateTime());
+			$entity->setDeleteDate(new \DateTime());
+
+			$em->flush();
+			$em->getConnection()->commit();
+
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'DB error'));
+			return $response;
+		}
+
+		$response = new JsonResponse(array("return_cd" => true, "name" => ''));
+		return $response;
+	}
+
+	/**
 	 * @Route("/master/group/delete", name="client.master.group.delete")
 	 * @Method("POST|GET")
 	 * @Template("GIMICClientBundle:Master:group.html.twig")
