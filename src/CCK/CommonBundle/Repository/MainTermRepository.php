@@ -33,6 +33,7 @@ class MainTermRepository extends EntityRepository
 				MainTerm.index_abbreviation,
 				MainTerm.handover,
 				User.name,
+				MainTerm.create_date,
 				MainTerm.modify_date
 			FROM
 				MainTerm
@@ -46,6 +47,7 @@ class MainTermRepository extends EntityRepository
 					AND ExplainIndex.delete_flag = false)
 					LEFT JOIN
 				(SELECT M.main_term refer_term,
+						R.id,
 						R.main_term_id,
 						R.delete_flag
 				FROM MainTerm M
@@ -138,9 +140,16 @@ class MainTermRepository extends EntityRepository
 		}
 
 		if($sort_field){
-			$sql .= " ORDER BY " . $sort_field . " " . $sort_order . " ";
+			$sql .= " ORDER BY ";
+			if(strpos($sort_field, 'SubTerm') !== false){
+				$sql .= "SubTerm.id " . $sort_order . ",";
+			}
+			if(strpos($sort_field, 'Refer_term') !== false){
+				$sql .= "Refer_term.id " . $sort_order . ",";
+			}
+			$sql .= $sort_field . " " . $sort_order . " ";
 		}else{
-			$sql .= " ORDER BY MainTerm.print_order,MainTerm.id ";
+			$sql .= " ORDER BY Header.hen,Header.sho,Header.dai,Header.chu,Header.ko,MainTerm.print_order,MainTerm.id ";
 		}
 
 		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
@@ -183,16 +192,28 @@ class MainTermRepository extends EntityRepository
 		// (*1)でまとめたサブ用語・指矢印用語を主用語単位にレコード生成する
 		$wk_result = $this->setRecordPerMainTerm($wk_result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_explain_term, $wk_result);
 
+		// サブ用語・指矢印用語でソートの場合、主用語単位にまとめた後、再度ソート
+		if((strpos($sort_field, 'SubTerm') !== false)||(strpos($sort_field, 'Refer_term') !== false)){
+			$field_name = explode(".", $sort_field);
+
+			if($field_name[1] == 'kana'){
+				$field_name[1] = 'sub_kana';
+			}elseif($field_name[1] == 'index_kana'){
+				$field_name[1] = 'sub_index_kana';
+			}
+			usort($wk_result, $this->build_sorter($field_name[1],$sort_order));
+		}
+
 		return $wk_result;
 	}
 
 	function stackSubTerm(&$result_record, &$wk_sub_term, &$wk_sub_kana, &$wk_sub_index_kana, &$wk_refer_term, &$wk_explain_term){
 		// サブ用語・指矢印用語を主用語単位にまとめる(*1)
-		if((array_search($result_record['sub_term'], $wk_sub_term) === false)&&(!is_null($result_record['sub_term']))) {array_push($wk_sub_term,$result_record['sub_term']);}
-		if((array_search($result_record['sub_kana'], $wk_sub_kana) === false)&&(!is_null($result_record['sub_kana']))) {array_push($wk_sub_kana,$result_record['sub_kana']);}
-		if((array_search($result_record['sub_index_kana'], $wk_sub_index_kana) === false)&&(!is_null($result_record['sub_index_kana']))) {array_push($wk_sub_index_kana,$result_record['sub_index_kana']);}
-		if((array_search($result_record['refer_term'], $wk_refer_term) === false)&&(!is_null($result_record['refer_term']))) {array_push($wk_refer_term,$result_record['refer_term']);}
-		if((array_search($result_record['index_term'], $wk_explain_term) === false)&&(!is_null($result_record['index_term']))) {array_push($wk_explain_term,$result_record['index_term']);}
+		if((array_search($result_record['sub_term'], $wk_sub_term) === false)&&(!is_null($result_record['sub_term']))&&($result_record['sub_term'] != '')) {array_push($wk_sub_term,$result_record['sub_term']);}
+		if((array_search($result_record['sub_kana'], $wk_sub_kana) === false)&&(!is_null($result_record['sub_kana']))&&($result_record['sub_kana'] != '')) {array_push($wk_sub_kana,$result_record['sub_kana']);}
+		if((array_search($result_record['sub_index_kana'], $wk_sub_index_kana) === false)&&(!is_null($result_record['sub_index_kana']))&&($result_record['sub_index_kana'] != '')) {array_push($wk_sub_index_kana,$result_record['sub_index_kana']);}
+		if((array_search($result_record['refer_term'], $wk_refer_term) === false)&&(!is_null($result_record['refer_term']))&&($result_record['refer_term'] != '')) {array_push($wk_refer_term,$result_record['refer_term']);}
+		if((array_search($result_record['index_term'], $wk_explain_term) === false)&&(!is_null($result_record['index_term']))&&($result_record['index_term'] != '')) {array_push($wk_explain_term,$result_record['index_term']);}
 	}
 
 	function setRecordPerMainTerm($wk_result_record, $wk_sub_term, $wk_sub_kana, $wk_sub_index_kana, $wk_refer_term, $wk_explain_term, $wk_result){
@@ -207,6 +228,18 @@ class MainTermRepository extends EntityRepository
 
 		return $wk_result;
 	}
+
+	function build_sorter($key,$order) {
+		return function ($a, $b) use ($key,$order) {
+			$token = 1;
+			if($order == ' DESC'){
+				$token = -1;
+			}
+
+			return strnatcmp($a[$key], $b[$key]) * $token;
+		};
+	}
+
 
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
