@@ -212,7 +212,7 @@
 					<td width="100px" class="text-left">{{ yougo.index_abbreviation }}</td>
 					<td width="80px" class="text-left">{{ yougo.handover|length > 5 ? yougo.handover[:5]~'…' : yougo.handover }}</td>
 					<td width="80px" class="text-left">{{ yougo.name }}</td>
-					<td width="100px" class="text-left">{{ yougo.modify_date|date('Y/m/d H:i') }}</td>
+					<td width="100px" class="text-left">{% if yougo.modify_date is empty %}{{ yougo.create_date|date('Y/m/d H:i') }}{% else %}{{ yougo.modify_date|date('Y/m/d H:i') }}{% endif %}</td>
 
 					<td width="60px">
 						<div class="form-inline">
