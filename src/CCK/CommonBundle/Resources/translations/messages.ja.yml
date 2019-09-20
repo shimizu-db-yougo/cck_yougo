@@ -233,6 +233,7 @@ delimiter:
     slash: ／
     paren_start: （
     paren_end: ）
+    paren_middle: ）（
         
 icon:
     ari: 有

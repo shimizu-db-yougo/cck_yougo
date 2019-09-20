@@ -169,6 +169,8 @@ class ClientExtension extends \Twig_Extension
 			return "delimiter.paren_start";
 		}elseif($delimiter == "6"){
 			return "delimiter.paren_end";
+		}elseif($delimiter == "7"){
+			return "delimiter.paren_end";
 		}else{
 			return "";
 		}

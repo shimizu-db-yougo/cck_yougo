@@ -45,7 +45,7 @@
 							{% for rec_sub_term in subterm %}
 								{% if i == 0 %}<span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(yougo.delimiter)|trans }}</span>{% endif %}
 								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (rec_sub_term.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_sub_term.sub_term }}{{ getTextFreqIcon(rec_sub_term.text_frequency)|raw }}{{ getCenterFreqIcon(rec_sub_term.center_frequency)|raw }}{{ getNewsExamIcon(rec_sub_term.news_exam)|raw }}</span><span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(rec_sub_term.delimiter)|trans }}</span>
-								{% if rec_sub_term.kana != '' %}{% set sub_kana = sub_kana~'（'~rec_sub_term.kana~'）' %}{% endif %}
+								{% if rec_sub_term.kana != '' %}{% set sub_kana = sub_kana~'（'~rec_sub_term.kana~getDelimiter(rec_sub_term.delimiter_kana)|trans %}{% endif %}
 								{% set i = i + 1 %}
 							{% endfor %}
 
