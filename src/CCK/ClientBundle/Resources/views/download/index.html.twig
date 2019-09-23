@@ -411,6 +411,8 @@
 				} else {
 					if(response.name == 'preset saved count over'){
 						alert('プリセット件数が10件を超えています。');
+					}else if(response.name == 'preset saved duplicate'){
+						alert('プリセット名が重複しています。名前をご確認ください。');
 					}else if(response.name == 'parameter err'){
 						alert('パラメータエラー。');
 					}else{

@@ -772,7 +772,17 @@ class DownloadController extends BaseController {
 			$response = new JsonResponse(array("return_cd" => false, "name" => 'preset saved count over'));
 			return $response;
 		}
-
+		
+		// プリセット名称重複チェック
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CSVPreset')->findOneBy(array(
+				'presetName' => $preset_name,
+				'deleteFlag' => FALSE
+		));
+		if($entity){
+			$response = new JsonResponse(array("return_cd" => false, "name" => 'preset saved duplicate'));
+			return $response;
+		}
+		
 		// transaction
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
