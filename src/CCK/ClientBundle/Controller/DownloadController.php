@@ -93,10 +93,10 @@ class DownloadController extends BaseController {
 	];
 
 	/**
-	 * @Route("/csv/download/index", name="client.csv.export")
+	 * @Route("/csv/download/index/{status}", name="client.csv.export")
 	 * @Template()
 	 */
-	public function indexAction(Request $request) {
+	public function indexAction(Request $request,$status) {
 		// session
 		$session = $request->getSession();
 
@@ -120,6 +120,17 @@ class DownloadController extends BaseController {
 				'deleteFlag' => FALSE
 		));
 
+		$message_honmon = '';
+		$message_sakuin = '';
+		$message_preset = '';
+		if($status == 204){
+			$message_honmon = "用語の登録がありません。教科・版を確認してください。";
+		}elseif($status == 205){
+			$message_sakuin = "用語の登録がありません。教科・版を確認してください。";
+		}elseif($status == 206){
+			$message_preset = "用語の登録がありません。教科・版を確認してください。";
+		}
+		
 		return array(
 				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
 				'cur_list' => $cur_list,
@@ -128,6 +139,9 @@ class DownloadController extends BaseController {
 				'sho_list' => array(),
 				'field_list' => $header,
 				'preset_list' => $preset,
+				'message_honmon' => $message_honmon,
+				'message_sakuin' => $message_sakuin,
+				'message_preset' => $message_preset
 		);
 	}
 
@@ -181,15 +195,6 @@ class DownloadController extends BaseController {
 
 		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($versionId,$term_id,$hen,$sho,$type);
 
-		// ヘッダー
-		if($type == '2'){
-			// 汎用CSV
-			$header = $this->encoding(explode(",", $request->query->get('generic_field')), $request);
-		}else{
-			// 本文・索引組版
-			$header = $this->encoding($this->generateHeader($entity[0]), $request);
-		}
-
 		// 原稿データCSV生成
 		if($entity){
 			$body_list = $this->constructManuscriptCSV($term_id, $request, $entity, $outFileName);
@@ -198,10 +203,26 @@ class DownloadController extends BaseController {
 		}
 
 		if($body_list === false){
-			$response = $this->responseForm('204', 'HTTP/1.1 204 No Content');
-			return $response;
+			if($type == '0'){
+				$status = 204;
+			}elseif ($type == '1'){
+				$status = 205;
+			}else{
+				$status = 206;
+			}
+			
+			return $this->redirect($this->generateUrl('client.csv.export', array('status' => $status)));
 		}
 
+		// ヘッダー
+		if($type == '2'){
+			// 汎用CSV
+			$header = $this->encoding(explode(",", $request->query->get('generic_field')), $request);
+		}else{
+			// 本文・索引組版
+			$header = $this->encoding($this->generateHeader($entity[0]), $request);
+		}
+		
 		// response
 		$response = new StreamedResponse(function() use($body_list,$header) {
 			$handle = fopen('php://output', 'w+');
