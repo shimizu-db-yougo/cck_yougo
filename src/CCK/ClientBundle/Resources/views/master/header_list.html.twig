@@ -47,7 +47,7 @@
 											{{ 'text.yougo.head.ko.add'|trans }}
 										{% endif %}
 					</td>
-					<td class="text-left">{{ header.name }}</td>
+					<td class="text-left">{{ replaceTag(header.name)|raw }}</td>
 					<td>
 						<div class="form-inline">
 							<button class="btn btn-primary btn-sm js-header-target" header-key = "{{ header.id }}" header-name = "{{ header.name }}" version-key = "{{ version }}" data-toggle="modal" master-target="#headerModal">{{ 'btn.edit'|trans }}</button>
@@ -106,7 +106,7 @@
 							<select class="form-control js-hen input-md" id="hen" name="hen">
 								<option value="0">--------------</option>
 								{% for hen in hen_list %}
-									<option value="{{ hen.hen }}">{{ hen.name }}</option>
+									<option value="{{ hen.hen }}">{{ replaceTag(hen.name)|raw }}</option>
 								{% endfor %}
 							</select>
 						</div>
@@ -241,7 +241,7 @@
 							<select class="form-control js-hen input-md" id="hen_s" name="hen_s">
 								<option value="0">--------------</option>
 								{% for hen in hen_list %}
-									<option value="{{ hen.hen }}">{{ hen.name }}</option>
+									<option value="{{ hen.hen }}">{{ replaceTag(hen.name)|raw }}</option>
 								{% endfor %}
 							</select>
 						</div>

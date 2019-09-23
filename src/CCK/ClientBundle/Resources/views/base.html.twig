@@ -106,7 +106,7 @@
 
 				$.each(response, function(key, list){
 					option = $('<option></option>');
-					option.append(list.name);
+					option.append(replaceTagOption(list.name));
 					option.attr('value', list.id);
 					// 掲載順リストの場合、修正対象の主用語のみ選択可能にする
 					if(term_id){
@@ -125,6 +125,34 @@
 			function injectOption(target, options){
 				$(target).empty().append(options);
 			}
+			
+			function replaceTagOption(val){
+				val = val.replace(/《rtn》/g,"");
+				val = val.replace(/《c_G》/g,"");
+				val = val.replace(/《\/c_G》/g,"");
+				val = val.replace(/《c_SY》/g,"");
+				val = val.replace(/《\/c_SY》/g,"");
+				val = val.replace(/《c_SK》/g,"");
+				val = val.replace(/《\/c_SK》/g,"");
+				val = val.replace(/《c_KJ》/g,"");
+				val = val.replace(/《\/c_KJ》/g,"");
+				val = val.replace(/《c_KA》/g,"");
+				val = val.replace(/《\/c_KA》/g,"");
+				val = val.replace(/《c_GAI》/g,"");
+				val = val.replace(/《\/c_GAI》/g,"");
+				val = val.replace(/《c_UT》/g,"");
+				val = val.replace(/《\/c_UT》/g,"");
+				val = val.replace(/《c_ST》/g,"");
+				val = val.replace(/《\/c_ST》/g,"");
+				val = val.replace(/《c_UBK》/g,"");
+				val = val.replace(/《\/c_UBK》/g,"");
+				val = val.replace(/《c_TM:[0-9]+》/g,"");
+				val = val.replace(/《\/c_TM》/g,"");
+				val = val.replace(/《c_SAK》/g,"");
+				val = val.replace(/《\/c_SAK》/g,"");
+				return val;
+			}
+
 
 			function changeCurriculumHeader(e,version='version'){
 				var selected_ver = e.val();
