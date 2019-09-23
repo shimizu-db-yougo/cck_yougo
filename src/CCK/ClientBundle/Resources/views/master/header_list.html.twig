@@ -168,7 +168,7 @@
 			</div>
 			<div class="modal-footer">
 					<div class="text-center">
-						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-default  js-header-cancel" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
 						<button type="button" class="btn btn-danger js-header-new-submit">{{ 'btn.yes'|trans }}</button>
 					</div>
 			</div>
@@ -196,7 +196,7 @@
 			</div>
 			<div class="modal-footer">
 					<div class="text-center">
-						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-default  js-header-cancel" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
 						<button type="button" class="btn btn-danger js-header-submit">{{ 'btn.yes'|trans }}</button>
 					</div>
 			</div>
@@ -314,7 +314,7 @@
 			</div>
 			<div class="modal-footer">
 					<div class="text-center">
-						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-default js-header-cancel" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
 						<button type="button" class="btn btn-danger js-header-sort-submit">{{ 'btn.yes'|trans }}</button>
 					</div>
 			</div>
@@ -326,9 +326,17 @@
 {% endblock %}
 {% block javascripts %}
 	{{ parent() }}
-	<script src="{{ asset('bundles/gimiccommon/jquery-ui/jquery-ui.min.js') }}"></script>
+	<script src="{{ asset('bundles/cckcommon/jquery-ui/jquery-ui.min.js') }}"></script>
 	<script>
 
+		$('.js-header-cancel').bind('click', function(){
+			$('.level-err').text('');
+			$('.hen-err').text('');
+			$('.sho-err').text('');
+			$('.chu-err').text('');
+			$('.name-err').text('');
+		});
+	
 		// 見出しマスタ新規登録
 		$('.js-header-new').bind('click', function(){
 			clearInputField();
