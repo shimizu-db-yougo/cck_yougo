@@ -55,7 +55,7 @@
 					</td>
 					<td>
 						<div class="form-inline">
-							<button class="btn btn-danger btn-sm js-header-delete" header-key = "{{ header.id }}" version-key = "{{ version }}" header-kubun = "{{ header.headerId }}">{{ 'btn.delete'|trans }}</button>
+							<button class="btn btn-danger btn-sm js-header-delete" header-key = "{{ header.id }}" version-key = "{{ version }}" header-kubun = "{{ header.headerId }}" hen-key = "{{ header.hen }}" sho-key = "{{ header.sho }}" dai-key = "{{ header.dai }}" chu-key = "{{ header.chu }}" ko-key = "{{ header.ko }}">{{ 'btn.delete'|trans }}</button>
 						</div>
 					</td>
 				</tr>
@@ -511,14 +511,24 @@
 
 			// get target
 			var target = $(e.currentTarget);
-			version = target.attr('version-key');
-			header_id = target.attr('header-key');
-			header_kubun = target.attr('header-kubun');
-
+			var version = target.attr('version-key');
+			var header_id = target.attr('header-key');
+			var header_kubun = target.attr('header-kubun');
+			var hen = target.attr('hen-key');
+			var sho = target.attr('sho-key');
+			var dai = target.attr('dai-key');
+			var chu = target.attr('chu-key');
+			var ko = target.attr('ko-key');
+			
 			var data = {
 					'version': version,
 					'header_id': header_id,
-					'header_kubun': header_kubun
+					'header_kubun': header_kubun,
+					'hen': hen,
+					'sho': sho,
+					'dai': dai,
+					'chu': chu,
+					'ko': ko
 			};
 			$.ajax({
 				url: "{{ path('client.master.header.delete') }}",

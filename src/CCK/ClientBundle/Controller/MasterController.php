@@ -434,15 +434,29 @@ class MasterController extends BaseController {
 
 		$version = $request->request->get('version');
 		$header_id = $request->request->get('header_id');
+		$header_kubun = $request->request->get('header_kubun');
+		$hen = $request->request->get('hen');
+		$sho = $request->request->get('sho');
+		$dai = $request->request->get('dai');
+		$chu = $request->request->get('chu');
+		$ko = $request->request->get('ko');
+		
+		// 削除する見出しに紐づくサブ見出しIDの取得
+		$entityHeaderSet = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getSortUpdateHeader($version, $header_kubun, $hen, $sho, $dai, $chu, $ko);
 
+		$list_header_id = '';
+		foreach($entityHeaderSet as $header_ele){
+			$list_header_id .= $header_ele['id'] . ',';
+		}
+
+		if(strlen($list_header_id)>0){$list_header_id = substr($list_header_id, 0, strlen($list_header_id)-1);}
+		
+		$this->get('logger')->error("**headerID***".$list_header_id);
+		
 		// 用語DBが登録された見出しは削除しない
-		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
-				'curriculumId' => $version,
-				'headerId' => $header_id,
-				'deleteFlag' => FALSE
-		));
+		$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoListByHeader($version, $list_header_id);
 
-		if($entity){
+		if($term){
 			$response = new JsonResponse(array("return_cd" => false, "name" => 'data exist err'));
 			return $response;
 		}
