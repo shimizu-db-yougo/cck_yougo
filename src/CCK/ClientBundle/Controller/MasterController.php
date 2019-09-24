@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\BrowserKit\Response;
 use CCK\CommonBundle\Entity\Header;
+use CCK\CommonBundle\Entity\Version;
 
 /**
  * Master controller.
@@ -440,7 +441,7 @@ class MasterController extends BaseController {
 		$dai = $request->request->get('dai');
 		$chu = $request->request->get('chu');
 		$ko = $request->request->get('ko');
-		
+
 		// 削除する見出しに紐づくサブ見出しIDの取得
 		$entityHeaderSet = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->getSortUpdateHeader($version, $header_kubun, $hen, $sho, $dai, $chu, $ko);
 
@@ -450,9 +451,9 @@ class MasterController extends BaseController {
 		}
 
 		if(strlen($list_header_id)>0){$list_header_id = substr($list_header_id, 0, strlen($list_header_id)-1);}
-		
+
 		$this->get('logger')->error("**headerID***".$list_header_id);
-		
+
 		// 用語DBが登録された見出しは削除しない
 		$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoListByHeader($version, $list_header_id);
 
@@ -497,35 +498,63 @@ class MasterController extends BaseController {
 	}
 
 	/**
-	 * @Route("/master/group/delete", name="client.master.group.delete")
-	 * @Method("POST|GET")
-	 * @Template("GIMICClientBundle:Master:group.html.twig")
+	 * @Route("/master/curriculum", name="client.master.curriculum")
+	 * @Template("CCKClientBundle:master:curriculum.html.twig")
 	 */
-	public function deleteGroupAction(Request $request){
+	public function curriculumAction(Request $request){
+		// session
 		$session = $request->getSession();
-		if(!$request->request->has('group_id')){
-			return $this->redirect($this->generateUrl('client.master.group'));
+
+		// get user information
+		$user = $this->getUser();
+
+		$page = ($request->query->has('page') && $request->query->get('page') != '') ? $request->query->get('page') : 1;
+
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+
+		return array(
+				'cur_list' => $cur_list,
+				'ver_list' => $ver_list,
+		);
+	}
+
+	/**
+	 * @Route("/master/curriculum/delete/{id}", name="client.master.cur.delete")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:master:curriculum.html.twig")
+	 */
+	public function deleteAction(Request $request, $id){
+		// get user information
+		$user = $this->getUser();
+
+		$id = (int) $id;
+
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+				'id' =>$id,
+				'deleteFlag' => FALSE
+		));
+		if(!$entity){
+			return $this->redirect($this->generateUrl('client.master.curriculum'));
 		}
+		$entity->setDeleteFlag(true);
+		$entity->setModifyDate(new \DateTime());
+		$entity->setDeleteDate(new \DateTime());
 
 		// transaction
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
 
 		try {
-			// 更新対象データの取得
-			$entity = $this->getDoctrine()->getManager()->getRepository('GIMICCommonBundle:Group')->findOneBy(array(
-					'id' =>$request->request->get('group_id'),
-					'deleteFlag' => FALSE
-			));
-
-			if($entity){
-				$entity->setDeleteDate(new \DateTime());
-				$entity->setDeleteFlag(true);
-			}
-
+			// 登録
 			$em->flush();
+			// 実行
 			$em->getConnection()->commit();
-		} catch (\Exception $e){
+		} catch(\Exception $e){
 			// もし、DBに登録失敗した場合rollbackする
 			$em->getConnection()->rollback();
 			$em->close();
@@ -535,8 +564,72 @@ class MasterController extends BaseController {
 			$this->get('logger')->error($e->getTraceAsString());
 		}
 
-		return $this->redirect($this->generateUrl('client.master.group'));
+		return $this->redirect($this->generateUrl('client.master.curriculum'));
 	}
+
+	/**
+	 * @Route("/master/curriculum/duplication", name="client.master.cur.duplication")
+	 * @Method("POST|GET")
+	 * @Template()
+	 */
+	public function duplicateAction(Request $request){
+		$session = $request->getSession();
+		if(!$request->request->has('id')){
+			return $this->redirect($this->generateUrl('client.master.curriculum'));
+		}
+
+		$id = $request->request->get('id');
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+		$max_ver = $em->getRepository('CCKCommonBundle:Version')->getRecentVersion($id);
+
+		$maintermRecordSet = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
+				'curriculumId' => $max_ver['id'],
+				'deleteFlag' => FALSE
+		));
+
+		try{
+			$entity = new Version();
+
+			$entity->setCurriculumId($id);
+			$entity->setName($request->request->get('cur_name'));
+			$em->persist($entity);
+			$em->flush();
+
+
+			foreach($maintermRecordSet as $mainterm){
+				print($mainterm->getMainTerm());
+				exit();
+
+				// 用語データの複製
+				$newTermId = $this->copyMainTerm($em, $mainterm);
+
+				$entityExp = $em->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($mainterm->getTermId());
+				$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($mainterm->getTermId());
+				$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($mainterm->getTermId());
+				$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($mainterm->getTermId());
+
+				$this->copyExpTerm($em, $entityExp, $newTermId);
+				$this->copySubTerm($em, $entitySub, $newTermId);
+				$this->copySynTerm($em, $entitySyn, $newTermId);
+				$this->copyRefTerm($em, $entityRef, $newTermId);
+
+			}
+
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.master.curriculum'));
+		}
+	}
+
 
 	/**
 	 * session remove

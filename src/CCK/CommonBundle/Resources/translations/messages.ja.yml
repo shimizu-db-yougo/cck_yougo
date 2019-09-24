@@ -54,6 +54,7 @@ btn:
         down10: 10件下に
     sort.text: ソート
     preset: プリセット
+    duplication: を複製
 
 # ソーティング
 sort:
@@ -163,6 +164,7 @@ text:
         year: 年
     curriculum:
         all: 全教科
+        name: 版名
     yougo:
         list.title: 用語一覧
         curriculum: 教科

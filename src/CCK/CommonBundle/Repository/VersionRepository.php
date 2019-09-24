@@ -37,4 +37,13 @@ class VersionRepository extends EntityRepository
 
 		return $qb->getQuery()->getResult();
 	}
+
+	public function getRecentVersion($cur){
+		$sql = "SELECT MAX(Version.id) id FROM Version WHERE curriculum_id = " . $cur . " AND delete_flag = false";
+
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result[0];
+	}
+
 }

@@ -1,0 +1,148 @@
+{% extends "CCKClientBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+	{{ parent() }}
+{% endblock %}
+
+{% block contents %}
+<div class="row">
+<blockquote class="blockquote-bottom pdr-0">
+	<p>{{ 'text.master.curriculum'|trans }}</p>
+</blockquote>
+</div>
+
+<div class="row">
+	<div class="col-lg-2">
+		{#{ return_msg }#}
+	</div>
+	<!-- <div class="col-lg-10">
+		<div class="pull-right">
+			<button class="btn btn-primary btn-lg js-header-new">{{ 'btn.new.default'|trans }}</button>
+		</div>
+	</div> -->
+</div>
+
+<div class="row">
+	{% for cur_elem in cur_list %}
+	<div class="col-lg-4">
+		<table class="table table-responsive table-striped">
+			<thead>
+				<tr>
+					<th width="90px" class="text-left">{{ cur_elem.name }}</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for ver_elem in ver_list %}
+				{% if cur_elem.id == ver_elem.curriculumId %}
+				<tr class="text-center">
+					<td class="text-left">{{ ver_elem.name }}</td>
+					<td>
+						<div class="form-inline">
+							<a href="{{ path('client.master.cur.delete', {'id': ver_elem.id}) }}"><button class="btn btn-danger btn-sm button_yougo_list" name="id" onClick="return checkDelete(this.form)">{{ 'btn.delete'|trans }}</button></a>
+						</div>
+					</td>
+				</tr>
+				{% endif %}
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% endfor %}
+</div>
+
+<div class="row">
+	{% for cur_elem in cur_list %}
+	<div class="col-lg-4">
+		<table class="table table-responsive table-striped">
+			<tbody>
+			<tr class="text-center">
+				<td>
+					<div class="form-inline">
+						<button class="btn btn-primary btn-sm button_yougo_list js-curriculum-target" curriculum-key = "{{ cur_elem.id }}" data-toggle="modal" master-target="#curriculumModal">{{ cur_elem.name~'btn.duplication'|trans }}</button>
+					</div>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	{% endfor %}
+</div>
+
+<div class="modal-footer">
+	<div class="text-center">
+		<a href="{{ path('client.master.index') }}"><div class="btn btn-default" name="back">{{ 'btn.back'|trans }}</div></a>
+	</div>
+</div>
+
+<div class="modal fade" id="curriculumModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog header-modal" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				教科・版の複製
+			</div>
+			<div class="modal-body">
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-2">{{ 'text.curriculum.name'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="name-err" class="name-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="cur_name" name="cur_name" >
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default js-curriculum-cancel" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-danger js-curriculum-submit">{{ 'btn.yes'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('bundles/cckcommon/jquery-ui/jquery-ui.min.js') }}"></script>
+	<script>
+		var cur_id;
+		$(".js-curriculum-target").bind('click', function(e){
+			// get target
+			var target = $(e.currentTarget);
+
+			cur_id = target.attr('curriculum-key');
+
+			$('#curriculumModal').modal();
+
+		});
+
+		$('.js-curriculum-submit').bind('click', function(e){
+			var cur_name = $('#cur_name').val();
+
+			var str_html = '';
+			str_html = "<input type='hidden' name='cur_name' value=\"" + cur_name.replace(/"/i, "&quot;") + "\">";
+
+			if(cur_id !== void 0){
+				// create form
+				$('<form>', {
+					"id": "duplicateCurriculumForm",
+					"html": "<input type='hidden' name='id' value='" + cur_id + "'>" + str_html,
+					"action": "{{ path('client.master.cur.duplication') }}",
+					"method": "POST"
+				}).appendTo(document.body).submit();
+			}
+		});
+
+		function checkDelete(form){
+			if(window.confirm('教科データを削除します。よろしいですか。')){
+				return true;
+			}else{
+				return false;
+			}
+		}
+
+		$(function(){
+		});
+	</script>
+{% endblock %}
+
