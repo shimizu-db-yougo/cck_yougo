@@ -349,12 +349,12 @@ class MainTermRepository extends EntityRepository
 			$sql .= " AND Header.sho = '" . str_replace("'", "''", $sho) . "'";
 		}
 
-		if($type == '0'){
-			// 本文
-			$sql .= " ORDER BY Header.hen,Header.sho,Header.dai,Header.chu,Header.ko,MainTerm.print_order,MainTerm.term_id";
-		}else{
+		if($type == '1'){
 			// 索引
 			$sql .= " ORDER BY MainTerm.index_kana,MainTerm.term_id";
+		}else{
+			// 本文
+			$sql .= " ORDER BY Header.hen,Header.sho,Header.dai,Header.chu,Header.ko,MainTerm.print_order,MainTerm.term_id";
 		}
 
 

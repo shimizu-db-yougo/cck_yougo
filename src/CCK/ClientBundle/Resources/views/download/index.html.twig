@@ -191,7 +191,7 @@
 			<div class="col-sm-5">
 				{{ message_preset }}
 			</div>
-			
+
 		</div>
 	</div>
 	<div class="modal-footer">
@@ -372,6 +372,10 @@
 
 		var str_html = "<input type='hidden' name='curriculum' value='" + document.getElementById('curriculum').value + "'>";
 		str_html += "<input type='hidden' name='version' value='" + document.getElementById('version').value + "'>";
+
+		var select_preset = document.getElementById('preset');
+		var preset_name = select_preset.options[select_preset.selectedIndex].text;
+		str_html += "<input type='hidden' name='preset' value='" + preset_name + "'>";
 		str_html += "<input type='hidden' name='type' value='2'>";
 		str_html += "<input type='hidden' name='generic_field' value='" + generic_field + "'><input type='hidden' name='generic_value' value='" + generic_value + "'>";
 

@@ -130,7 +130,7 @@ class DownloadController extends BaseController {
 		}elseif($status == 206){
 			$message_preset = "用語の登録がありません。教科・版を確認してください。";
 		}
-		
+
 		return array(
 				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
 				'cur_list' => $cur_list,
@@ -161,23 +161,25 @@ class DownloadController extends BaseController {
 
 		// 教科名の取得
 		$curriculumId = $request->query->get('curriculum');
-		$versionId = $request->query->get('version');
+
+		// 本文/索引の区分
+		$type = $request->query->get('type');
+		if($type == '0'){
+			$type_name = '本文';
+			$versionId = $request->query->get('version');
+		}elseif($type == '1'){
+			$type_name = '索引';
+			$versionId = $request->query->get('version2');
+		}else{
+			$type_name = $request->query->get('preset');
+			$versionId = $request->query->get('version');
+		}
 
 		$entityCurriculum = $em->getRepository('CCKCommonBundle:Curriculum')->getCurriculumVersionList($versionId);
 
 		$cur_name = '';
 		if($entityCurriculum){
 			$cur_name = $entityCurriculum[0]['cur_name'] . '_' . $entityCurriculum[0]['name'];
-		}
-
-		// 本文/索引の区分
-		$type = $request->query->get('type');
-		if($type == '0'){
-			$type_name = '本文';
-		}elseif($type == '1'){
-			$type_name = '索引';
-		}else{
-			$type_name = 'preset';
 		}
 
 		// 見出しID(編、章)
@@ -210,7 +212,7 @@ class DownloadController extends BaseController {
 			}else{
 				$status = 206;
 			}
-			
+
 			return $this->redirect($this->generateUrl('client.csv.export', array('status' => $status)));
 		}
 
@@ -222,7 +224,7 @@ class DownloadController extends BaseController {
 			// 本文・索引組版
 			$header = $this->encoding($this->generateHeader($entity[0]), $request);
 		}
-		
+
 		// response
 		$response = new StreamedResponse(function() use($body_list,$header) {
 			$handle = fopen('php://output', 'w+');
@@ -707,7 +709,10 @@ class DownloadController extends BaseController {
 				'hen' => $entityHeader->getHen(),
 				'deleteFlag' => FALSE
 		));
-		$record['hen'] = $entityHen->getName();
+		$record['hen'] = "";
+		if($entityHen){
+			$record['hen'] = $entityHen->getName();
+		}
 
 		$entitySho = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findOneBy(array(
 				'versionId' => $record['ver_id'],
@@ -793,7 +798,7 @@ class DownloadController extends BaseController {
 			$response = new JsonResponse(array("return_cd" => false, "name" => 'preset saved count over'));
 			return $response;
 		}
-		
+
 		// プリセット名称重複チェック
 		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CSVPreset')->findOneBy(array(
 				'presetName' => $preset_name,
@@ -803,7 +808,7 @@ class DownloadController extends BaseController {
 			$response = new JsonResponse(array("return_cd" => false, "name" => 'preset saved duplicate'));
 			return $response;
 		}
-		
+
 		// transaction
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
