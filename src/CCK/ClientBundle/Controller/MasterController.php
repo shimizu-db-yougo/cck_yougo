@@ -18,6 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\BrowserKit\Response;
 use CCK\CommonBundle\Entity\Header;
 use CCK\CommonBundle\Entity\Version;
+use CCK\CommonBundle\Entity\User;
 
 /**
  * Master controller.
@@ -626,6 +627,220 @@ class MasterController extends BaseController {
 		return $this->redirect($this->generateUrl('client.master.curriculum'));
 	}
 
+	/**
+	 * @Route("/master/user", name="client.master.user")
+	 * @Template("CCKClientBundle:master:user.html.twig")
+	 */
+	public function userAction(Request $request){
+		// session
+		$session = $request->getSession();
+
+		// get user information
+		$user = $this->getUser();
+
+		$page = ($request->query->has('page') && $request->query->get('page') != '') ? $request->query->get('page') : 1;
+
+		$user_list = $this->getDoctrine()->getEntityManager()->getRepository('CCKCommonBundle:User')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$pagination = $this->createPagination($request, $user_list, 30, $page);
+
+		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+		$ver_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+				'deleteFlag' => FALSE
+		));
+
+		return array(
+				'pagination' => $pagination,
+				'currentUser'	=> ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
+				'closeGenko' => $user->getUserId(),
+				'cur_list' => $cur_list,
+				'ver_list' => $ver_list,
+		);
+	}
+
+	/**
+	 * @Route("/master/user/new", name="client.master.user.new")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:master:user.html.twig")
+	 */
+	public function newUserAction(Request $request){
+		$session = $request->getSession();
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			$user_id = $request->request->get('user_id');
+			$password = $request->request->get('password');
+			$name = $request->request->get('name');
+
+			$user_obj = new User();
+
+			$user_obj->setUserId($user_id);
+
+			$encoder = $this->container->get('security.password_encoder');
+			$encoded = $encoder->encodePassword($user_obj, $request->request->get('password'));
+			$user_obj->setPassword($encoded);
+
+			$user_obj->setName($name);
+			$user_obj->setListCnt(0);
+
+			$em->persist($user_obj);
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		}
+
+		return $this->redirect($this->generateUrl('client.master.user'));
+	}
+
+
+	/**
+	 * @Route("/master/user/update", name="client.master.user.update")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:,master:user.html.twig")
+	 */
+	public function updateUserAction(Request $request){
+		$session = $request->getSession();
+		if(!$request->request->has('id')){
+			return $this->redirect($this->generateUrl('client.master.user'));
+		}
+
+		$id = (int) $request->request->get('id');
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:User')->findOneBy(array(
+				'id' =>$id,
+				'deleteFlag' => FALSE
+		));
+		if(!$entity){
+			return $this->redirect($this->generateUrl('client.master.user'));
+		}
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			if($request->request->has('user_id')){
+				$entity->setUserId($request->request->get('user_id'));
+			}
+			if($request->request->has('password')){
+				$encoder = $this->container->get('security.password_encoder');
+				$encoded = $encoder->encodePassword($entity, $request->request->get('password'));
+				$entity->setPassword($encoded);
+			}
+			if($request->request->has('name')){
+				$entity->setName($request->request->get('name'));
+			}
+
+			$em->flush();
+			$em->getConnection()->commit();
+
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		}
+
+		return $this->redirect($this->generateUrl('client.master.user'));
+	}
+
+	/**
+	 * @Route("/master/user/delete", name="client.master.user.delete")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:master:user.html.twig")
+	 */
+	public function deleteUserAction(Request $request){
+		$session = $request->getSession();
+		if(!$request->request->has('id')){
+			return $this->redirect($this->generateUrl('client.master.user'));
+		}
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			// 更新対象データの取得
+			$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:User')->findOneBy(array(
+					'id' =>$request->request->get('id'),
+					'deleteFlag' => FALSE
+			));
+
+			if($entity){
+				$entity->setDeleteDate(new \DateTime());
+				$entity->setDeleteFlag(true);
+			}
+
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		}
+
+		return $this->redirect($this->generateUrl('client.master.user'));
+	}
+
+	/**
+	 * @Route("/master/user/ajax", name="client.master.user.ajax")
+	 */
+	public function getUserAjaxAction(Request $request){
+		$user = $this->getUser();
+
+		$user_id = "";
+		if($request->request->has('user_id')){
+			$user_id = $request->request->get('user_id');
+		}
+
+		// 自分のユーザIDは重複チェックから省く
+		$self_user_id = "";
+		if($request->request->has('index_id')){
+			$index_id = $request->request->get('index_id');
+			if($index_id != ""){
+				$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:User')->findOneBy(array(
+						'id' =>$index_id,
+						'deleteFlag' => FALSE
+				));
+
+				if($entity){
+					$self_user_id = $entity->getUserId();
+				}
+			}
+		}
+
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:User')->findOneBy(array(
+				'user_id' =>$user_id
+		));
+
+		$is_used = '';
+		if(($entity)&&($self_user_id != $user_id)){
+			$is_used = 'user_id';
+		}
+
+		$response = new JsonResponse($is_used);
+
+		return $response;
+	}
 
 	/**
 	 * session remove

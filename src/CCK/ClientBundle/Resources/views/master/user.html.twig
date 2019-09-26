@@ -1,0 +1,375 @@
+{% extends "CCKClientBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+	{{ parent() }}
+{% endblock %}
+
+{% block contents %}
+<div class="row">
+<blockquote class="blockquote-bottom pdr-0">
+	<p>{{ 'text.master.user'|trans }}</p>
+</blockquote>
+</div>
+
+<div class="row">
+	<div class="col-lg-2">
+		{#{ return_msg }#}
+	</div>
+	<div class="col-lg-10">
+		<div class="pull-right">
+			<button class="btn btn-primary btn-lg js-user-new">{{ 'btn.new.default'|trans }}</button>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12 text-center">
+		{{ knp_pagination_render(pagination) }}
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+		<table class="table table-responsive table-striped">
+			<thead>
+				<tr>
+					<th width="90px" class="text-left">{{ 'text.user.id'|trans }}</th>
+					<th width="70px" class="text-left">{{ 'text.user.login_id'|trans }}</th>
+					<th width="120px" class="text-left">{{ 'text.user.name'|trans }}</th>
+					<th width="60px" class="text-center">{{ 'btn.edit'|trans }}</th>
+					<th width="40px" class="text-center">{{ 'text.delete'|trans }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for user in pagination %}
+				<tr class="text-center">
+					<td class="text-left">{{ user.id }}</td>
+					<td class="text-left">{{ user.userId }}</td>
+					<td class="text-left">{{ user.name }}</td>
+					<td>
+						<div class="form-inline">
+							<button class="btn btn-primary btn-sm js-user-target" user-key = "{{ user.id }}" user-id = "{{ user.userId }}" user-name = "{{ user.name }}" data-toggle="modal" master-target="#userModal">{{ 'btn.edit'|trans }}</button>
+						</div>
+					</td>
+					<td>
+						<div class="form-inline">
+							<button type="button" class="btn btn-danger btn-sm js-delete-target" data-target="{{ user.id }}" data-toggle="modal" data-target="#deleteModal">{{ 'btn.delete'|trans }}</button>
+						</div>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="modal-footer">
+	<div class="text-center">
+		<a href="{{ path('client.master.index') }}"><div class="btn btn-default" name="back">{{ 'btn.back'|trans }}</div></a>
+	</div>
+</div>
+
+<!-- ユーザマスタ新規登録  -->
+<div class="modal fade" id="userNewModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog user-modal" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				ユーザマスタの新規登録
+			</div>
+			<div class="modal-body">
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.user.user_id'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="user_id_n-err" class="user_id-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="user_id_n" name="user_id_n" >
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.password'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="password_n-err" class="password-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="password_n" name="password_n" >
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.user.name'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="name_n-err" class="name-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="name_n" name="name_n" >
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default js-user-cancel" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-danger js-user-new-submit">{{ 'btn.yes'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- ユーザマスタ新規登録  -->
+<!-- ユーザマスタ更新  -->
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog user-modal" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				ユーザマスタの更新
+			</div>
+			<div class="modal-body">
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.user.user_id'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="user_id-err" class="user_id-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="user_id" name="user_id" >
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.password'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="password-err" class="password-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="password" name="password" >
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.user.name'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="name-err" class="name-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="name" name="name" >
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default js-user-cancel-edit" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-danger js-user-submit">{{ 'btn.yes'|trans }}</button>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+<!-- ユーザマスタ更新  -->
+
+<!-- 削除  -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="myModalLabel">{{ 'text.delete.title'|trans }}</h4>
+			</div>
+			<div class="modal-body">
+				<p class="text-center alert alert-danger">{{ 'text.delete.description'|trans }}</p>
+			</div>
+			<div class="modal-footer">
+				<div class="text-center">
+					<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+					<button type="button" class="btn btn-danger js-delete-submit">{{ 'btn.yes'|trans }}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+<!-- 削除  -->
+
+{% endblock %}
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('bundles/cckcommon/jquery-ui/jquery-ui.min.js') }}"></script>
+	<script>
+
+		// キャンセル
+		$('.js-user-cancel').bind('click', function(e){
+			$('#user_id_n').val('');
+			$('#password_n').val('');
+			$('#name_n').val('');
+
+			$('.user_id-err').text('');
+			$('.password-err').text('');
+			$('.name-err').text('');
+		});
+
+		$('.js-user-cancel-edit').bind('click', function(e){
+			$('.user_id-err').text('');
+			$('.password-err').text('');
+			$('.name-err').text('');
+		});
+
+		// ユーザマスタ新規登録
+		$('.js-user-new').bind('click', function(){
+			$('#userNewModal').modal();
+		});
+
+		// ユーザマスタ 新規登録
+		$('.js-user-new-submit').bind('click', function(e){
+
+			var user_id = $('#user_id_n').val();
+			var password = $('#password_n').val();
+			var name = $('#name_n').val();
+
+			// ユーザID重複チェック
+			if(userDuplicatedCheck(user_id,'') == true){
+				$('.user_id-err').text('ユーザIDが重複しています。');
+				return false;
+			}
+
+			if(user_id == ''){
+				$('.user_id-err').text('必須項目です');
+				return false;
+			}
+
+			if(!user_id.match(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i)){
+				$('.user_id-err').text('ログインIDはメールアドレス形式で登録してください。');
+				return false;
+			}
+
+			if((password.length < 6)||(password.length > 12)){
+				$('.password-err').text('パスワードは6桁以上12桁以下で入力してください。');
+				return false;
+			}
+
+			if((!password.match(/[a-z]/))||(!password.match(/[A-Z]/))||(!password.match(/[0-9]/))||(!password.match(/[ -\/:-@\[-`\{-\~]/))){
+				$('.password-err').text('パスワードは半角の英大文字・英小文字・数字・記号をすべて使用して入力してください。');
+				return false;
+			}
+
+			var str_html = '';
+			str_html = "<input type='hidden' name='user_id' value=\"" + user_id.replace(/"/i, "&quot;") + "\">" +
+			"<input type='hidden' name='password' value=\"" + password.replace(/"/i, "&quot;") + "\">" +
+			"<input type='hidden' name='name' value=\"" + name.replace(/"/i, "&quot;") + "\">";
+
+			// create form
+			$('<form>', {
+				"id": "registerUserForm",
+				"html": str_html,
+				"action": "{{ path('client.master.user.new') }}",
+				"method": "POST"
+			}).appendTo(document.body).submit();
+		});
+
+		// ユーザマスタ更新
+		var index_id;
+		$(".js-user-target").bind('click', function(e){
+			// get target
+			var target = $(e.currentTarget);
+
+			index_id = target.attr('user-key');
+			user_id = target.attr('user-id');
+			name = target.attr('user-name');
+
+			// modal open
+			$('#user_id').val(user_id);
+			$('#name').val(name);
+
+			$('#userModal').modal();
+
+		});
+
+		// ユーザマスタの更新
+		$('.js-user-submit').bind('click', function(e){
+			var user_id = $('#user_id').val();
+			var password = $('#password').val();
+			var name = $('#name').val();
+
+			// ユーザID重複チェック
+			if(userDuplicatedCheck(user_id,index_id) == true){
+				$('.user_id-err').text('ユーザIDが重複しています。');
+				return false;
+			}
+
+			// 入力チェック
+			if(user_id == ''){
+				$('.user_id-err').text('必須項目です');
+				return false;
+			}
+
+			if(!user_id.match(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i)){
+				$('.user_id-err').text('ログインIDはメールアドレス形式で登録してください。');
+				return false;
+			}
+
+			if((password.length < 6)||(password.length > 12)){
+				$('.password-err').text('パスワードは6桁以上12桁以下で入力してください。');
+				return false;
+			}
+
+			if((!password.match(/[a-z]/))||(!password.match(/[A-Z]/))||(!password.match(/[0-9]/))||(!password.match(/[ -\/:-@\[-`\{-\~]/))){
+				$('.password-err').text('パスワードは半角の英大文字・英小文字・数字・記号をすべて使用して入力してください。');
+				return false;
+			}
+
+			var str_html = '';
+			str_html = "<input type='hidden' name='user_id' value=\"" + user_id.replace(/"/i, "&quot;") + "\">" +
+						"<input type='hidden' name='password' value=\"" + password.replace(/"/i, "&quot;") + "\">" +
+						"<input type='hidden' name='name' value=\"" + name.replace(/"/i, "&quot;") + "\">";
+
+			if(index_id !== void 0){
+				// create form
+				$('<form>', {
+					"id": "updateUserForm",
+					"html": "<input type='hidden' name='id' value='" + index_id + "'>" + str_html,
+					"action": "{{ path('client.master.user.update') }}",
+					"method": "POST"
+				}).appendTo(document.body).submit();
+			}
+		});
+
+		function userDuplicatedCheck(user_id,index_id){
+			var data = {
+					'user_id': user_id,
+					'index_id': index_id
+				};
+			var jqxhr;
+			var is_duplicated = false;
+			jqxhr = $.ajax({
+					url: "{{ path('client.master.user.ajax') }}",
+					data: data,
+					method: 'POST',
+					async: false,
+					success: function (response) {
+						return_cd = response;
+						if (response == '') {
+							is_duplicated = false;
+						} else {
+							is_duplicated = true;
+						}
+					},
+					error: function (response) {
+						alert('ネットワークエラー。');
+						return false;
+					}
+				}).done(function(data){
+				}).fail(function(){
+					jqxhr.abort();
+				});
+
+			return is_duplicated;
+		}
+
+		function checkDelete(form){
+			if(window.confirm('教科データを削除します。よろしいですか。')){
+				return true;
+			}else{
+				return false;
+			}
+		}
+
+		$(function(){
+		});
+	</script>
+{% endblock %}
+
