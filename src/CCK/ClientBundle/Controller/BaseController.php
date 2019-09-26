@@ -496,7 +496,7 @@ class BaseController extends Controller {
 		return $retChar;
 	}
 
-	public function copyMainTerm($em, $entityMain){
+	public function copyMainTerm($em, $entityMain, $newCurId = null){
 
 		$entityNewMain = new MainTerm();
 
@@ -509,7 +509,13 @@ class BaseController extends Controller {
 			$newTermId = (int)$maxTermIDRec[0]['term_id'] + 1;
 
 			$entityNewMain->setTermId($newTermId);
-			$entityNewMain->setCurriculumId($entityMain->getCurriculumId());
+
+			if($newCurId){
+				$entityNewMain->setCurriculumId($newCurId);
+			}else{
+				$entityNewMain->setCurriculumId($entityMain->getCurriculumId());
+			}
+
 			$entityNewMain->setHeaderId($entityMain->getHeaderId());
 			$entityNewMain->setPrintOrder($entityMain->getPrintOrder());
 			$entityNewMain->setMainTerm($entityMain->getMainTerm());

@@ -570,7 +570,7 @@ class MasterController extends BaseController {
 	/**
 	 * @Route("/master/curriculum/duplication", name="client.master.cur.duplication")
 	 * @Method("POST|GET")
-	 * @Template()
+	 * @Template("CCKClientBundle:master:curriculum.html.twig")
 	 */
 	public function duplicateAction(Request $request){
 		$session = $request->getSession();
@@ -597,13 +597,9 @@ class MasterController extends BaseController {
 			$em->persist($entity);
 			$em->flush();
 
-
 			foreach($maintermRecordSet as $mainterm){
-				print($mainterm->getMainTerm());
-				exit();
-
 				// 用語データの複製
-				$newTermId = $this->copyMainTerm($em, $mainterm);
+				$newTermId = $this->copyMainTerm($em, $mainterm, $entity->getId());
 
 				$entityExp = $em->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($mainterm->getTermId());
 				$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($mainterm->getTermId());
@@ -626,8 +622,8 @@ class MasterController extends BaseController {
 			$this->get('logger')->error($e->getMessage());
 			$this->get('logger')->error($e->getTraceAsString());
 
-			return $this->redirect($this->generateUrl('client.master.curriculum'));
 		}
+		return $this->redirect($this->generateUrl('client.master.curriculum'));
 	}
 
 
