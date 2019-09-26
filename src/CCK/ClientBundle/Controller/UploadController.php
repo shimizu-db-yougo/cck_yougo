@@ -174,7 +174,15 @@ class UploadController extends BaseController {
 						$is_term = true;
 						$term = false;
 
-						if(substr($termID, 0, 1) == 'M'){
+						if(strpos($termID, '.') !== false){
+							// 画像ファイル名
+							$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+									'illustFilename' => $termID,
+									'deleteFlag' => FALSE
+							));
+
+							$is_term = false;
+						}elseif(substr($termID, 0, 1) == 'M'){
 							$termID = ltrim(substr($termID, 1), '0');
 
 							$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
@@ -202,14 +210,6 @@ class UploadController extends BaseController {
 									'id' => $termID,
 									'deleteFlag' => FALSE
 							));
-						}elseif(strpos($termID, '.') !== false){
-							// 画像ファイル名
-							$term = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
-									'illustFilename' => $termID,
-									'deleteFlag' => FALSE
-							));
-
-							$is_term = false;
 						}
 
 						if($term){
