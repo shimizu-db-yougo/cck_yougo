@@ -246,6 +246,9 @@ class DownloadController extends BaseController {
 		$response->headers->set('Content-Type', 'application/octet-stream');
 		$response->headers->set('Content-Disposition', 'attachment; filename='. $outFileName);
 
+		// ダウンロード完了時にローディング表示を消す
+		setcookie('downloaded','complete',0,'/');
+
 		return $response;
 
 	}

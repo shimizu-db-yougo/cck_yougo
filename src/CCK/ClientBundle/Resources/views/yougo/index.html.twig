@@ -3,6 +3,28 @@
 {% block stylesheets %}
 	{{ parent() }}
 	{% include 'CCKClientBundle:Common:style_yougo.html.twig' %}
+
+	<style>
+	#loading {
+		z-index: 40;
+		display: table;
+		width: 100%;
+		height: 100%;
+		position: fixed;
+		top: 0;
+		left: 0;
+		background-color: #fff;
+		opacity: 0.8;
+	}
+
+	#loading .loadingMsg {
+		display: table-cell;
+		text-align: center;
+		vertical-align: middle;
+		padding-top: 140px;
+		background: url({{ asset('./img/gif-load.gif') }}) center center no-repeat;
+	}
+	</style>
 {% endblock %}
 
 {% block contents %}
@@ -124,7 +146,7 @@
 									<input type="text" class="form-control input-sm" name="term" value="{{ term }}">
 								</div>
 								<div class="col-sm-1">
-									<button class="btn btn-primary button_text_align input-sm" type="submit">{{ 'btn.search'|trans }}</button>
+									<button class="btn btn-primary button_text_align input-sm" type="submit" OnClick="loading('処理中...');">{{ 'btn.search'|trans }}</button>
 								</div>
 								<div class="col-sm-1">
 									<button class="btn btn-default button_text_align input-sm" type="button" OnClick="search_clear();">{{ 'btn.clear'|trans }}</button>

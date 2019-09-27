@@ -92,6 +92,7 @@
 		<script src="{{ asset('bundles/cckcommon/bootstrap/js/bootstrap.min.js') }}"></script>
 		<script src="{{ asset('bundles/cckcommon/js/docs.min.js') }}"></script>
 		<script src="{{ asset('bundles/cckcommon/js/common.js') }}?{{ 'now'|date('U') }}"></script>
+		<script src="{{ asset('bundles/cckcommon/jquery-cookie-master/src/jquery.cookie.js') }}"></script>
 		<script>
 			function generateOptions(response,skipNotApplicable = false,term_id = false){
 				var options = [];
@@ -125,7 +126,7 @@
 			function injectOption(target, options){
 				$(target).empty().append(options);
 			}
-			
+
 			function replaceTagOption(val){
 				val = val.replace(/《rtn》/g,"");
 				val = val.replace(/《c_G》/g,"");
@@ -513,6 +514,19 @@
 					window.location.href = "{{ path('client.yougo.index') }}" + "?curriculum=" + cur + "&version=" + ver;
 				});
 			});
+
+			function loading(msg){
+				// 引数なし（メッセージなし）を許容
+				if( msg == undefined ){
+					msg = "";
+				}
+				// 画面表示メッセージ
+				var dispMsg = "<div class='loadingMsg'>" + msg + "</div>";
+				// ローディング画像が表示されていない場合のみ出力
+				if($("#loading").length == 0){
+					$("body").append("<div id='loading'>" + dispMsg + "</div>");
+				}
+			}
 		</script>
 
 		{% endblock %}
