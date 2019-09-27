@@ -760,15 +760,13 @@ class MasterController extends BaseController {
 	}
 
 	/**
-	 * @Route("/master/user/delete", name="client.master.user.delete")
+	 * @Route("/master/user/delete/{id}", name="client.master.user.delete")
 	 * @Method("POST|GET")
 	 * @Template("CCKClientBundle:master:user.html.twig")
 	 */
-	public function deleteUserAction(Request $request){
-		$session = $request->getSession();
-		if(!$request->request->has('id')){
-			return $this->redirect($this->generateUrl('client.master.user'));
-		}
+	public function deleteUserAction(Request $request, $id){
+
+		$id = (int) $id;
 
 		// transaction
 		$em = $this->get('doctrine.orm.entity_manager');
@@ -777,11 +775,12 @@ class MasterController extends BaseController {
 		try {
 			// 更新対象データの取得
 			$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:User')->findOneBy(array(
-					'id' =>$request->request->get('id'),
+					'id' =>$id,
 					'deleteFlag' => FALSE
 			));
 
 			if($entity){
+				$entity->setModifyDate(new \DateTime());
 				$entity->setDeleteDate(new \DateTime());
 				$entity->setDeleteFlag(true);
 			}
