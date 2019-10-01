@@ -2,14 +2,14 @@
 	<li class="side-select"><select class="form-control js-cur-side" name="cur">
 		<option value="0">{{ 'text.curriculum.all'|trans }}</option>
 		{% for cur in cur_list %}
-			<option value="{{ cur.id }}">{{ cur.name }}</option>
+			<option value="{{ cur.id }}" {{ cur.id == curriculum ? " selected " : '' }}>{{ cur.name }}</option>
 		{% endfor %}
 	</select></li>
 	<li>&nbsp;</li>
 	<li class="side-select"><select class="form-control js-han-side" name="ver" disabled>
 		<option value="0">--------------</option>
 		{% for ver in ver_list %}
-			<option value="{{ ver.id }}">{{ ver.name }}</option>
+			<option value="{{ ver.id }}" {{ ver.id == version ? " selected " : '' }}>{{ ver.name }}</option>
 		{% endfor %}
 	</select></li>
 	<li><hr></li>
