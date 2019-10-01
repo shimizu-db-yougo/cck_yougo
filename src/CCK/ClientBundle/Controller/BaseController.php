@@ -14,6 +14,7 @@ use CCK\CommonBundle\Entity\SubTerm;
 use CCK\CommonBundle\Entity\Synonym;
 use CCK\CommonBundle\Entity\Refer;
 use CCK\CommonBundle\Entity\ExplainIndex;
+use CCK\CommonBundle\Entity\Center;
 
 class BaseController extends Controller {
 
@@ -595,6 +596,7 @@ class BaseController extends Controller {
 		$em->getConnection()->beginTransaction();
 
 		try{
+			$arr_rtn_id = array();
 			foreach($entitySub as $entitySubRec){
 				$entityNewSub = new SubTerm();
 
@@ -614,6 +616,8 @@ class BaseController extends Controller {
 
 				$em->persist($entityNewSub);
 				$em->flush();
+
+				array_push($arr_rtn_id, $entityNewSub->getId());
 			}
 
 			$em->getConnection()->commit();
@@ -627,6 +631,7 @@ class BaseController extends Controller {
 
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
+		return $arr_rtn_id;
 	}
 
 	public function copySynTerm($em, $entitySyn, $newTermId){
@@ -634,6 +639,7 @@ class BaseController extends Controller {
 		$em->getConnection()->beginTransaction();
 
 		try{
+			$arr_rtn_id = array();
 			foreach($entitySyn as $entitySynRec){
 				$entityNewSyn = new Synonym();
 
@@ -652,6 +658,8 @@ class BaseController extends Controller {
 
 				$em->persist($entityNewSyn);
 				$em->flush();
+
+				array_push($arr_rtn_id, $entityNewSyn->getId());
 			}
 
 			$em->getConnection()->commit();
@@ -665,6 +673,7 @@ class BaseController extends Controller {
 
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
+		return $arr_rtn_id;
 	}
 
 	public function copyRefTerm($em, $entityRef, $newTermId){
@@ -682,6 +691,65 @@ class BaseController extends Controller {
 
 				$em->persist($entityNewRef);
 				$em->flush();
+			}
+
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	public function copyCenterData($em, $entityCenter, $newTermId, $newSubId, $newSynId){
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			$idx = 0;
+			$idx_sub = 0;
+			$idx_syn = 0;
+
+			foreach($entityCenter as $entityCenterRec){
+				$entityNewCenter = new Center();
+				$idx++;
+
+				$entityNewCenter->setMainTermId($newTermId);
+				if($entityCenterRec->getYougoFlag() == 1){
+					$entityNewCenter->setSubTermId(null);
+
+					if($idx == 10){$idx = 0;}
+				}elseif($entityCenterRec->getYougoFlag() == 2){
+					$entityNewCenter->setSubTermId($newSubId[$idx_sub]);
+
+					if($idx == 10){
+						$idx = 0;
+						$idx_sub++;
+					}
+
+				}else{
+					$entityNewCenter->setSubTermId($newSynId[$idx_syn]);
+
+					if($idx == 10){
+						$idx = 0;
+						$idx_syn++;
+					}
+
+				}
+				$entityNewCenter->setYougoFlag($entityCenterRec->getYougoFlag());
+				$entityNewCenter->setYear($entityCenterRec->getYear());
+				$entityNewCenter->setMainExam($entityCenterRec->getMainExam());
+				$entityNewCenter->setSubExam($entityCenterRec->getSubExam());
+				$entityNewCenter->setDeleteFlag(false);
+
+				$em->persist($entityNewCenter);
+				$em->flush();
+
 			}
 
 			$em->getConnection()->commit();

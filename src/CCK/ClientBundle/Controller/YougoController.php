@@ -476,6 +476,7 @@ class YougoController extends BaseController {
 
 			// 見出し変更により改修対象の主用語を掲載順リストに表示できなくなるので、先頭に主用語を付与する
 			if($term_id != ''){
+				$term_id = ltrim(substr($term_id, 1),'0'); // 用語ID"M00XXXX"先頭の"M00"を削除
 				$is_meinterm_exist = false;
 				foreach ($term as $term_ele){
 					if($term_ele['id'] == $term_id){
@@ -1692,13 +1693,19 @@ class YougoController extends BaseController {
 		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($id);
 		$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($id);
 		$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($id);
+		$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
+				'mainTermId' => $id,
+				'deleteFlag' => FALSE
+				),
+				array('id' => 'ASC','yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
 
 		// 用語データの複製
 		$newTermId = $this->copyMainTerm($em, $entityMain);
 		$this->copyExpTerm($em, $entityExp, $newTermId);
-		$this->copySubTerm($em, $entitySub, $newTermId);
-		$this->copySynTerm($em, $entitySyn, $newTermId);
+		$newSubId = $this->copySubTerm($em, $entitySub, $newTermId);
+		$newSynId = $this->copySynTerm($em, $entitySyn, $newTermId);
 		$this->copyRefTerm($em, $entityRef, $newTermId);
+		$this->copyCenterData($em, $entityCenter, $newTermId, $newSubId, $newSynId);
 
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE
