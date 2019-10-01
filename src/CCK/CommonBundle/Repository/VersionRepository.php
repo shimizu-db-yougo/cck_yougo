@@ -19,7 +19,7 @@ class VersionRepository extends EntityRepository
 			->addSelect('c.id')
 			->where('c.deleteFlag = :deleteFlag')
 			->andWhere('c.curriculumId = :curriculum_id')
-			->addOrderBy('c.id')
+			->addOrderBy('c.id','DESC')
 			->setParameters(array(
 					'deleteFlag' => false,
 					'curriculum_id' => $cur
@@ -29,7 +29,7 @@ class VersionRepository extends EntityRepository
 			->select('c.name')
 			->addSelect('c.id')
 			->where('c.deleteFlag = :deleteFlag')
-			->addOrderBy('c.id')
+			->addOrderBy('c.id','DESC')
 			->setParameters(array(
 					'deleteFlag' => false
 			));
