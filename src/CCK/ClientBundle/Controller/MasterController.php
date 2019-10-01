@@ -606,11 +606,17 @@ class MasterController extends BaseController {
 				$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($mainterm->getTermId());
 				$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($mainterm->getTermId());
 				$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($mainterm->getTermId());
+				$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
+						'mainTermId' => $mainterm->getTermId(),
+						'deleteFlag' => FALSE
+						),
+						array('id' => 'ASC','yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
 
 				$this->copyExpTerm($em, $entityExp, $newTermId);
-				$this->copySubTerm($em, $entitySub, $newTermId);
-				$this->copySynTerm($em, $entitySyn, $newTermId);
+				$newSubId = $this->copySubTerm($em, $entitySub, $newTermId);
+				$newSynId = $this->copySynTerm($em, $entitySyn, $newTermId);
 				$this->copyRefTerm($em, $entityRef, $newTermId);
+				$this->copyCenterData($em, $entityCenter, $newTermId, $newSubId, $newSynId);
 
 			}
 
