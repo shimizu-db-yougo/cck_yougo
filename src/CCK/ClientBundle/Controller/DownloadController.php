@@ -394,7 +394,7 @@ class DownloadController extends BaseController {
 
 		if($expterm){
 			foreach ($expterm as $exptermRec) {
-				$exptermRec['id'] = 'K'.str_pad($exptermRec['id'], 5, 0, STR_PAD_LEFT);
+				$exptermRec['id'] = 'K'.str_pad($exptermRec['id'], 6, 0, STR_PAD_LEFT);
 
 				$exp['exp_term_id'] .= $exptermRec['id'] . '\v';
 				$exp['exp_term'] .= $exptermRec['indexTerm'] . '\v';
@@ -494,7 +494,7 @@ class DownloadController extends BaseController {
 
 		if($refterm){
 			foreach ($refterm as $reftermRec) {
-				$reftermRec['refer_term_id'] = 'M'.str_pad($reftermRec['refer_term_id'], 5, 0, STR_PAD_LEFT);
+				$reftermRec['refer_term_id'] = 'M'.str_pad($reftermRec['refer_term_id'], 6, 0, STR_PAD_LEFT);
 				$this->getHeaderName($reftermRec);
 
 				$ref['ref_hen'] .= $reftermRec['hen'] . '\v';
@@ -536,7 +536,7 @@ class DownloadController extends BaseController {
 		// 主用語　見出し名称の取得
 		$this->getHeaderName($main);
 
-		$main['term_id'] = 'M'.str_pad($main['term_id'], 5, 0, STR_PAD_LEFT);
+		$main['term_id'] = 'M'.str_pad($main['term_id'], 6, 0, STR_PAD_LEFT);
 
 		if($main['red_letter'] == '1'){
 			$main['red_letter'] = '●';
@@ -582,7 +582,7 @@ class DownloadController extends BaseController {
 	}
 
 	private function replaceSubField(&$sub){
-		$sub['id'] = 'S'.str_pad($sub['id'], 5, 0, STR_PAD_LEFT);
+		$sub['id'] = 'S'.str_pad($sub['id'], 6, 0, STR_PAD_LEFT);
 
 		if($sub['red_letter'] == '1'){
 			$sub['red_letter'] = '●';
@@ -646,7 +646,7 @@ class DownloadController extends BaseController {
 	}
 
 	private function replaceSynField(&$syn){
-		$syn['id'] = 'D'.str_pad($syn['id'], 5, 0, STR_PAD_LEFT);
+		$syn['id'] = 'D'.str_pad($syn['id'], 6, 0, STR_PAD_LEFT);
 
 		if($syn['synonym_id'] == '1'){
 			$syn['synonym_id'] = '同';
