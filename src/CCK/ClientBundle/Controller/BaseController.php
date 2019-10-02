@@ -765,6 +765,125 @@ class BaseController extends Controller {
 		}
 	}
 
+	public function copyCenterDataByYear($em, $entityCenter, $newTermId, $newSubId, $newSynId, $wkYear){
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			$idx = 0;
+			$idx_sub = 0;
+			$idx_syn = 0;
+
+			$wkSubTermId = null;
+			$wkYougoFlag = 1;
+
+			$wkStartYear = $wkYear;
+			$wkEndYear = $wkYear + 10;
+
+			foreach($entityCenter as $entityCenterRec){
+				$idx++;
+
+				if($idx > 10){
+					// DBから10件読み込んだ後、対象年がある場合は、初期データを登録する
+					for($i = $wkYear; $wkYear < $wkEndYear; $wkYear++){
+						$entityNewCenter = new Center();
+
+						$entityNewCenter->setMainTermId($newTermId);
+
+						$entityNewCenter->setSubTermId($wkSubTermId);
+						$entityNewCenter->setYougoFlag($wkYougoFlag);
+
+						$entityNewCenter->setYear($wkYear);
+						$entityNewCenter->setMainExam(0);
+						$entityNewCenter->setSubExam(0);
+						$entityNewCenter->setDeleteFlag(false);
+
+						$em->persist($entityNewCenter);
+						$em->flush();
+
+					}
+
+					$wkYear = $wkStartYear;
+					$idx = 1;
+
+				}
+
+				if($idx < 11){
+					if($wkYear > $entityCenterRec->getYear()){
+						// DBの実施年より対象年が大きい場合、スキップ
+					}else{
+						// DBの実施年と対象年が等しい場合、元データを複製する
+						$entityNewCenter = new Center();
+
+						$entityNewCenter->setMainTermId($newTermId);
+						if($entityCenterRec->getYougoFlag() == 1){
+							$entityNewCenter->setSubTermId(null);
+							$wkSubTermId = null;
+
+						}elseif($entityCenterRec->getYougoFlag() == 2){
+							$entityNewCenter->setSubTermId($newSubId[$idx_sub]);
+							$wkSubTermId = $newSubId[$idx_sub];
+
+							if($idx == 10){
+								$idx_sub++;
+							}
+
+						}else{
+							$entityNewCenter->setSubTermId($newSynId[$idx_syn]);
+							$wkSubTermId = $newSynId[$idx_syn];
+
+							if($idx == 10){
+								$idx_syn++;
+							}
+
+						}
+						$entityNewCenter->setYougoFlag($entityCenterRec->getYougoFlag());
+						$wkYougoFlag = $entityCenterRec->getYougoFlag();
+						$entityNewCenter->setYear($entityCenterRec->getYear());
+						$entityNewCenter->setMainExam($entityCenterRec->getMainExam());
+						$entityNewCenter->setSubExam($entityCenterRec->getSubExam());
+						$entityNewCenter->setDeleteFlag(false);
+
+						$em->persist($entityNewCenter);
+						$em->flush();
+
+						$wkYear++;
+					}
+				}
+			}
+
+			// DBから10件読み込んだ後、対象年がある場合は、初期データを登録する
+			for($i = $wkYear; $wkYear < $wkEndYear; $wkYear++){
+				$entityNewCenter = new Center();
+
+				$entityNewCenter->setMainTermId($newTermId);
+
+				$entityNewCenter->setSubTermId($wkSubTermId);
+				$entityNewCenter->setYougoFlag($wkYougoFlag);
+
+				$entityNewCenter->setYear($wkYear);
+				$entityNewCenter->setMainExam(0);
+				$entityNewCenter->setSubExam(0);
+				$entityNewCenter->setDeleteFlag(false);
+
+				$em->persist($entityNewCenter);
+				$em->flush();
+
+			}
+
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
 	/**
 	 * session data remove
 	 */
