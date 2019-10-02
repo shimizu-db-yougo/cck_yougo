@@ -1037,6 +1037,7 @@ class YougoController extends BaseController {
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
 
+		$main_term_id = ltrim(substr($main_term_id, 1),'0'); // 用語ID"M00XXXX"先頭の"M00"を削除
 		$year = date('Y')-10;
 		for ($idx=0;$idx<10;$idx++){
 
