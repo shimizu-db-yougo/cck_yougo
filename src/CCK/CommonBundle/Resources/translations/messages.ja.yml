@@ -165,6 +165,7 @@ text:
     curriculum:
         all: 全教科
         name: 版名
+        startyear: センター頻度開始年
     yougo:
         list.title: 用語一覧
         curriculum: 教科

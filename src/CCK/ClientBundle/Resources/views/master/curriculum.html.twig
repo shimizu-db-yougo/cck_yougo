@@ -83,10 +83,17 @@
 			<div class="modal-body">
 				<div class="row master-update-row">
 					<div class="col-sm-12">
-						<label class="col-sm-2">{{ 'text.curriculum.name'|trans }}</label>
-						<div class="col-sm-4">
+						<label class="col-sm-4">{{ 'text.curriculum.name'|trans }}</label>
+						<div class="col-sm-6">
 							<span id="name-err" class="name-err wine-red msgErr"></span>
 							<input type="text" class="form-control col-sm-3" id="cur_name" name="cur_name" >
+						</div>
+					</div>
+					<div class="col-sm-12">
+						<label class="col-sm-4">{{ 'text.curriculum.startyear'|trans }}</label>
+						<div class="col-sm-6">
+							<span id="startyear-err" class="startyear-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="startyear" name="startyear" value="{{ 'now'|date('Y')-10 }}">
 						</div>
 					</div>
 				</div>
@@ -105,6 +112,10 @@
 	{{ parent() }}
 	<script src="{{ asset('bundles/cckcommon/jquery-ui/jquery-ui.min.js') }}"></script>
 	<script>
+		$('.js-curriculum-cancel').bind('click', function(){
+			$('.startyear-err').text('');
+		});
+
 		var cur_id;
 		$(".js-curriculum-target").bind('click', function(e){
 			// get target
@@ -118,9 +129,16 @@
 
 		$('.js-curriculum-submit').bind('click', function(e){
 			var cur_name = $('#cur_name').val();
+			var startyear = $('#startyear').val();
+
+			if(startyear.length != 4){
+				$('.startyear-err').text('開始年は4桁で入力してください');
+				return false;
+			}
 
 			var str_html = '';
-			str_html = "<input type='hidden' name='cur_name' value=\"" + cur_name.replace(/"/i, "&quot;") + "\">";
+			str_html = "<input type='hidden' name='cur_name' value=\"" + cur_name.replace(/"/i, "&quot;") + "\">"+
+						"<input type='hidden' name='startyear' value='" + startyear + "'>";
 
 			if(cur_id !== void 0){
 				// create form
