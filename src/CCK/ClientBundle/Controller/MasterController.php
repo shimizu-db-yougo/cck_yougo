@@ -590,6 +590,11 @@ class MasterController extends BaseController {
 				'deleteFlag' => FALSE
 		));
 
+		$headerRecordSet = $em->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'versionId' => $max_ver['id'],
+				'deleteFlag' => FALSE
+		));
+
 		try{
 			$entity = new Version();
 
@@ -616,8 +621,13 @@ class MasterController extends BaseController {
 				$newSubId = $this->copySubTerm($em, $entitySub, $newTermId);
 				$newSynId = $this->copySynTerm($em, $entitySyn, $newTermId);
 				$this->copyRefTerm($em, $entityRef, $newTermId);
-				$this->copyCenterData($em, $entityCenter, $newTermId, $newSubId, $newSynId);
+				$this->copyCenterDataByYear($em, $entityCenter, $newTermId, $newSubId, $newSynId, $request->request->get('startyear'));
 
+			}
+
+			foreach($headerRecordSet as $header){
+				// 見出しデータの複製
+				$this->copyHeader($em, $header, $entity->getId());
 			}
 
 			$em->getConnection()->commit();

@@ -15,6 +15,7 @@ use CCK\CommonBundle\Entity\Synonym;
 use CCK\CommonBundle\Entity\Refer;
 use CCK\CommonBundle\Entity\ExplainIndex;
 use CCK\CommonBundle\Entity\Center;
+use CCK\CommonBundle\Entity\Header;
 
 class BaseController extends Controller {
 
@@ -495,6 +496,40 @@ class BaseController extends Controller {
 			}
 		}
 		return $retChar;
+	}
+
+	public function copyHeader($em, $entityHeader, $newCurId){
+
+		$entityNewHeader = new Header();
+
+		$em->getConnection()->beginTransaction();
+
+		try{
+			$entityNewHeader->setVersionId($newCurId);
+
+			$entityNewHeader->setHeaderId($entityHeader->getHeaderId());
+			$entityNewHeader->setHen($entityHeader->getHen());
+			$entityNewHeader->setSho($entityHeader->getSho());
+			$entityNewHeader->setDai($entityHeader->getDai());
+			$entityNewHeader->setChu($entityHeader->getChu());
+			$entityNewHeader->setKo($entityHeader->getKo());
+			$entityNewHeader->setName($entityHeader->getName());
+			$entityNewHeader->setSort($entityHeader->getSort());
+			$entityNewHeader->setDeleteFlag(false);
+
+			$em->persist($entityNewHeader);
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
 	}
 
 	public function copyMainTerm($em, $entityMain, $newCurId = null){
