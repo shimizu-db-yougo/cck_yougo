@@ -100,7 +100,7 @@ text:
     help:
         title: 使い方ガイド
     login: ログイン
-    login.title: 清水書院様　用語集管理システム
+    login.title: 清水書院　用語集管理システム
     logout: ログアウト
     checkbox:
         0: なし
