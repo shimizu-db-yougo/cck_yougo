@@ -50,7 +50,8 @@ class ClientExtension extends \Twig_Extension
 			new \Twig_SimpleFunction('getSynonymIcon', array($this, 'getSynonymIcon')),
 			new \Twig_SimpleFunction('getNewsExamIcon', array($this, 'getNewsExamIcon')),
 			new \Twig_SimpleFunction('replaceTag', array($this, 'replaceTag')),
-			new \Twig_SimpleFunction('getDelimiter', array($this, 'getDelimiter'))
+			new \Twig_SimpleFunction('getDelimiter', array($this, 'getDelimiter')),
+			new \Twig_SimpleFunction('getDelimiterSyn', array($this, 'getDelimiterSyn'))
 		);
 	}
 
@@ -171,6 +172,29 @@ class ClientExtension extends \Twig_Extension
 			return "delimiter.paren_end";
 		}elseif($delimiter == "7"){
 			return "delimiter.paren_end";
+		}else{
+			return "";
+		}
+	}
+
+	/**
+	 * [getDelimiter description]
+	 * @param  [type] $delimiter     [description]
+	 * @return [type]               [description]
+	 */
+	public function getDelimiterSyn($delimiter){
+		if($delimiter == "1"){
+			return "delimiter.full_space";
+		}elseif($delimiter == "2"){
+			return "delimiter.paren_start";
+		}elseif($delimiter == "3"){
+			return "delimiter.paren_end";
+		}elseif($delimiter == "4"){
+			return "delimiter.newline";
+		}elseif($delimiter == "5"){
+			return "delimiter.newline_paren_start";
+		}elseif($delimiter == "6"){
+			return "delimiter.newline_paren_end";
 		}else{
 			return "";
 		}
