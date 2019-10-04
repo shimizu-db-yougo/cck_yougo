@@ -237,7 +237,11 @@ delimiter:
     paren_start: （
     paren_end: ）
     paren_middle: ）（
-        
+    full_space: &emsp;
+    newline: <br/>
+    newline_paren_start: <br/>（
+    newline_paren_end: ）<br/>
+    
 icon:
     ari: 有
     nashi: 無
@@ -280,6 +284,7 @@ csv:
         illust_nombre: 図版キャプションノンブル
         handover: 組版処理コメント
         term_explain: 主用語_解説
+        exp_id: 解説内さくいん用語ID
         exp_term: 主用語_解説内さくいん用語
         exp_index_kana: 解説内用語_さくいん読み仮名
         exp_index_add_letter: 解説内用語_さくいん時追加文字

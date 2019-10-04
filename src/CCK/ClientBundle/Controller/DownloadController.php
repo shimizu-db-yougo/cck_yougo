@@ -49,6 +49,7 @@ class DownloadController extends BaseController {
 			'index_abbreviation',
 			'nombre',
 			'term_explain',
+			'exp_id',
 			'exp_term',
 			'exp_index_kana',
 			'exp_index_add_letter',
@@ -188,6 +189,9 @@ class DownloadController extends BaseController {
 
 		// 用語ID
 		$term_id = $request->query->get('term_id');
+		if($term_id){
+			$type_name = 'M'.str_pad($term_id, 6, 0, STR_PAD_LEFT);
+		}
 
 		// ファイル名の生成
 		$outFileName = $cur_name . '_' . $type_name . '_' . date('YmdHis') . ".csv";
@@ -312,6 +316,7 @@ class DownloadController extends BaseController {
 		$result['header_position'] = $translator->trans('csv.term.header_position');
 
 		// 解説内索引用語
+		$result['exp_id'] = $translator->trans('csv.term.exp_id');
 		$result['exp_term'] = $translator->trans('csv.term.exp_term');
 		$result['exp_index_kana'] = $translator->trans('csv.term.exp_index_kana');
 		$result['exp_index_add_letter'] = $translator->trans('csv.term.exp_index_add_letter');
@@ -386,7 +391,7 @@ class DownloadController extends BaseController {
 
 		// 解説内索引用語
 		$exp = [];
-		$exp['exp_term_id'] = "";
+		$exp['exp_id'] = "";
 		$exp['exp_term'] = "";
 		$exp['exp_index_kana'] = "";
 		$exp['exp_index_add_letter'] = "";
@@ -396,7 +401,7 @@ class DownloadController extends BaseController {
 			foreach ($expterm as $exptermRec) {
 				$exptermRec['id'] = 'K'.str_pad($exptermRec['id'], 6, 0, STR_PAD_LEFT);
 
-				$exp['exp_term_id'] .= $exptermRec['id'] . '\v';
+				$exp['exp_id'] .= $exptermRec['id'] . '\v';
 				$exp['exp_term'] .= $exptermRec['indexTerm'] . '\v';
 				$exp['exp_index_kana'] .= $exptermRec['indexKana'] . '\v';
 				$exp['exp_index_add_letter'] .= $exptermRec['indexAddLetter'] . '\v';
