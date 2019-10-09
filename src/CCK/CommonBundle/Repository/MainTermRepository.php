@@ -132,7 +132,7 @@ class MainTermRepository extends EntityRepository
 		}
 
 		if($term){
-			$sql .= " AND MainTerm.main_term LIKE '%" . str_replace("'", "''", $term) . "%'";
+			$sql .= " AND REPLACE_TAGS(MainTerm.main_term) LIKE '%" . str_replace("'", "''", $term) . "%'";
 		}
 
 		if($term_id){
