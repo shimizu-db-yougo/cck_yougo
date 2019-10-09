@@ -221,17 +221,17 @@
 				{% for yougo in pagination %}
 				<tr class="text-center">
 					<td width="68px" class="text-left">{{ 'M%06s'|format(yougo.term_id) }}</td>
-					<td width="100px" class="text-left">{{ yougo.main_term }}</td>
-					<td width="120px" class="text-left">{{ yougo.kana }}</td>
-					<td width="120px" class="text-left">{{ yougo.index_kana }}</td>
-					<td width="120px" class="text-left">{{ yougo.index_term }}</td>
-					<td width="100px" class="text-left">{{ yougo.sub_term }}</td>
-					<td width="120px" class="text-left">{{ yougo.sub_kana }}</td>
-					<td width="124px" class="text-left">{{ yougo.sub_index_kana }}</td>
-					<td width="100px" class="text-left">{{ yougo.refer_term }}</td>
-					<td width="100px" class="text-left">{{ yougo.index_original }}</td>
-					<td width="124px" class="text-left">{{ yougo.index_original_kana }}</td>
-					<td width="100px" class="text-left">{{ yougo.index_abbreviation }}</td>
+					<td width="100px" class="text-left">{{ replaceTag(yougo.main_term)|raw }}</td>
+					<td width="120px" class="text-left">{{ replaceTag(yougo.kana)|raw }}</td>
+					<td width="120px" class="text-left">{{ replaceTag(yougo.index_kana)|raw }}</td>
+					<td width="120px" class="text-left">{{ replaceTag(yougo.index_term)|raw }}</td>
+					<td width="100px" class="text-left">{{ replaceTag(yougo.sub_term)|raw }}</td>
+					<td width="120px" class="text-left">{{ replaceTag(yougo.sub_kana)|raw }}</td>
+					<td width="124px" class="text-left">{{ replaceTag(yougo.sub_index_kana)|raw }}</td>
+					<td width="100px" class="text-left">{{ replaceTag(yougo.refer_term)|raw }}</td>
+					<td width="100px" class="text-left">{{ replaceTag(yougo.index_original)|raw }}</td>
+					<td width="124px" class="text-left">{{ replaceTag(yougo.index_original_kana)|raw }}</td>
+					<td width="100px" class="text-left">{{ replaceTag(yougo.index_abbreviation)|raw }}</td>
 					<td width="80px" class="text-left">{{ yougo.handover|length > 5 ? yougo.handover[:5]~'…' : yougo.handover }}</td>
 					<td width="80px" class="text-left">{{ yougo.name }}</td>
 					<td width="100px" class="text-left">{% if yougo.modify_date is empty %}{{ yougo.create_date|date('Y/m/d H:i') }}{% else %}{{ yougo.modify_date|date('Y/m/d H:i') }}{% endif %}</td>
@@ -260,7 +260,7 @@
 					<td width="60px">
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{{ path('client.typesetting.download', {'curriculum': curriculum,'version':version,'type':'0','term_id':yougo.term_id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.csv'|trans }}</button></a>
+								<a href="{{ path('client.typesetting.download', {'curriculum': curriculum,'version':version,'type':'0','term_id':yougo.term_id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" onClick="downloadCheck();">{{ 'btn.csv'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
@@ -328,6 +328,17 @@
 			}else{
 				return false;
 			}
+		}
+
+		function downloadCheck(){
+			loading('処理中...');
+
+			setInterval(function () {
+				if ($.cookie("downloaded")) {
+					$.removeCookie("downloaded", { path: "/" });
+					$("#loading").remove();
+				}
+			}, 1000);
 		}
 
 		$(function(){
