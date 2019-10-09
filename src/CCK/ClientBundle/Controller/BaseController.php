@@ -16,6 +16,7 @@ use CCK\CommonBundle\Entity\Refer;
 use CCK\CommonBundle\Entity\ExplainIndex;
 use CCK\CommonBundle\Entity\Center;
 use CCK\CommonBundle\Entity\Header;
+use CCK\CommonBundle\Entity\Vacant;
 
 class BaseController extends Controller {
 
@@ -917,6 +918,95 @@ class BaseController extends Controller {
 
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
+	}
+
+	/**
+	 * @param unknown $yougoid
+	 * @param unknown $userid
+	 * @return boolean
+	 */
+	public function openGenko($yougoid, $userid){
+		// 用語ID存在チェック
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Vacant')->findBy(array(
+				'termId' =>$yougoid,
+				'userId' =>$userid,
+				'deleteFlag' => FALSE
+		));
+		if($entity){
+			return true;
+		}
+
+		try {
+			$em = $this->get('doctrine.orm.entity_manager');
+			$em->getConnection()->beginTransaction();
+			$entity = new Vacant();
+			$entity->setTermId($yougoid);
+			$entity->setUserId($userid);
+			$entity->setStartDate(new \DateTime());
+			$entity->setCreateDate(new \DateTime());
+
+			$em->persist($entity);
+
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * @param unknown $yougoid
+	 * @param unknown $userid
+	 * @return boolean
+	 */
+	public function closeGenko($userid){
+
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Vacant')->findBy(array(
+				'userId' =>$userid,
+				'deleteFlag' => FALSE
+		));
+		if(!$entity){
+			return true;
+		}
+
+		foreach($entity as $entity_el){
+			$entity_el->setEndDate(new \DateTime());
+			$entity_el->setDeleteFlag(true);
+			$entity_el->setModifyDate(new \DateTime());
+			$entity_el->setDeleteDate(new \DateTime());
+
+			// transaction
+			$em = $this->get('doctrine.orm.entity_manager');
+			$em->getConnection()->beginTransaction();
+
+			try {
+				// 登録
+				$em->flush();
+				// 実行
+				$em->getConnection()->commit();
+			} catch(\Exception $e){
+				// もし、DBに登録失敗した場合rollbackする
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

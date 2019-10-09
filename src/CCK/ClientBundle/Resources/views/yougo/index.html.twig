@@ -239,7 +239,7 @@
 					<td width="60px">
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{{ path('client.yougo.edit', {'term_id': yougo.term_id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" >{{ 'btn.edit'|trans }}</button></a>
+								<a href="{{ path('client.yougo.edit', {'term_id': yougo.term_id}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" onClick='return checkVacant("{{ yougo.term_id }}","{{ currentUser.user_id }}");'>{{ 'btn.edit'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
@@ -339,6 +339,37 @@
 					$("#loading").remove();
 				}
 			}, 1000);
+		}
+
+		function checkVacant(term_id, user_id){
+			var data = {
+					'term_id': term_id,
+					'user_id': user_id
+				};
+			var return_cd;
+			jqxhr = $.ajax({
+					url: "{{ path('client.yougo.vacant.ajax') }}",
+					data: data,
+					method: 'POST',
+					async: false,
+					success: function (response) {
+						return_cd = response.return_cd;
+						if (return_cd == true) {
+						} else {
+							alert('この用語は編集中です。編集ユーザ名：' + response.name);
+						}
+					},
+					error: function (response) {
+						alert('ネットワークエラー。');
+						return false;
+					}
+				}).done(function(data){
+					console.log("戻り値："+return_cd);
+				}).fail(function(){
+					jqxhr.abort();
+				});
+			console.log(jqxhr);
+			return return_cd;
 		}
 
 		$(function(){

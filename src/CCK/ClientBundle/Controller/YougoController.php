@@ -183,6 +183,9 @@ class YougoController extends BaseController {
 
 		$page = ($request->query->has('page') && $request->query->get('page') != '') ? $request->query->get('page') : 1; //pageのGETパラメータを直接設定(デフォルト1)
 
+		// 用語を未編集にする
+		$this->closeGenko($user->getUserId());
+
 		$sort_field = '';
 		$sort_order = '';
 		$sort_order_link = $session->get(self::SES_SORT_ORDER_KEY);
@@ -1176,6 +1179,11 @@ class YougoController extends BaseController {
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
 
+		// 更新対象用語を編集中にする
+		if($this->openGenko($entityMain->getTermId(), $user->getUserId()) == false){
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+
 		$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($id);
 		$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($id);
 		$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($id);
@@ -1721,6 +1729,38 @@ class YougoController extends BaseController {
 		}
 
 		return $this->redirect($this->generateUrl('client.yougo.edit', array('term_id' => $newTermId)));
+	}
+
+	/**
+	 * @Route("/yougo/vacant/ajax", name="client.yougo.vacant.ajax")
+	 */
+	public function getVacantAjaxAction(Request $request){
+		$user = $this->getUser();
+
+		$yougo_id = "";
+		if($request->request->has('term_id')){
+			$yougo_id = $request->request->get('term_id');
+		}
+		$user_id = "";
+		if($request->request->has('user_id')){
+			$user_id = $request->request->get('user_id');
+		}
+
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Vacant')->getOccupiedYougoData($yougo_id, $user_id);
+
+		if(!$entity){
+			$response = new JsonResponse(array("return_cd" => true, "name" => ''));
+		}else{
+			// 編集中ユーザ名の取得
+			$edit_user = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:User')->findOneBy(array(
+					'user_id' => $entity[0]['user_id'],
+					'deleteFlag' => FALSE
+			));
+
+			$response = new JsonResponse(array("return_cd" => false, "name" => $edit_user->getName()));
+		}
+
+		return $response;
 	}
 
 	/**

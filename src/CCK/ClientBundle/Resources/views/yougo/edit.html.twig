@@ -26,7 +26,7 @@
 	<div class="col-lg-12">
 		<div class="text-center">
 			<button type="button" class="btn btn-primary js-yougo-submit">{{ 'btn.submit'|trans }}</button>
-			<div class="btn btn-default" onclick="history.back();" name="back">{{ 'btn.back'|trans }}</div>
+			<a href="{{ path('client.yougo.index') }}"><div class="btn btn-default" name="back">{{ 'btn.back'|trans }}</div></a>
 		</div>
 	</div>
 </div>
