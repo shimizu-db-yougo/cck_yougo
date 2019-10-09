@@ -174,7 +174,7 @@
 					</select>
 				</div>
 				<div class="col-sm-1">
-					<button class="btn btn-danger button_text_align input-sm js-preset-delete" type="button">{{ 'btn.delete'|trans }}</button>
+					<button class="btn btn-danger button_text_align input-sm js-preset-delete" type="button" disabled>{{ 'btn.delete'|trans }}</button>
 				</div>
 			</div>
 		</div>
@@ -256,6 +256,7 @@
 	{{ parent() }}
 	<script>
 
+	var arr_preset_field = [];
 	$(function(){
 		$('.js-cur').bind('change', function(){
 			changeCurriculumHeader($('.js-cur'));
@@ -279,11 +280,19 @@
 
 		$('.js-preset').bind('change', function(){
 			console.log($(this).prop("id"));
+			console.log($(this).val());
+
+			// プリセット未選択"-----------"は削除ボタンを押せない
+			if($(this).val() == 0){
+				$('.js-preset-delete').prop("disabled", true);
+			}else{
+				$('.js-preset-delete').prop("disabled", false);
+			}
 
 			clearField();
 
 			var txt_preset_field = $('[name=preset] option:selected').prop("id");
-			var arr_preset_field = txt_preset_field.split(',');
+			arr_preset_field = txt_preset_field.split(',');
 
 			for(idx in arr_preset_field){
 				$('select[name=s2]').append($('select[name=s1] option[value=' + arr_preset_field[idx] + ']').clone());
@@ -299,10 +308,12 @@
 	$(document).ready(function() {
 	    $('input[name=right]').on('click', function() {
 	        move('s1', 's2');
+	        checkPresetFieldChange();
 	    });
 
 	    $('input[name=left]').on('click', function() {
 	        move('s2', 's1');
+	        checkPresetFieldChange();
 	    });
 
 	    var move = function(_this, target) {
@@ -321,6 +332,37 @@
 			}
 		}, 1000);
 	});
+
+	function checkPresetFieldChange(){
+        // プリセット項目の変更チェック
+        var preset_field_changed = [];
+        $('select[name=s2] option').each(function() {
+            console.log($(this).val());
+            preset_field_changed.push($(this).val());
+        });
+
+        var selected_preset_name = $('[name=preset] option:selected').text();
+        var search_update_text = selected_preset_name.indexOf("(更新)");
+        if(arr_preset_field.length == preset_field_changed.length){
+        	var is_changed = false;
+        	for(idx_field in arr_preset_field){
+        		if(arr_preset_field[idx_field] != preset_field_changed[idx_field]){
+        			if(search_update_text == -1){
+            			$('[name=preset] option:selected').text(selected_preset_name + "(更新)");
+        			}
+        			is_changed = true;
+        			break;
+        		}
+        	}
+        	if(!is_changed){
+            	$('[name=preset] option:selected').text(selected_preset_name.replace("(更新)",""));
+        	}
+        }else{
+			if(search_update_text == -1){
+				$('[name=preset] option:selected').text(selected_preset_name + "(更新)");
+			}
+        }
+	}
 
 	function checkDownload(cur,han){
 		if(($('.'+cur).val() == 0)||($('.'+han).val() == 0)){
@@ -371,6 +413,8 @@
 		O.insertBefore(tmpOption,O.options[i+MODE])
 
 		buttonStyle(O,idx);
+
+		checkPresetFieldChange()
 	}
 
 	function checkDelete(form){
