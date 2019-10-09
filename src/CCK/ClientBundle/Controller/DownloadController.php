@@ -153,11 +153,6 @@ class DownloadController extends BaseController {
 	public function typesettingDownloadAction(Request $request){
 		$tmpFilePath = tempnam(sys_get_temp_dir(), 'tmp');
 
-		if(!$request->query->has('curriculum')){
-			$response = $this->responseForm('404', 'HTTP/1.1 404 Not Found');
-			return $response;
-		}
-
 		$em = $this->getDoctrine()->getManager();
 
 		// 教科名の取得
