@@ -1764,6 +1764,17 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/yougo/logout", name="client.yougo.logout")
+	 */
+	public function yougoLogoutAction() {
+		$user = $this->getUser();
+		// 用語を未編集にする
+		$this->closeGenko($user->getUserId());
+
+		return $this->redirect($this->generateUrl('client.logout'));
+	}
+
+	/**
 	 * @Route("/genko/yogotest", name="client.genko.yogotest")
 	 * @Method("POST|GET")
 	 * @Template()

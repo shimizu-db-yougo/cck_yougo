@@ -63,7 +63,7 @@
 						{% endif %}
 						<li><a href="{{ asset('./uploads/help/junbi.pdf') }}" target="_blank">{{ 'text.help.title'|trans }}</a></li>
 						{% if is_granted('ROLE_USER') %}
-							<li><a href="{{ path('client.logout') }}">{{ 'text.logout'|trans }}</a></li>
+							<li><a href="{{ path('client.yougo.logout') }}">{{ 'text.logout'|trans }}</a></li>
 						{% else %}
 						<li><a href="{#{ path('client.login') }#}"><i class="fa fa-lock fa-fw"></i>{{ 'text.login'|trans }}</a></li>
 						{% endif %}
