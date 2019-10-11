@@ -60,6 +60,41 @@
 		</div>
 	</div>
 </div>
+
+
+<div class="row">
+<blockquote class="blockquote-bottom pdr-0">
+	<p>{{ 'text.csv.import.list'|trans|raw }}</p>
+</blockquote>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+		<table class="table table-responsive table-striped">
+			<thead>
+				<tr>
+					<th width="80px" class="text-left">{{ 'text.yougo.curriculum'|trans }}</th>
+					<th width="80px" class="text-left">{{ 'text.yougo.version'|trans }}</th>
+					<th width="80px" class="text-left">{{ 'text.yougo.upload_date'|trans }}</th>
+					<th width="120px" class="text-center">{{ 'text.yougo.upload_user'|trans }}</th>
+					<th width="120px" class="text-center">{{ 'text.yougo.upload_file'|trans }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for upload in upload_list %}
+				<tr class="text-center">
+					<td class="text-left">{{ upload.cur_name }}</td>
+					<td class="text-left">{{ upload.ver_name }}</td>
+					<td class="text-left">{{ upload.create_date|date('Y/m/d H:i') }}</td>
+					<td class="text-left">{{ upload.user_name }}</td>
+					<td class="text-left">{{ upload.file_name }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
 <div class="modal-footer">
 	<div class="text-center">
 		<a href="{{ path('client.yougo.index') }}"><div class="btn btn-default" name="back">{{ 'btn.back'|trans }}</div></a>

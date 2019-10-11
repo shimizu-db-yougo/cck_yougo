@@ -149,6 +149,7 @@ text:
     csv.import:
         title: データ取り込み
         nombre: ノンブル取り込み
+        list: アップロード履歴
     optional: (任意)
     mail:
         alert:
@@ -222,6 +223,9 @@ text:
         explain.index.add: さくいん時追加文字
         explain.nombre: ノンブル
         explain_term: 解説内索引用語
+        upload_date: アップロード日時
+        upload_user: ユーザー
+        upload_file: ファイル名
     header:
         name: 見出し名前
         level: 見出し種類

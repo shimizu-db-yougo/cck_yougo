@@ -15,6 +15,7 @@ use ZipArchive;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use CCK\CommonBundle\Entity\Upload;
 
 /**
  * upload controller.
@@ -57,11 +58,14 @@ class UploadController extends BaseController {
 			$status_message = "csvファイルの取込みに失敗しました。ファイルを確認して下さい。";
 		}
 
+		$upload_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Upload')->getUploadList();
+
 		return array(
 				'currentUser' => ['user_id' => $this->getUser()->getUserId(), 'name' => $this->getUser()->getName()],
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
 				'return_message' => $status_message,
+				'upload_list' => $upload_list,
 		);
 	}
 
@@ -70,6 +74,8 @@ class UploadController extends BaseController {
 	 * @Method("POST|GET")
 	 */
 	public function nombreUploadAction(Request $request){
+		$user = $this->getUser();
+
 		// postでもらうべきのリストを取得
 		$targets = $this->container->getParameter('api.upload.nombre');
 
@@ -247,6 +253,9 @@ class UploadController extends BaseController {
 			}
 		}
 
+		// インポート履歴
+		$this->registerUploadHistory($em,$params['version'],$user->getUserId(),$files);
+
 		$em->close();
 
 		return $this->redirect($this->generateUrl('client.csv.import', array('status' => 200)));
@@ -266,4 +275,33 @@ class UploadController extends BaseController {
 		}
 		return true;
 	}
+
+	private function registerUploadHistory($em, $versionId,$userid,$files){
+		try {
+			foreach($files as $ele_file){
+				$em->getConnection()->beginTransaction();
+				$entity = new Upload();
+				$entity->setVersionId($versionId);
+				$entity->setUserId($userid);
+				$entity->setFileName($ele_file['name']);
+				$entity->setCreateDate(new \DateTime());
+
+				$em->persist($entity);
+
+				$em->flush();
+				$em->getConnection()->commit();
+			}
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return false;
+		}
+	}
+
 }
