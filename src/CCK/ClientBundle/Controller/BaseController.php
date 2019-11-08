@@ -592,6 +592,9 @@ class BaseController extends Controller {
 
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
+
+		unset($entityNewMain);
+
 		return $newTermId;
 	}
 
@@ -611,9 +614,10 @@ class BaseController extends Controller {
 				$entityNewExp->setDeleteFlag(false);
 
 				$em->persist($entityNewExp);
-				$em->flush();
+				unset($entityNewExp);
 			}
 
+			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
 			$em->getConnection()->rollback();
@@ -651,11 +655,12 @@ class BaseController extends Controller {
 				$entityNewSub->setDeleteFlag(false);
 
 				$em->persist($entityNewSub);
-				$em->flush();
 
 				array_push($arr_rtn_id, $entityNewSub->getId());
+				unset($entityNewSub);
 			}
 
+			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
 			$em->getConnection()->rollback();
@@ -693,11 +698,11 @@ class BaseController extends Controller {
 				$entityNewSyn->setDeleteFlag(false);
 
 				$em->persist($entityNewSyn);
-				$em->flush();
 
 				array_push($arr_rtn_id, $entityNewSyn->getId());
+				unset($entityNewSyn);
 			}
-
+			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
 			$em->getConnection()->rollback();
@@ -726,9 +731,9 @@ class BaseController extends Controller {
 				$entityNewRef->setDeleteFlag(false);
 
 				$em->persist($entityNewRef);
-				$em->flush();
+				unset($entityNewRef);
 			}
-
+			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
 			$em->getConnection()->rollback();
@@ -835,8 +840,7 @@ class BaseController extends Controller {
 						$entityNewCenter->setDeleteFlag(false);
 
 						$em->persist($entityNewCenter);
-						$em->flush();
-
+						unset($entityNewCenter);
 					}
 
 					$wkYear = $wkStartYear;
@@ -881,8 +885,7 @@ class BaseController extends Controller {
 						$entityNewCenter->setDeleteFlag(false);
 
 						$em->persist($entityNewCenter);
-						$em->flush();
-
+						unset($entityNewCenter);
 						$wkYear++;
 					}
 				}
@@ -903,10 +906,10 @@ class BaseController extends Controller {
 				$entityNewCenter->setDeleteFlag(false);
 
 				$em->persist($entityNewCenter);
-				$em->flush();
-
+				unset($entityNewCenter);
 			}
 
+			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
 			$em->getConnection()->rollback();

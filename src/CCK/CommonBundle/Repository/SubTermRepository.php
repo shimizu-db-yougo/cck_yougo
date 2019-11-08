@@ -12,5 +12,15 @@ use Doctrine\ORM\EntityRepository;
  */
 class SubTermRepository extends EntityRepository
 {
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function getNewTermID(){
+		$sql = "
+			SELECT * FROM SubTerm WHERE SubTerm.id = (SELECT MAX(SubTerm.id) FROM SubTerm)
+		";
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
 
+		return $result;
+	}
 }
