@@ -4,9 +4,9 @@ security:
 
     encoders:
         CCK\CommonBundle\Entity\User:
-            algorithm: sha512
+            algorithm: plaintext
             encode_as_base64: false
-            iterations: 1
+            iterations: 0
 
     # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
     providers:
