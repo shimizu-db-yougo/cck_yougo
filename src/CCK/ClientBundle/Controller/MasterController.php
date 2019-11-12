@@ -699,6 +699,18 @@ class MasterController extends BaseController {
 			$em->flush();
 
 			// エクスポートファイルの定義
+			$csvDir = $this->container->getParameter('duplicate')['dir_path'];
+
+			// ディレクトリ作成
+			if (!is_dir($csvDir)) {
+				// ディレクトリが存在しない場合作成
+				mkdir($csvDir, 0777, True);
+				// umaskを考慮して再度777に変更
+				chmod($csvDir, 0777);
+			}else{
+				$this->clearDirectory($csvDir);
+			}
+
 			$handleMain = $this->openExportFile("MainTerm");
 			$handleExplain = $this->openExportFile("ExplainIndex");
 			$handleSub = $this->openExportFile("SubTerm");
@@ -711,6 +723,7 @@ class MasterController extends BaseController {
 			// 用語IDの発番
 			$maxTermIDRec = $em->getRepository('CCKCommonBundle:MainTerm')->getNewTermID();
 			$newTermId = (int)$maxTermIDRec[0]['term_id'] + 1;
+			$newTermIdStart = (int)$maxTermIDRec[0]['term_id'];
 
 			$maxSubTermIDRec = $em->getRepository('CCKCommonBundle:SubTerm')->getNewTermID();
 			$newSubTermId = (int)$maxSubTermIDRec[0]['id'] + 1;
@@ -721,7 +734,7 @@ class MasterController extends BaseController {
 			$record_cnt = 0;
 			foreach($maintermRecordSet as $mainterm){
 				// 用語データの複製
-				$newTermId = $this->exportMainTerm($handleMain, $mainterm, $newTermId, $entity->getId());
+				$newTermId = $this->exportMainTerm($handleMain[0], $mainterm, $newTermId, $entity->getId());
 				$term_id = $mainterm->getTermId();
 				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,MAIN***");
 
@@ -737,34 +750,70 @@ class MasterController extends BaseController {
 
 				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":READ***");
 
-				$this->exportExpTerm($handleExplain, $entityExp, $newTermId);
+				$this->exportExpTerm($handleExplain[0], $entityExp, $newTermId);
 				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,EXPLAIN***");
-				$newSubId = $this->exportSubTerm($handleSub, $entitySub, $newTermId, $newSubTermId);
+				$newSubId = $this->exportSubTerm($handleSub[0], $entitySub, $newTermId, $newSubTermId);
 				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,SUBTERM***");
-				$newSynId = $this->exportSynTerm($handleSyn, $entitySyn, $newTermId, $newSynTermId);
+				$newSynId = $this->exportSynTerm($handleSyn[0], $entitySyn, $newTermId, $newSynTermId);
 				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,SYNONYM***");
-				$this->exportRefTerm($handleRefer, $entityRef, $newTermId);
+				$this->exportRefTerm($handleRefer[0], $entityRef, $newTermId, $newTermIdStart);
 				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,REFER***");
-				$this->exportCenterDataByYear($em,$handle, $entityCenter, $newTermId, $newSubId, $newSynId, $request->request->get('startyear'));
+				$this->exportCenterDataByYear($handleCenter[0], $entityCenter, $newTermId, $newSubId, $newSynId, $request->request->get('startyear'));
 				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,CENTER***");
 
 				$newTermId++;
-				$newSubTermId = max($newSubId);
-				$newSynTermId = max($newSynId);
-
+				if(count($newSubId) > 0){
+					$newSubTermId = max($newSubId)+1;
+				}
+				if(count($newSynId) > 0){
+					$newSynTermId = max($newSynId)+1;
+				}
 			}
 
-			fclose($handleMain);
-			fclose($handleExplain);
-			fclose($handleSub);
-			fclose($handleSyn);
-			fclose($handleRefer);
-			fclose($handleCenter);
-
-			/*foreach($headerRecordSet as $header){
+			$handleHeader = $this->openExportFile("Header");
+			foreach($headerRecordSet as $header){
 				// 見出しデータの複製
-				$this->copyHeader($em, $header, $entity->getId());
-			}*/
+				$this->exportHeader($handleHeader[0], $header, $entity->getId());
+			}
+
+			fclose($handleMain[0]);
+			fclose($handleExplain[0]);
+			fclose($handleSub[0]);
+			fclose($handleSyn[0]);
+			fclose($handleRefer[0]);
+			fclose($handleCenter[0]);
+			fclose($handleHeader[0]);
+
+			// SQLファイルの圧縮
+			$zip = new \ZipArchive();
+			$outFileName = 'duplicatedData.zip';
+			$tmpFilePath = tempnam(sys_get_temp_dir(), 'tmp');
+			// 作業ファイルをオープン
+			$result = $zip->open($tmpFilePath, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE);
+			if($result !== true) {
+				return false;
+			}
+
+			// 圧縮するファイルを定義
+			$zip = $this->addZipFile($zip, $handleMain);
+			$zip = $this->addZipFile($zip, $handleExplain);
+			$zip = $this->addZipFile($zip, $handleSub);
+			$zip = $this->addZipFile($zip, $handleSyn);
+			$zip = $this->addZipFile($zip, $handleRefer);
+			$zip = $this->addZipFile($zip, $handleCenter);
+			$zip = $this->addZipFile($zip, $handleHeader);
+
+			// ストリームを閉じる
+			$zip->close();
+
+			// ダウンロード
+			$response = new BinaryFileResponse($tmpFilePath);
+			$response->headers->set('Content-type', 'application/octet-stream');
+			BinaryFileResponse::trustXSendfileTypeHeader();
+			$response->setContentDisposition(
+					ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+					$outFileName
+			);
 
 			$this->get('logger')->error("***用語複製処理:END***");
 
@@ -778,35 +827,36 @@ class MasterController extends BaseController {
 			$this->get('logger')->error($e->getTraceAsString());
 
 		}
-		return $this->redirect($this->generateUrl('client.master.curriculum'));
+		//return $this->redirect($this->generateUrl('client.master.curriculum'));
+		return $response;
 	}
 
 	private function openExportFile($tablename){
 		// CSV出力先の決定
 		$csvName = $tablename.'_' . date('Ymd') . '_' . date('Hi') . '.csv';
 		$csvDir = $this->container->getParameter('duplicate')['dir_path'];
-		$csv_file = $csvDir . '/' . $csvName;
-
-		// ディレクトリ作成
-		if (!is_dir($csvDir)) {
-			// ディレクトリが存在しない場合作成
-			mkdir($csvDir, 0777, True);
-			// umaskを考慮して再度777に変更
-			chmod($csvDir, 0777);
-		}
+		$csv_path = $csvDir . '/' . $csvName;
 
 		// ファイル作成
-		if (!file_exists($csv_file)) {
+		if (!file_exists($csv_path)) {
 			// ファイルが存在しない場合作成
-			touch($csv_file);
+			touch($csv_path);
 			// 権限変更
-			chmod($csv_file, 0666);
+			chmod($csv_path, 0666);
 		}
 
 		// CSVファイル出力
-		$handle = fopen($csv_file, "w+");
+		$handle = fopen($csv_path, "w+");
 
-		return $handle;
+		return array($handle,$csv_path,$csvName);
+	}
+
+	private function addZipFile($zip, $fileData){
+		$addFilePath = file_get_contents($fileData[1]);
+		$addFileName = $fileData[2];
+		$zip->addFromString($addFileName , $addFilePath);
+
+		return $zip;
 	}
 
 	/**
@@ -973,7 +1023,7 @@ class MasterController extends BaseController {
 				$sql .= "'".$entityExpRec['indexTerm']."',";
 				$sql .= "'".$entityExpRec['indexAddLetter']."',";
 				$sql .= "'".$entityExpRec['indexKana']."',";
-				$sql .= "'".$entityExpRec['nombre'].",";
+				$sql .= $entityExpRec['nombre'].",";
 				$sql .= "NOW(),";
 				$sql .= "null,";
 				$sql .= "null,";
@@ -1048,7 +1098,7 @@ class MasterController extends BaseController {
 				$sql .= $entitySynRec['center_frequency'].",";
 				$sql .= (($entitySynRec['news_exam']) ? "1" : "0").",";
 				$sql .= "'".$entitySynRec['delimiter']."',";
-				$sql .= "'".$entitySynRec['kana']."',";
+				$sql .= "'',";
 				$sql .= "'".$entitySynRec['index_add_letter']."',";
 				$sql .= "'".$entitySynRec['index_kana']."',";
 				$sql .= $entitySynRec['nombre'].",";
@@ -1073,14 +1123,14 @@ class MasterController extends BaseController {
 		return $arr_rtn_id;
 	}
 
-	public function exportRefTerm($handle, $entityRef, $newTermId){
+	public function exportRefTerm($handle, $entityRef, $newTermId, $newTermIdStart){
 
 		try{
 			foreach($entityRef as $entityRefRec){
 				$sql = "INSERT INTO `Refer` (`id`, `main_term_id`, `refer_term_id`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
 				$sql .= "(null,";
 				$sql .= $newTermId.",";
-				$sql .= $entityRefRec['refer_term_id'].",";
+				$sql .= ($entityRefRec['refer_term_id'] + $newTermIdStart).",";
 				$sql .= $entityRefRec['nombre'].",";
 				$sql .= "NOW(),";
 				$sql .= "null,";
@@ -1098,14 +1148,14 @@ class MasterController extends BaseController {
 		}
 	}
 
-	public function exportCenterDataByYear($entityCenter, $newTermId, $newSubId, $newSynId, $wkYear){
+	public function exportCenterDataByYear($handle, $entityCenter, $newTermId, $newSubId, $newSynId, $wkYear){
 
 		try{
 			$idx = 0;
 			$idx_sub = 0;
 			$idx_syn = 0;
 
-			$wkSubTermId = null;
+			$wkSubTermId = 'null';
 			$wkYougoFlag = 1;
 
 			$wkStartYear = $wkYear;
@@ -1129,6 +1179,8 @@ class MasterController extends BaseController {
 						$sql .= "null,";
 						$sql .= "null,";
 						$sql .= "0);";
+
+						fputs($handle, $sql."\n");
 					}
 
 					$wkYear = $wkStartYear;
@@ -1141,15 +1193,9 @@ class MasterController extends BaseController {
 						// DBの実施年より対象年が大きい場合、スキップ
 					}else{
 						// DBの実施年と対象年が等しい場合、元データを複製する
-						$entityNewCenter = new Center();
-
-						$entityNewCenter->setMainTermId($newTermId);
 						if($entityCenterRec->getYougoFlag() == 1){
-							$entityNewCenter->setSubTermId(null);
-							$wkSubTermId = null;
-
+							$wkSubTermId = 'null';
 						}elseif($entityCenterRec->getYougoFlag() == 2){
-							$entityNewCenter->setSubTermId($newSubId[$idx_sub]);
 							$wkSubTermId = $newSubId[$idx_sub];
 
 							if($idx == 10){
@@ -1157,7 +1203,6 @@ class MasterController extends BaseController {
 							}
 
 						}else{
-							$entityNewCenter->setSubTermId($newSynId[$idx_syn]);
 							$wkSubTermId = $newSynId[$idx_syn];
 
 							if($idx == 10){
@@ -1165,15 +1210,21 @@ class MasterController extends BaseController {
 							}
 
 						}
-						$entityNewCenter->setYougoFlag($entityCenterRec->getYougoFlag());
-						$wkYougoFlag = $entityCenterRec->getYougoFlag();
-						$entityNewCenter->setYear($entityCenterRec->getYear());
-						$entityNewCenter->setMainExam($entityCenterRec->getMainExam());
-						$entityNewCenter->setSubExam($entityCenterRec->getSubExam());
-						$entityNewCenter->setDeleteFlag(false);
 
-						$em->persist($entityNewCenter);
-						unset($entityNewCenter);
+						$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+						$sql .= "(null,";
+						$sql .= $newTermId.",";
+						$sql .= $wkSubTermId.",";
+						$sql .= $entityCenterRec->getYougoFlag().",";
+						$sql .= $entityCenterRec->getYear().",";
+						$sql .= $entityCenterRec->getMainExam().",";
+						$sql .= $entityCenterRec->getSubExam().",";
+						$sql .= "NOW(),";
+						$sql .= "null,";
+						$sql .= "null,";
+						$sql .= "0);";
+
+						fputs($handle, $sql."\n");
 						$wkYear++;
 					}
 				}
@@ -1181,28 +1232,53 @@ class MasterController extends BaseController {
 
 			// DBから10件読み込んだ後、対象年がある場合は、初期データを登録する
 			for($i = $wkYear; $wkYear < $wkEndYear; $wkYear++){
-				$entityNewCenter = new Center();
+				$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+				$sql .= "(null,";
+				$sql .= $newTermId.",";
+				$sql .= $wkSubTermId.",";
+				$sql .= $wkYougoFlag.",";
+				$sql .= $wkYear.",";
+				$sql .= "0,";
+				$sql .= "0,";
+				$sql .= "NOW(),";
+				$sql .= "null,";
+				$sql .= "null,";
+				$sql .= "0);";
 
-				$entityNewCenter->setMainTermId($newTermId);
-
-				$entityNewCenter->setSubTermId($wkSubTermId);
-				$entityNewCenter->setYougoFlag($wkYougoFlag);
-
-				$entityNewCenter->setYear($wkYear);
-				$entityNewCenter->setMainExam(0);
-				$entityNewCenter->setSubExam(0);
-				$entityNewCenter->setDeleteFlag(false);
-
-				$em->persist($entityNewCenter);
-				unset($entityNewCenter);
+				fputs($handle, $sql."\n");
 			}
 
-			$em->flush();
-			$em->getConnection()->commit();
 		} catch (\Exception $e){
-			$em->getConnection()->rollback();
-			$em->close();
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
 
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	public function exportHeader($handle, $entityHeader, $newCurId){
+
+		try{
+			$sql = "INSERT INTO `Header` (`id`, `version_id`, `header_id`, `hen`, `sho`, `dai`, `chu`, `ko`, `name`, `sort`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES ";
+			$sql .= "(null,";
+			$sql .= $newCurId.",";
+			$sql .= $entityHeader->getHeaderId().",";
+			$sql .= $entityHeader->getHen().",";
+			$sql .= $entityHeader->getSho().",";
+			$sql .= $entityHeader->getDai().",";
+			$sql .= $entityHeader->getChu().",";
+			$sql .= $entityHeader->getKo().",";
+			$sql .= "'".$entityHeader->getName()."',";
+			$sql .= $entityHeader->getSort().",";
+			$sql .= "NOW(),";
+			$sql .= "null,";
+			$sql .= "null,";
+			$sql .= "0);";
+
+			fputs($handle, $sql."\n");
+
+		} catch (\Exception $e){
 			// log
 			$this->get('logger')->error($e->getMessage());
 			$this->get('logger')->error($e->getTraceAsString());
