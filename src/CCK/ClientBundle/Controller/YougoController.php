@@ -324,7 +324,8 @@ class YougoController extends BaseController {
 				'term' => $term,
 				'list_count' => $list_count,
 				'sort_order' => $sort_order_link,
-				'sort_field' => $sort_field
+				'sort_field' => $sort_field,
+				'term_cnt' => count($entities)
 		);
 	}
 
