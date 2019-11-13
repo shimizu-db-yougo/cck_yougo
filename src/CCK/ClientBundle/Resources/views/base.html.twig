@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
 		<meta name="description" content="">
 		<meta name="author" content="">
 		<meta name="robots" content="noindex">
@@ -22,6 +22,7 @@
 
 		{% block stylesheets %}
 		<link href="{{ asset('bundles/cckcommon/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+		<link href="{{ asset('bundles/cckcommon/bootstrap/css/non-responsive.css') }}" rel="stylesheet">
 		<link href="{{ asset('bundles/cckcommon/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
 		<link href="{{ asset('bundles/cckcommon/css/bootstrap-overwrite.css') }}" rel="stylesheet">
 		<link href="{{ asset('bundles/cckcommon/css/reset.css') }}" rel="stylesheet">
@@ -32,6 +33,9 @@
 		.side-select {
 			margin-left: 4px;
 			margin-right: 4px;
+		}
+		.area-contents {
+			margin-left: 136px;
 		}
 		</style>
 		{% endblock %}

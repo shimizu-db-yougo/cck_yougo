@@ -8,7 +8,7 @@
 {% block contents %}
 <form class="form-horizontal" enctype='multipart/form-data' method='POST'  autocomplete="off" novalidate>
 <div class="row">
-	<div class="col-lg-12">
+	<div class="col-xs-12">
 		<div class="panel-body">
 			<div class="row">
 				<div class="form-horizontal" id="form_mainterm">
@@ -23,7 +23,7 @@
 </div>
 {% include 'CCKClientBundle:Common:subterm.html.twig' %}
 <div class="row">
-	<div class="col-lg-12">
+	<div class="col-xs-12">
 		<div class="text-center">
 			<button type="button" class="btn btn-primary js-yougo-submit">{{ 'btn.submit'|trans }}</button>
 			<a href="{{ path('client.yougo.index') }}"><div class="btn btn-default" name="back">{{ 'btn.back'|trans }}</div></a>
@@ -35,7 +35,7 @@
 <div class="content">
 
 <div class="row">
-	<div class="col-lg-12">
+	<div class="col-xs-12">
 	</div>
 </div>
 
@@ -78,7 +78,7 @@
 				var yougo_sub_parse = JSON.parse(yougo_sub);
 				console.log(yougo_sub_parse.length);
 
-				var header_sub = '<div class="form-group"><div class="col-lg-12">サブ用語</div></div>';
+				var header_sub = '<div class="form-group"><div class="col-xs-12">サブ用語</div></div>';
 
 				for(var i=0; i<yougo_sub_parse.length; i++){
 					console.log(yougo_sub_parse[i].sub_term);
@@ -97,7 +97,7 @@
 				// 同対類用語取得
 				var yougo_syn = '{{ yougo_syn|json_encode|raw }}';
 				var yougo_syn_parse = JSON.parse(yougo_syn);
-				var header_syn = '<div class="form-group"><div class="col-lg-12">同対類用語</div></div>';
+				var header_syn = '<div class="form-group"><div class="col-xs-12">同対類用語</div></div>';
 
 				for(var i=0; i<yougo_syn_parse.length; i++){
 					if(i>0){header_syn = ''};
@@ -112,7 +112,7 @@
 				// 指矢印用語取得
 				var yougo_ref = '{{ yougo_ref|json_encode|raw }}';
 				var yougo_ref_parse = JSON.parse(yougo_ref);
-				var header_ref = '<div class="form-group"><div class="col-lg-12">指矢印用語</div></div>';
+				var header_ref = '<div class="form-group"><div class="col-xs-12">指矢印用語</div></div>';
 
 				for(var i=0; i<yougo_ref_parse.length; i++){
 					if(i>0){header_ref = ''};

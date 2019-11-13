@@ -33,16 +33,16 @@
 <!-- yougo search area -->
 <form action="{{ path('client.yougo.index') }}" class="form-horizontal" method="GET" autocomplete="off">
 <div class="row">
-	<div class="col-lg-12">
+	<div class="col-xs-12">
 		<div class="panel panel-primary panel-search">
 			<div class="panel-heading">{{ 'text.search.conditions'|trans }}</div>
 			<div class="panel-body">
 				<div class="row">
 					<div class="form-horizontal">
 						<div class="form-group">
-							<div class="col-lg-12">
-								<label class="col-sm-1">{{ 'text.yougo.curriculum'|trans }}</label>
-								<div class="col-sm-2">
+							<div class="col-xs-12">
+								<label class="col-xs-1">{{ 'text.yougo.curriculum'|trans }}</label>
+								<div class="col-xs-2">
 									<select class="form-control js-cur input-sm" name="curriculum">
 										<option value="0">--------------</option>
 										{% for cur in cur_list %}
@@ -50,8 +50,8 @@
 										{% endfor %}
 									</select>
 								</div>
-								<label class="col-sm-1">{{ 'text.yougo.version'|trans }}</label>
-								<div class="col-sm-2">
+								<label class="col-xs-1">{{ 'text.yougo.version'|trans }}</label>
+								<div class="col-xs-2">
 									<select class="form-control js-han input-sm" name="version" disabled>
 										<option value="0">--------------</option>
 										{% for ver in ver_list %}
@@ -62,9 +62,9 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<div class="col-lg-12">
-								<label class="col-sm-1">{{ 'text.yougo.head.hen'|trans }}</label>
-								<div class="col-sm-2">
+							<div class="col-xs-12">
+								<label class="col-xs-1">{{ 'text.yougo.head.hen'|trans }}</label>
+								<div class="col-xs-2">
 									<select class="form-control js-hen input-sm" name="hen">
 										<option value="0">--------------</option>
 										{% for hen in hen_list %}
@@ -72,8 +72,8 @@
 										{% endfor %}
 									</select>
 								</div>
-								<label class="col-sm-1">{{ 'text.yougo.head.sho'|trans }}</label>
-								<div class="col-sm-2">
+								<label class="col-xs-1">{{ 'text.yougo.head.sho'|trans }}</label>
+								<div class="col-xs-2">
 									<select class="form-control js-sho input-sm" name="sho">
 										<option value="0">--------------</option>
 										{% for sho in sho_list %}
@@ -81,8 +81,8 @@
 										{% endfor %}
 									</select>
 								</div>
-								<label class="col-sm-1">{{ 'text.yougo.head.dai'|trans }}</label>
-								<div class="col-sm-2">
+								<label class="col-xs-1">{{ 'text.yougo.head.dai'|trans }}</label>
+								<div class="col-xs-2">
 									<select class="form-control js-dai input-sm" name="dai">
 										<option value="0">--------------</option>
 										{% for dai in dai_list %}
@@ -93,9 +93,9 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<div class="col-lg-12">
-								<label class="col-sm-1">{{ 'text.yougo.head.chu'|trans }}</label>
-								<div class="col-sm-2">
+							<div class="col-xs-12">
+								<label class="col-xs-1">{{ 'text.yougo.head.chu'|trans }}</label>
+								<div class="col-xs-2">
 									<select class="form-control js-chu input-sm" name="chu">
 										<option value="0">--------------</option>
 										{% for chu in chu_list %}
@@ -103,8 +103,8 @@
 										{% endfor %}
 									</select>
 								</div>
-								<label class="col-sm-1">{{ 'text.yougo.head.ko'|trans }}</label>
-								<div class="col-sm-2">
+								<label class="col-xs-1">{{ 'text.yougo.head.ko'|trans }}</label>
+								<div class="col-xs-2">
 									<select class="form-control js-ko input-sm" name="ko">
 										<option value="0">--------------</option>
 										{% for ko in ko_list %}
@@ -112,16 +112,16 @@
 										{% endfor %}
 									</select>
 								</div>
-								<label class="col-sm-1">{{ 'text.yougo.nombre'|trans }}</label>
-								<div class="col-sm-2">
+								<label class="col-xs-1">{{ 'text.yougo.nombre'|trans }}</label>
+								<div class="col-xs-2">
 									<input type="text" class="form-control input-sm" name="nombre" value="{{ nombre }}">
 								</div>
 							</div>
 						</div>
 						<div class="form-group">
-							<div class="col-lg-12">
-								<label class="col-sm-1">{{ 'text.yougo.freq.text'|trans }}</label>
-								<div class="col-sm-2">
+							<div class="col-xs-12">
+								<label class="col-xs-1">{{ 'text.yougo.freq.text'|trans }}</label>
+								<div class="col-xs-2">
 									<select class="form-control input-sm" name="text_freq">
 										<option value="0">--------------</option>
 										<option value="1" {{ text_freq == '1' ? " selected " : '' }}">A</option>
@@ -129,26 +129,26 @@
 										<option value="3" {{ text_freq == '3' ? " selected " : '' }}">C</option>
 									</select>
 								</div>
-								<label class="col-sm-1">{{ 'text.yougo.freq.center'|trans }}</label>
-								<div class="col-sm-2">
+								<label class="col-xs-1">{{ 'text.yougo.freq.center'|trans }}</label>
+								<div class="col-xs-2">
 									<input type="text" class="form-control input-sm" name="center_freq" value="{{ center_freq }}">
 								</div>
-								<label class="col-sm-1">{{ 'text.yougo.news.exam'|trans }}</label>
-								<div class="col-sm-1">
+								<label class="col-xs-1">{{ 'text.yougo.news.exam'|trans }}</label>
+								<div class="col-xs-1">
 									<input type="checkbox" name="news_exam[]" {{ news_exam == true ? " checked" : '' }}>
 								</div>
 							</div>
 						</div>
 						<div class="form-group">
-							<div class="col-lg-12">
-								<label class="col-sm-1">{{ 'text.yougo.term'|trans }}</label>
-								<div class="col-sm-4">
+							<div class="col-xs-12">
+								<label class="col-xs-1">{{ 'text.yougo.term'|trans }}</label>
+								<div class="col-xs-4">
 									<input type="text" class="form-control input-sm" name="term" value="{{ term }}">
 								</div>
-								<div class="col-sm-1">
+								<div class="col-xs-1">
 									<button class="btn btn-primary button_text_align input-sm" type="submit" OnClick="loading('処理中...');">{{ 'btn.search'|trans }}</button>
 								</div>
-								<div class="col-sm-1">
+								<div class="col-xs-1">
 									<button class="btn btn-default button_text_align input-sm" type="button" OnClick="search_clear();">{{ 'btn.clear'|trans }}</button>
 								</div>
 							</div>
@@ -167,16 +167,16 @@
 <!-- yougo list area -->
 <div class="content">
 <div class="row">
-	<div class="col-lg-8 text-center">
+	<div class="col-xs-8 text-center">
 		{{ knp_pagination_render(pagination) }}
 	</div>
-	<div class="col-lg-1 text-center">
+	<div class="col-xs-1 text-center">
 		<a href="{{ path('client.yougo.new') }}"><button class="btn btn-primary btn-sm" name="id">{{ 'btn.new.default'|trans }}</button></a>
 	</div>
-	<div class="col-lg-1 text-center">
+	<div class="col-xs-1 text-center">
 		<a href="{{ path('client.yougo.preview.search') }}"  target="_blank"><button class="btn btn-primary btn-sm" name="id">{{ 'btn.preview'|trans }}</button></a>
 	</div>
-	<div class="col-lg-2 text-right">
+	<div class="col-xs-2 text-right">
 	<form action="{{ path('client.yougo.index') }}" class="form-horizontal sty_list_count" method="GET">
 		<select class="form-control js-list-count" name="list_count">
 			<option value="10" {{ list_count == '10' ? " selected " : '' }}">10件表示</option>
@@ -191,7 +191,7 @@
 </div>
 
 <div class="row">
-	<div class="col-lg-12">
+	<div class="col-xs-12">
 		<table class="table table-yougo table-striped">
 			<thead>
 				<tr class="text-center">
@@ -279,13 +279,13 @@
 </div>
 
 <div class="row">
-	<div class="col-lg-12 text-right">
+	<div class="col-xs-12 text-right">
 		{{ cur_page }}/{{ sum_page }}
 	</div>
 </div>
 
 <div class="row">
-	<div class="col-lg-12 text-center">
+	<div class="col-xs-12 text-center">
 		{{ knp_pagination_render(pagination) }}
 	</div>
 </div>

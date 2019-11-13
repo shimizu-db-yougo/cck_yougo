@@ -16,8 +16,8 @@
 {% dump(app.request.cookies) %}
 {% dump(app.request.cookies.get('sidebar')) %}
 {% set classSide = (app.request.cookies.get('sidebar')=='hide'?'':' show') %}
-{% set classMain = (app.request.cookies.get('sidebar')=='hide'?'':'col-sm-11 col-sm-offset-1 col-md-11 col-md-offset-1 ') %}
-{% set classOrig = (app.request.cookies.get('sidebar')=='hide'?'col-sm-11 col-sm-offset-1 col-md-11 col-md-offset-1 ':'') %}
+{% set classMain = (app.request.cookies.get('sidebar')=='hide'?'':'col-xs-11 col-xs-offset-1') %}
+{% set classOrig = (app.request.cookies.get('sidebar')=='hide'?'col-xs-11 col-xs-offset-1':'') %}
 {% set toggleText = (app.request.cookies.get('sidebar')=='hide'?'"閉じる">メニュー':'"メニュー">閉じる') %}
 {% set toggleIcon = (app.request.cookies.get('sidebar')=='hide'?'right':'left') %}
 <div class="container-fluid">
@@ -25,10 +25,10 @@
 		<!--<div class="toggle-sidebar hidden-xs{{ classSide }}" data-btn="toggle-sidebar">
 			<span data-toggletext={{ toggleText|raw }}</span><i class="fa fa-angle-{{ toggleIcon }}" data-toggleicon="fa-angle-right fa-angle-left"></i>
 		</div> -->
-		<div class="col-sm-1 col-md-1 sidebar{{ classSide }}">
+		<div class="col-xs-1 sidebar{{ classSide }}">
 			{% include 'CCKClientBundle:Common:sidebar.html.twig' %}
 		</div>
-		<div class="{{ classMain }}main" data-origclass="{{ classOrig }}main">
+		<div class="{{ classMain }}main area-contents" data-origclass="{{ classOrig }}main">
 			{% block contents %}
 			{% endblock %}
 		</div>
