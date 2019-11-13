@@ -19,6 +19,7 @@ use Symfony\Component\BrowserKit\Response;
 use CCK\CommonBundle\Entity\Header;
 use CCK\CommonBundle\Entity\Version;
 use CCK\CommonBundle\Entity\User;
+use CCK\CommonBundle\Entity\Curriculum;
 
 /**
  * Master controller.
@@ -496,6 +497,47 @@ class MasterController extends BaseController {
 
 		$response = new JsonResponse(array("return_cd" => true, "name" => ''));
 		return $response;
+	}
+
+	/**
+	 * @Route("/master/curriculum/new", name="client.master.cur.new")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:master:curriculum.html.twig")
+	 */
+	public function newCurriculumAction(Request $request){
+		$session = $request->getSession();
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			$cur_name = $request->request->get('cur_name');
+			$ver_name = $request->request->get('ver_name');
+
+			$cur_obj = new Curriculum();
+			$cur_obj->setName($cur_name);
+			$em->persist($cur_obj);
+			$em->flush();
+
+			$ver_obj = new Version();
+			$ver_obj->setCurriculumId($cur_obj->getId());
+			$ver_obj->setName($ver_name);
+
+			$em->persist($ver_obj);
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		}
+
+		return $this->redirect($this->generateUrl('client.master.curriculum'));
 	}
 
 	/**

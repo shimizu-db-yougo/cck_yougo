@@ -15,13 +15,34 @@
 	<div class="col-lg-2">
 		{#{ return_msg }#}
 	</div>
-	<!-- <div class="col-lg-10">
+	<div class="col-lg-10">
 		<div class="pull-right">
-			<button class="btn btn-primary btn-lg js-header-new">{{ 'btn.new.default'|trans }}</button>
+			<button class="btn btn-primary btn-lg js-cur-new">{{ '教科の'~'btn.new.default'|trans }}</button>
 		</div>
-	</div> -->
+	</div>
 </div>
 
+<!-- 3教科ずつ横に並べる -->
+{% set cur_rec = [] %}
+{% set cur_rec_bundle = [] %}
+{% set cur_cnt = 0 %}
+{% for cur_elem in cur_list %}
+	{% set cur_rec = cur_rec|merge([cur_elem]) %}
+	{% set cur_cnt = cur_cnt + 1 %}
+	{% if cur_cnt > 2 %}
+		{% set cur_rec_bundle = cur_rec_bundle|merge([cur_rec]) %}
+		{% set cur_rec = [] %}
+		{% set cur_cnt = 0 %}
+	{% endif %}
+{% endfor %}
+
+{% if cur_cnt > 0 %}
+	{% set cur_rec_bundle = cur_rec_bundle|merge([cur_rec]) %}
+{% endif %}
+
+{% dump(cur_rec_bundle) %}
+
+{% for cur_list in cur_rec_bundle %}
 <div class="row">
 	{% for cur_elem in cur_list %}
 	<div class="col-lg-4">
@@ -68,10 +89,48 @@
 	</div>
 	{% endfor %}
 </div>
+{% endfor %}
 
 <div class="modal-footer">
 	<div class="text-center">
 		<a href="{{ path('client.master.index') }}"><div class="btn btn-default" name="back">{{ 'btn.back'|trans }}</div></a>
+	</div>
+</div>
+
+<!-- 教科マスタ新規登録  -->
+<div class="modal fade" id="curNewModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog cur-modal" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				教科マスタの新規登録
+			</div>
+			<div class="modal-body">
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.yougo.curriculum'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="curriculum_n-err" class="curriculum-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="curriculum_n" name="curriculum_n" >
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.yougo.version'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="version_n-err" class="version-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="version_n" name="version_n" >
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+					<div class="text-center">
+						<button type="button" class="btn btn-default js-cur-cancel" data-dismiss="modal">{{ 'btn.no'|trans }}</button>
+						<button type="button" class="btn btn-danger js-cur-new-submit">{{ 'btn.yes'|trans }}</button>
+					</div>
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -169,6 +228,20 @@
 	{{ parent() }}
 	<script src="{{ asset('bundles/cckcommon/jquery-ui/jquery-ui.min.js') }}"></script>
 	<script>
+		// キャンセル
+		$('.js-cur-cancel').bind('click', function(e){
+			$('#curriculum_n').val('');
+			$('#version_n').val('');
+
+			$('.curriculum-err').text('');
+			$('.version-err').text('');
+		});
+
+		// ユーザマスタ新規登録
+		$('.js-cur-new').bind('click', function(){
+			$('#curNewModal').modal();
+		});
+
 		$('.js-curriculum-cancel').bind('click', function(){
 			$('.startyear-err').text('');
 		});
@@ -182,6 +255,35 @@
 
 			$('#curriculumModal').modal();
 
+		});
+
+		// 教科マスタ 新規登録
+		$('.js-cur-new-submit').bind('click', function(e){
+
+			var cur_name = $('#curriculum_n').val();
+			var ver_name = $('#version_n').val();
+
+			if(cur_name == ''){
+				$('.curriculum-err').text('必須項目です');
+				return false;
+			}
+
+			if(ver_name == ''){
+				$('.version-err').text('必須項目です');
+				return false;
+			}
+
+			var str_html = '';
+			str_html = "<input type='hidden' name='cur_name' value=\"" + cur_name.replace(/"/i, "&quot;") + "\">" +
+			"<input type='hidden' name='ver_name' value=\"" + ver_name.replace(/"/i, "&quot;") + "\">";
+
+			// create form
+			$('<form>', {
+				"id": "registerCurForm",
+				"html": str_html,
+				"action": "{{ path('client.master.cur.new') }}",
+				"method": "POST"
+			}).appendTo(document.body).submit();
 		});
 
 		$('.js-curriculum-submit').bind('click', function(e){
