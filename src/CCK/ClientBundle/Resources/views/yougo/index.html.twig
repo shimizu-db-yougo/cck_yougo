@@ -201,15 +201,15 @@
 					<th width="68px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.term_id"}) }}">{{ 'text.yougo.term_id'|trans }}{% if sort_field == "MainTerm.term_id" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.main_term"}) }}">{{ 'text.yougo.term'|trans }}{% if sort_field == "MainTerm.main_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="120px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.kana"}) }}">{{ 'text.yougo.kana'|trans }}{% if sort_field == "MainTerm.kana" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
+					<th width="80px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.text_frequency"}) }}">{{ 'text.yougo.freq.text'|trans }}{% if sort_field == "MainTerm.text_frequency" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
+					<th width="90px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.center_frequency"}) }}">{{ 'text.yougo.freq.center'|trans }}{% if sort_field == "MainTerm.center_frequency" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
+					<th width="80px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.news_exam"}) }}">{{ 'text.yougo.news.exam'|trans }}{% if sort_field == "MainTerm.news_exam" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="120px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.index_kana"}) }}">{{ 'text.yougo.index_kana'|trans }}{% if sort_field == "MainTerm.index_kana" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="120px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "ExplainIndex.index_term"}) }}">{{ 'text.yougo.explain_term'|trans }}{% if sort_field == "ExplainIndex.index_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "SubTerm.sub_term"}) }}">{{ 'text.yougo.sub_term'|trans }}{% if sort_field == "SubTerm.sub_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="120px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "SubTerm.kana"}) }}">{{ 'text.yougo.sub_kana'|trans }}{% if sort_field == "SubTerm.kana" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="124px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "SubTerm.index_kana"}) }}">{{ 'text.yougo.sub_index_kana'|trans }}{% if sort_field == "SubTerm.index_kana" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "Refer_term.refer_term"}) }}">{{ 'text.yougo.refer_term'|trans }}{% if sort_field == "Refer_term.refer_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
-					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.index_original"}) }}">{{ 'text.yougo.index_original'|trans }}{% if sort_field == "MainTerm.index_original" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
-					<th width="124px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.index_original_kana"}) }}">{{ 'text.yougo.index_original_kana'|trans }}{% if sort_field == "MainTerm.index_original_kana" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
-					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.index_abbreviation"}) }}">{{ 'text.yougo.index_abbreviation'|trans }}{% if sort_field == "MainTerm.index_abbreviation" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="80px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.handover"}) }}">{{ 'text.yougo.handover'|trans }}{% if sort_field == "MainTerm.handover" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="80px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "User.name"}) }}">{{ 'text.yougo.update_user'|trans }}{% if sort_field == "User.name" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.modify_date"}) }}">{{ 'text.yougo.modify_date'|trans }}{% if sort_field == "MainTerm.modify_date" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
@@ -226,15 +226,15 @@
 					<td width="68px" class="text-left">{{ 'M%06s'|format(yougo.term_id) }}</td>
 					<td width="100px" class="text-left">{{ replaceTag(yougo.main_term)|raw }}</td>
 					<td width="120px" class="text-left">{{ replaceTag(yougo.kana)|raw }}</td>
+					<td width="80px" class="text-left">{{ yougo.text_frequency }}</td>
+					<td width="90px" class="text-left">{{ yougo.center_frequency }}</td>
+					<td width="80px" class="text-left">{{ yougo.news_exam == 0 ? 'なし':'あり' }}</td>
 					<td width="120px" class="text-left">{{ replaceTag(yougo.index_kana)|raw }}</td>
 					<td width="120px" class="text-left">{{ replaceTag(yougo.index_term)|raw }}</td>
 					<td width="100px" class="text-left">{{ replaceTag(yougo.sub_term)|raw }}</td>
 					<td width="120px" class="text-left">{{ replaceTag(yougo.sub_kana)|raw }}</td>
 					<td width="124px" class="text-left">{{ replaceTag(yougo.sub_index_kana)|raw }}</td>
 					<td width="100px" class="text-left">{{ replaceTag(yougo.refer_term)|raw }}</td>
-					<td width="100px" class="text-left">{{ replaceTag(yougo.index_original)|raw }}</td>
-					<td width="124px" class="text-left">{{ replaceTag(yougo.index_original_kana)|raw }}</td>
-					<td width="100px" class="text-left">{{ replaceTag(yougo.index_abbreviation)|raw }}</td>
 					<td width="80px" class="text-left">{{ yougo.handover|length > 5 ? yougo.handover[:5]~'…' : yougo.handover }}</td>
 					<td width="80px" class="text-left">{{ yougo.name }}</td>
 					<td width="100px" class="text-left">{% if yougo.modify_date is empty %}{{ yougo.create_date|date('Y/m/d H:i') }}{% else %}{{ yougo.modify_date|date('Y/m/d H:i') }}{% endif %}</td>
