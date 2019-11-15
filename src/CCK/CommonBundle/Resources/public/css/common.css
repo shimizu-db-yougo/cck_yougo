@@ -147,8 +147,8 @@ span.help-block {
     padding: 20px;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: #B4EAF4;
-    color: #000000;
+    background-color: #337AB7;
+    color: #ffffff;
     border-right: 1px solid #eee;
   }
 }
@@ -162,7 +162,7 @@ span.help-block {
 .nav-sidebar > li > a {
   padding-right: 20px;
   padding-left: 20px;
-  color: #000000;
+  color: #ffffff;
 }
 .nav-sidebar > .active > a,
 .nav-sidebar > .active > a:hover,
