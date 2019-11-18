@@ -12,5 +12,15 @@ use Doctrine\ORM\EntityRepository;
  */
 class SynonymRepository extends EntityRepository
 {
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function getNewTermID(){
+		$sql = "
+			SELECT * FROM Synonym WHERE Synonym.id = (SELECT MAX(Synonym.id) FROM Synonym)
+		";
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
 
+		return $result;
+	}
 }

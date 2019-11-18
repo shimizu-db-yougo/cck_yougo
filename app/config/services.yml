@@ -5,6 +5,9 @@ parameters:
     archive:
         dir_path: "%kernel.root_dir%/../web/uploads/archive/"
         link: "uploads/archive/"
+    duplicate:
+        dir_path: "%kernel.root_dir%/../web/uploads/duplicate/"
+        link: "uploads/duplicate/"
         
     # temp path
     temp: "%kernel.root_dir%/../web/uploads/temp/"

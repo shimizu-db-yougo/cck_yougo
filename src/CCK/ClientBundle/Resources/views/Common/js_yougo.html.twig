@@ -144,14 +144,14 @@
 						}
 
 						$('#form_explains').append(
-								'<div class="col-lg-12 form_index">'
+								'<div class="col-xs-12 form_index">'
 								+'<input class="form-control input-sm" type="hidden" id="explain_main_term_id" name="explain_main_term_id" value="' + main_term_id + '">'
 								+'<input class="form-control input-sm" type="hidden" id="explain_index_term" name="explain_index_term" value="' + explain_list[i].indexTerm + '">'
 								+'<input class="form-control input-sm" type="hidden" id="explain_nombre" name="explain_nombre" value="'+ explain_list[i].nombre + '">'
-								+'<label class="col-sm-2">'+ explain_list[i].indexTerm + '</label>'
-								+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
-								+'<div class="col-sm-4"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
-								+'<label class="col-sm-2">'+ explain_list[i].nombre + '</label>'
+								+'<label class="col-xs-2">'+ explain_list[i].indexTerm + '</label>'
+								+'<div class="col-xs-4"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
+								+'<div class="col-xs-4"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
+								+'<label class="col-xs-2">'+ explain_list[i].nombre + '</label>'
 								+'</div>');
 					}
 				}
@@ -225,9 +225,9 @@
 			mainterm.birth_year = $('#form_mainterm [name=birth_year]').val();
 			mainterm.index_add_letter = $('#form_mainterm [name=index_add_letter]').val();
 			mainterm.index_kana = $('#form_mainterm [name=index_kana]').val();
-			mainterm.index_original_kana = $('#form_mainterm [name=index_original_kana]').val();
-			mainterm.index_original = $('#form_mainterm [name=index_original]').val();
-			mainterm.index_abbreviation = $('#form_mainterm [name=index_abbreviation]').val();
+			mainterm.index_original_kana = $('#form_mainterm [id=index_original_kana]').val();
+			mainterm.index_original = $('#form_mainterm [id=index_original]').val();
+			mainterm.index_abbreviation = $('#form_mainterm [id=index_abbreviation]').val();
 			mainterm.nombre = $('#form_mainterm [name=nombre]').text();
 			mainterm.term_explain = $('#form_mainterm [id=term_explain]').val();
 			mainterm.illust_filename = $('#form_illust [name=illust_filename]').val();
@@ -375,26 +375,26 @@
 		function constructSubForm(record){
 			var html =
 			'<div class="form-horizontal form_subterm">'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.sub_term"|trans }}</label>'
-			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="sub_term" name="sub_term" value="' + (((record)&&(record.sub_term)) ? record.sub_term : '') + '"></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.yomigana"|trans }}</label>'
-			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="kana" name="kana" value="' + (((record)&&(record.kana)) ? record.kana : '') + '"></div>'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.sub_term"|trans }}</label>'
+			+'<div class="col-xs-3"><input class="form-control input-sm" type="text" id="sub_term" name="sub_term" value="' + (((record)&&(record.sub_term)) ? record.sub_term : '') + '"></div>'
+			+'<label class="col-xs-1">{{ "text.yougo.red_letter"|trans }}</label>'
+			+'<div class="col-xs-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
+			+'<label class="col-xs-1">{{ "text.yougo.yomigana"|trans }}</label>'
+			+'<div class="col-xs-3"><input class="form-control input-sm" type="text" id="kana" name="kana" value="' + (((record)&&(record.kana)) ? record.kana : '') + '"></div>'
 			+'</div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
-			+'<div class="col-sm-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + (((record)&&(record.center_frequency)) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
-			+'<div class="col-sm-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.freq.text"|trans }}</label>'
+			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-xs-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
+			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + (((record)&&(record.center_frequency)) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
+			+'<label class="col-xs-1">{{ "text.yougo.news.exam"|trans }}</label>'
+			+'<div class="col-xs-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>'
-			+'<div class="col-sm-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.delimiter"|trans }}</label>'
+			+'<div class="col-xs-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
 					+'<option value="0">なし</option>';
 
 			html += '<option value="1" ' + (((record)&&(record.delimiter == '1')) ? ' selected ' : '') + '>と</option>'
@@ -406,8 +406,8 @@
 
 			html += '</select></div>'
 
-			+'<label class="col-sm-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
-			+'<div class="col-sm-1"><select class="form-control input-sm" id="delimiter_kana" name="delimiter_kana">'
+			+'<label class="col-xs-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
+			+'<div class="col-xs-1"><select class="form-control input-sm" id="delimiter_kana" name="delimiter_kana">'
 					+'<option value="0">なし</option>';
 
 			html += '<option value="1" ' + (((record)&&(record.delimiter_kana == '1')) ? ' selected ' : '') + '>と</option>'
@@ -420,16 +420,16 @@
 
 			html += '</select></div>'
 			+'</div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" id="index_add_letter" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.index_kana"|trans }}</label>'
-			+'<div class="col-sm-3"><input type="text" class="form-control input-sm" id="index_kana" name="index_kana" value="' + (((record)&&(record.index_kana)) ? record.index_kana : '') + '"></div>'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
+			+'<div class="col-xs-1"><input type="text" class="form-control input-sm" id="index_add_letter" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
+			+'<label class="col-xs-1">{{ "text.yougo.index_kana"|trans }}</label>'
+			+'<div class="col-xs-3"><input type="text" class="form-control input-sm" id="index_kana" name="index_kana" value="' + (((record)&&(record.index_kana)) ? record.index_kana : '') + '"></div>'
 			+'</div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-			+'<label class="col-sm-1" id="nombre">{{ "' + (((record)&&(record.nombre)) ? record.nombre : '') + '" }}</label>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-sub-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.subterm"|trans }}</button></div>'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.nombre"|trans }}</label>'
+			+'<label class="col-xs-1" id="nombre">{{ "' + (((record)&&(record.nombre)) ? record.nombre : '') + '" }}</label>'
+			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-sub-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.subterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="sub_term_id" name="sub_term_id" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
 			return html;
@@ -438,30 +438,30 @@
 		function constructSynForm(record){
 			var html =
 			'<div class="form-horizontal form_synterm">'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.icon"|trans }}</label>'
-			+'<div class="col-sm-1"><select class="form-control input-sm" id="synonym_id" name="synonym_id">'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.icon"|trans }}</label>'
+			+'<div class="col-xs-1"><select class="form-control input-sm" id="synonym_id" name="synonym_id">'
 			+'<option value="1" ' + (((record)&&(record.synonym_id == '1')) ? ' selected ' : '') + '>同</option>'
 			+'<option value="2" ' + (((record)&&(record.synonym_id == '2')) ? ' selected ' : '') + '>対</option>'
 			+'<option value="3" ' + (((record)&&(record.synonym_id == '3')) ? ' selected ' : '') + '>類</option>'
 			+'</select></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.syn_term"|trans }}</label>'
-			+'<div class="col-sm-3"><input class="form-control input-sm" type="text" id="syn_term" name="syn_term" value="' + (((record)&&(record.term)) ? record.term : '') + '"></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.red_letter"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
+			+'<label class="col-xs-1">{{ "text.yougo.syn_term"|trans }}</label>'
+			+'<div class="col-xs-3"><input class="form-control input-sm" type="text" id="syn_term" name="syn_term" value="' + (((record)&&(record.term)) ? record.term : '') + '"></div>'
+			+'<label class="col-xs-1">{{ "text.yougo.red_letter"|trans }}</label>'
+			+'<div class="col-xs-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
-			+'<div class="col-sm-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-center-target3" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="3" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-			+'<div class="col-sm-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + (((record)&&(record.center_frequency)) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.news.exam"|trans }}</label>'
-			+'<div class="col-sm-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.freq.text"|trans }}</label>'
+			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-xs-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
+			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target3" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="3" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + (((record)&&(record.center_frequency)) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
+			+'<label class="col-xs-1">{{ "text.yougo.news.exam"|trans }}</label>'
+			+'<div class="col-xs-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.delimiter"|trans }}</label>'
-			+'<div class="col-sm-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.delimiter"|trans }}</label>'
+			+'<div class="col-xs-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
 					+'<option value="0">なし</option>';
 
 			html += '<option value="1" ' + (((record)&&(record.delimiter == '1')) ? ' selected ' : '') + '>全角スペース</option>'
@@ -473,16 +473,16 @@
 
 			html += '</select></div>'
 			+'</div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
-			+'<div class="col-sm-1"><input type="text" class="form-control input-sm" id="index_add_letter" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.index_kana"|trans }}</label>'
-			+'<div class="col-sm-3"><input type="text" class="form-control input-sm" id="index_kana" name="index_kana" value="' + (((record)&&(record.index_kana)) ? record.index_kana : '') + '"></div>'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.index_add_letter"|trans }}</label>'
+			+'<div class="col-xs-1"><input type="text" class="form-control input-sm" id="index_add_letter" name="index_add_letter" value="' + (((record)&&(record.index_add_letter)) ? record.index_add_letter : '') + '"></div>'
+			+'<label class="col-xs-1">{{ "text.yougo.index_kana"|trans }}</label>'
+			+'<div class="col-xs-3"><input type="text" class="form-control input-sm" id="index_kana" name="index_kana" value="' + (((record)&&(record.index_kana)) ? record.index_kana : '') + '"></div>'
 			+'</div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.nombre"|trans }}</label>'
-			+'<label class="col-sm-1" id="nombre">{{ "' + (((record)&&(record.nombre)) ? record.nombre : '') + '" }}</label>'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-syn-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.synterm"|trans }}</button></div>'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.nombre"|trans }}</label>'
+			+'<label class="col-xs-1" id="nombre">{{ "' + (((record)&&(record.nombre)) ? record.nombre : '') + '" }}</label>'
+			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-syn-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.synterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="syn_term_id" name="syn_term_id" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
 			return html;
@@ -491,51 +491,51 @@
 		function constructRefForm(record){
 			var html =
 			'<div class="form-horizontal form_refterm">'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.head.hen"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-hen4 input-sm" name="ref_hen' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.head.hen"|trans }}</label>'
+			+'<div class="col-xs-3"><select class="form-control js-hen4 input-sm" name="ref_hen' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
 				+'<option value="0" term-id="' + ((record) ? record.id : '') + '">--------------</option>'
 				+'{% for hen in hen_list %}'
 					+'<option value="{{ hen.id }}" term-id="' + ((record) ? record.id : '') + '" ' + ((record) ? '{{ hen.id == select_hen ? " selected " : "" }}' : '') + '>{{ replaceTag(hen.name)|raw }}</option>'
 				+'{% endfor %}'
 			+'</select></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.head.sho"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-sho4 input-sm" name="ref_sho' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
+			+'<label class="col-xs-1">{{ "text.yougo.head.sho"|trans }}</label>'
+			+'<div class="col-xs-3"><select class="form-control js-sho4 input-sm" name="ref_sho' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
 				+'<option value="0">--------------</option>'
 				+'{% for sho in sho_list %}'
 					+'<option value="{{ sho.id }}" term-id="' + ((record) ? record.id : '') + '" ' + ((record) ? '{{ sho.id == select_sho ? " selected " : "" }}' : '') + '>{{ replaceTag(sho.name)|raw }}</option>'
 				+'{% endfor %}'
 			+'</select></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.head.dai"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-dai4 input-sm" name="ref_dai' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
+			+'<label class="col-xs-1">{{ "text.yougo.head.dai"|trans }}</label>'
+			+'<div class="col-xs-3"><select class="form-control js-dai4 input-sm" name="ref_dai' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
 				+'<option value="0">--------------</option>'
 				+'{% for dai in dai_list %}'
 					+'<option value="{{ dai.id }}" term-id="' + ((record) ? record.id : '') + '" ' + ((record) ? '{{ dai.id == select_dai ? " selected " : "" }}' : '') + '>{{ replaceTag(dai.name)|raw }}</option>'
 				+'{% endfor %}'
 			+'</select></div></div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<label class="col-sm-1">{{ "text.yougo.head.chu"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-chu4 input-sm" name="ref_chu' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<label class="col-xs-1">{{ "text.yougo.head.chu"|trans }}</label>'
+			+'<div class="col-xs-3"><select class="form-control js-chu4 input-sm" name="ref_chu' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
 				+'<option value="0">--------------</option>'
 				+'{% for chu in chu_list %}'
 					+'<option value="{{ chu.id }}" term-id="' + ((record) ? record.id : '') + '" ' + ((record) ? '{{ chu.id == select_chu ? " selected " : "" }}' : '') + '>{{ replaceTag(chu.name)|raw }}</option>'
 				+'{% endfor %}'
 			+'</select></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.head.ko"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-ko input-sm" name="ref_ko' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
+			+'<label class="col-xs-1">{{ "text.yougo.head.ko"|trans }}</label>'
+			+'<div class="col-xs-3"><select class="form-control js-ko input-sm" name="ref_ko' + ((record) ? record.id : '') + '" term-id="' + ((record) ? record.id : '') + '">'
 				+'<option value="0">--------------</option>'
 				+'{% for ko in ko_list %}'
 					+'<option value="{{ ko.id }}" term-id="' + ((record) ? record.id : '') + '" ' + ((record) ? '{{ ko.id == select_ko ? " selected " : "" }}' : '') + '>{{ replaceTag(ko.name)|raw }}</option>'
 				+'{% endfor %}'
 			+'</select></div>'
-			+'<label class="col-sm-1">{{ "text.yougo.refer_term"|trans }}</label>'
-			+'<div class="col-sm-3"><select class="form-control js-term input-sm" name="ref_term' + ((record) ? record.id : '') + '" id="ref_term">'
+			+'<label class="col-xs-1">{{ "text.yougo.refer_term"|trans }}</label>'
+			+'<div class="col-xs-3"><select class="form-control js-term input-sm" name="ref_term' + ((record) ? record.id : '') + '" id="ref_term">'
 			+'{% for refer_term in main_term_list %}'
 				+'<option value="{{ refer_term.termId }}">{{ refer_term.mainTerm }}</option>'
 			+'{% endfor %}'
 			+'</select></div></div></div>'
-			+'<div class="form-group"><div class="col-lg-12">'
-			+'<div class="col-sm-1"><button type="button" class="btn btn-primary btn-sm js-ref-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.refterm"|trans }}</button></div>'
+			+'<div class="form-group"><div class="col-xs-12">'
+			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-ref-remove" term-id="' + ((record) ? record.id : '') + '">{{ "btn.remove.refterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="ref_idx" name="ref_idx" value="' + ((record) ? record.id : '') + '">'
 			+'</div></div><hr></div>';
 			return html;
@@ -624,8 +624,8 @@
 				data: data,
 				method: 'POST',
 				success: function(response){
-					var html = '<div class="row"><div class="col-sm-12"><label class="col-sm-4"></label>'
-					+'<label class="col-sm-4">本試</label><label class="col-sm-4">追試</label>'
+					var html = '<div class="row"><div class="col-xs-12"><label class="col-xs-4"></label>'
+					+'<label class="col-xs-4">本試</label><label class="col-xs-4">追試</label>'
 					+'</div>'
 					$('#formcenter').append(html);
 
@@ -633,9 +633,9 @@
 						console.log(key);
 						console.log(list.year);
 
-						html = '<div class="row"><div class="col-sm-12"><label class="col-sm-4">' + list.year + '</label>'
-						+'<input type="text" class="col-sm-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + list.mainExam + '">'
-						+'<input type="text" class="col-sm-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + list.subExam + '">'
+						html = '<div class="row"><div class="col-xs-12"><label class="col-xs-4">' + list.year + '</label>'
+						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + list.mainExam + '">'
+						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + list.subExam + '">'
 						+'</div>';
 
 						$('#formcenter').append(html);

@@ -3,9 +3,10 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
 		<meta name="description" content="">
 		<meta name="author" content="">
+		<meta name="robots" content="noindex">
 
 		<title>清水書院用語集管理システム</title>
 
@@ -21,6 +22,7 @@
 
 		{% block stylesheets %}
 		<link href="{{ asset('bundles/cckcommon/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+		<link href="{{ asset('bundles/cckcommon/bootstrap/css/non-responsive.css') }}" rel="stylesheet">
 		<link href="{{ asset('bundles/cckcommon/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
 		<link href="{{ asset('bundles/cckcommon/css/bootstrap-overwrite.css') }}" rel="stylesheet">
 		<link href="{{ asset('bundles/cckcommon/css/reset.css') }}" rel="stylesheet">
@@ -32,6 +34,9 @@
 			margin-left: 4px;
 			margin-right: 4px;
 		}
+		.area-contents {
+			margin-left: 136px;
+		}
 		</style>
 		{% endblock %}
 
@@ -39,7 +44,7 @@
 
 	<body>
 		{% block header %}
-		<nav class="navbar navbar-inverse navbar-fixed-top">
+		<nav class="navbar navbar-inverse navbar-fixed-top" style="min-height: 30px; height: 30px;">
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -59,11 +64,11 @@
 					{% endif %}
 					<ul class="nav navbar-nav navbar-right">
 						{% if currentUser is defined %}
-						<li class="navbar-text">[{{ currentUser.user_id }}] {{ currentUser.name }}</li>
+						<li style="top: 8px;color: #FFFFFF;">[{{ currentUser.user_id }}] {{ currentUser.name }}</li>
 						{% endif %}
-						<li><a href="{{ asset('./uploads/help/junbi.pdf') }}" target="_blank">{{ 'text.help.title'|trans }}</a></li>
+						<li><a href="{{ asset('./uploads/help/junbi.pdf') }}" target="_blank" style="top:-7px;">{{ 'text.help.title'|trans }}</a></li>
 						{% if is_granted('ROLE_USER') %}
-							<li><a href="{{ path('client.yougo.logout') }}">{{ 'text.logout'|trans }}</a></li>
+							<li><a href="{{ path('client.yougo.logout') }}" style="top:-7px;">{{ 'text.logout'|trans }}</a></li>
 						{% else %}
 						<li><a href="{#{ path('client.login') }#}"><i class="fa fa-lock fa-fw"></i>{{ 'text.login'|trans }}</a></li>
 						{% endif %}
@@ -80,7 +85,7 @@
 		<div id="footer">
 			<div class="outer">
 				<div class="inner">
-					<p class="text-muted text-center">© 2004-{{ 'now'|date('Y') }} cck Co.,Ltd. All Rights Reserved.</p>
+					<p class="text-muted text-center">© {{ 'now'|date('Y') }} Shimizu Shoin co.,Ltd All rights reserved.</p>
 				</div>
 			</div>
 		</div>

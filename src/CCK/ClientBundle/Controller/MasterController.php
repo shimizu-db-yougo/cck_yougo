@@ -19,6 +19,7 @@ use Symfony\Component\BrowserKit\Response;
 use CCK\CommonBundle\Entity\Header;
 use CCK\CommonBundle\Entity\Version;
 use CCK\CommonBundle\Entity\User;
+use CCK\CommonBundle\Entity\Curriculum;
 
 /**
  * Master controller.
@@ -499,6 +500,47 @@ class MasterController extends BaseController {
 	}
 
 	/**
+	 * @Route("/master/curriculum/new", name="client.master.cur.new")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:master:curriculum.html.twig")
+	 */
+	public function newCurriculumAction(Request $request){
+		$session = $request->getSession();
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			$cur_name = $request->request->get('cur_name');
+			$ver_name = $request->request->get('ver_name');
+
+			$cur_obj = new Curriculum();
+			$cur_obj->setName($cur_name);
+			$em->persist($cur_obj);
+			$em->flush();
+
+			$ver_obj = new Version();
+			$ver_obj->setCurriculumId($cur_obj->getId());
+			$ver_obj->setName($ver_name);
+
+			$em->persist($ver_obj);
+			$em->flush();
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		}
+
+		return $this->redirect($this->generateUrl('client.master.curriculum'));
+	}
+
+	/**
 	 * @Route("/master/curriculum", name="client.master.curriculum")
 	 * @Template("CCKClientBundle:master:curriculum.html.twig")
 	 */
@@ -603,32 +645,52 @@ class MasterController extends BaseController {
 			$em->persist($entity);
 			$em->flush();
 
+			$this->get('logger')->error("***用語複製処理:START***");
+
+			$record_cnt = 0;
 			foreach($maintermRecordSet as $mainterm){
 				// 用語データの複製
 				$newTermId = $this->copyMainTerm($em, $mainterm, $entity->getId());
+				$term_id = $mainterm->getTermId();
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,MAIN***");
 
-				$entityExp = $em->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($mainterm->getTermId());
-				$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($mainterm->getTermId());
-				$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($mainterm->getTermId());
-				$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($mainterm->getTermId());
+				$entityExp = $em->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($term_id);
+				$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($term_id);
+				$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($term_id);
+				$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($term_id);
 				$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
-						'mainTermId' => $mainterm->getTermId(),
+						'mainTermId' => $term_id,
 						'deleteFlag' => FALSE
 						),
 						array('id' => 'ASC','yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
 
-				$this->copyExpTerm($em, $entityExp, $newTermId);
-				$newSubId = $this->copySubTerm($em, $entitySub, $newTermId);
-				$newSynId = $this->copySynTerm($em, $entitySyn, $newTermId);
-				$this->copyRefTerm($em, $entityRef, $newTermId);
-				$this->copyCenterDataByYear($em, $entityCenter, $newTermId, $newSubId, $newSynId, $request->request->get('startyear'));
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":READ***");
 
+				$this->copyExpTerm($em, $entityExp, $newTermId);
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,EXPLAIN***");
+				$newSubId = $this->copySubTerm($em, $entitySub, $newTermId);
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,SUBTERM***");
+				$newSynId = $this->copySynTerm($em, $entitySyn, $newTermId);
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,SYNONYM***");
+				$this->copyRefTerm($em, $entityRef, $newTermId);
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,REFER***");
+				$this->copyCenterDataByYear($em, $entityCenter, $newTermId, $newSubId, $newSynId, $request->request->get('startyear'));
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,CENTER***");
+
+				$record_cnt = $record_cnt + 1;
+				if($record_cnt > 99){
+					$em->getConnection()->commit();
+					$record_cnt = 0;
+					$em->getConnection()->beginTransaction();
+				}
 			}
 
 			foreach($headerRecordSet as $header){
 				// 見出しデータの複製
 				$this->copyHeader($em, $header, $entity->getId());
 			}
+
+			$this->get('logger')->error("***用語複製処理:END***");
 
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
@@ -641,6 +703,811 @@ class MasterController extends BaseController {
 
 		}
 		return $this->redirect($this->generateUrl('client.master.curriculum'));
+	}
+
+	/**
+	 * @Route("/master/curriculum/download", name="client.master.cur.download")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:master:curriculum.html.twig")
+	 */
+	public function downloadAction(Request $request){
+		$session = $request->getSession();
+		if(!$request->request->has('id')){
+			return $this->redirect($this->generateUrl('client.master.curriculum'));
+		}
+
+		$id = $request->request->get('id');
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+		$max_ver = $em->getRepository('CCKCommonBundle:Version')->getRecentVersion($id);
+
+		$maintermRecordSet = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
+				'curriculumId' => $max_ver['id'],
+				'deleteFlag' => FALSE
+		));
+
+		$headerRecordSet = $em->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'versionId' => $max_ver['id'],
+				'deleteFlag' => FALSE
+		));
+
+		try{
+			$entity = new Version();
+
+			$entity->setCurriculumId($id);
+			$entity->setName($request->request->get('cur_name'));
+			$em->persist($entity);
+			$em->flush();
+
+			// エクスポートファイルの定義
+			$csvDir = $this->container->getParameter('duplicate')['dir_path'];
+
+			// ディレクトリ作成
+			if (!is_dir($csvDir)) {
+				// ディレクトリが存在しない場合作成
+				mkdir($csvDir, 0777, True);
+				// umaskを考慮して再度777に変更
+				chmod($csvDir, 0777);
+			}else{
+				$this->clearDirectory($csvDir);
+			}
+
+			$handleMain = $this->openExportFile("MainTerm");
+			$handleExplain = $this->openExportFile("ExplainIndex");
+			$handleSub = $this->openExportFile("SubTerm");
+			$handleSyn = $this->openExportFile("Synonym");
+			$handleRefer = $this->openExportFile("Refer");
+			$handleCenter = $this->openExportFile("Center");
+
+			$handleCenterFreqMain = $this->openExportFile("CenterFreqMain");
+			$handleCenterFreqSub = $this->openExportFile("CenterFreqSub");
+			$handleCenterFreqSyn = $this->openExportFile("CenterFreqSyn");
+
+			$this->get('logger')->info("***用語複製処理:START***");
+
+			// 用語IDの発番
+			$maxTermIDRec = $em->getRepository('CCKCommonBundle:MainTerm')->getNewTermID();
+			$newTermId = (int)$maxTermIDRec[0]['term_id'] + 1;
+			$newTermIdStart = (int)$maxTermIDRec[0]['term_id'];
+
+			$maxSubTermIDRec = $em->getRepository('CCKCommonBundle:SubTerm')->getNewTermID();
+			$newSubTermId = (int)$maxSubTermIDRec[0]['id'] + 1;
+
+			$maxSynTermIDRec = $em->getRepository('CCKCommonBundle:Synonym')->getNewTermID();
+			$newSynTermId = (int)$maxSynTermIDRec[0]['id'] + 1;
+
+			$record_cnt = 0;
+			foreach($maintermRecordSet as $mainterm){
+				// 用語データの複製
+				$newTermId = $this->exportMainTerm($handleMain[0], $mainterm, $newTermId, $entity->getId());
+				$term_id = $mainterm->getTermId();
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,MAIN***");
+
+				$entityExp = $em->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($term_id);
+				$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($term_id);
+				$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($term_id);
+				$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($term_id);
+				$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
+						'mainTermId' => $term_id,
+						'deleteFlag' => FALSE
+				),
+						array('id' => 'ASC','yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
+
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":READ***");
+
+				$this->exportExpTerm($handleExplain[0], $entityExp, $newTermId);
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,EXPLAIN***");
+				$newSubId = $this->exportSubTerm($handleSub[0], $entitySub, $newTermId, $newSubTermId);
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,SUBTERM***");
+				$newSynId = $this->exportSynTerm($handleSyn[0], $entitySyn, $newTermId, $newSynTermId);
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,SYNONYM***");
+				$this->exportRefTerm($handleRefer[0], $entityRef, $newTermId, $newTermIdStart);
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,REFER***");
+				$arr_center_freq = $this->exportCenterDataByYear($handleCenter[0], $entityCenter, $newTermId, $newSubId, $newSynId, $request->request->get('startyear'));
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,CENTER***".serialize($arr_center_freq)."****");
+
+				// センター頻度の更新SQL生成
+				$this->exportCenterFreqMain($handleCenterFreqMain[0], $arr_center_freq[0]);
+				$this->exportCenterFreqSub($handleCenterFreqSub[0], $arr_center_freq[1]);
+				$this->exportCenterFreqSyn($handleCenterFreqSyn[0], $arr_center_freq[2]);
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,CENTER_FREQ***");
+
+				$newTermId++;
+				if(count($newSubId) > 0){
+					$newSubTermId = max($newSubId)+1;
+				}
+				if(count($newSynId) > 0){
+					$newSynTermId = max($newSynId)+1;
+				}
+			}
+
+			$handleHeader = $this->openExportFile("Header");
+			foreach($headerRecordSet as $header){
+				// 見出しデータの複製
+				$this->exportHeader($handleHeader[0], $header, $entity->getId());
+			}
+
+			fclose($handleMain[0]);
+			fclose($handleExplain[0]);
+			fclose($handleSub[0]);
+			fclose($handleSyn[0]);
+			fclose($handleRefer[0]);
+			fclose($handleCenter[0]);
+			fclose($handleHeader[0]);
+
+			fclose($handleCenterFreqMain[0]);
+			fclose($handleCenterFreqSub[0]);
+			fclose($handleCenterFreqSyn[0]);
+
+
+			$rtn_cd = $this->importSQLFile($handleMain[1],$handleExplain[1],$handleSub[1],$handleSyn[1],$handleRefer[1],$handleCenter[1],$handleHeader[1],
+					$handleCenterFreqMain[1],$handleCenterFreqSub[1],$handleCenterFreqSyn[1]);
+
+			if($rtn_cd == false){
+				throw new \Exception("importSQL error");
+			}
+
+			/*// SQLファイルの圧縮
+			$zip = new \ZipArchive();
+			$outFileName = 'duplicatedData.zip';
+			$tmpFilePath = tempnam(sys_get_temp_dir(), 'tmp');
+			// 作業ファイルをオープン
+			$result = $zip->open($tmpFilePath, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE);
+			if($result !== true) {
+				return false;
+			}
+
+			// 圧縮するファイルを定義
+			$zip = $this->addZipFile($zip, $handleMain);
+			$zip = $this->addZipFile($zip, $handleExplain);
+			$zip = $this->addZipFile($zip, $handleSub);
+			$zip = $this->addZipFile($zip, $handleSyn);
+			$zip = $this->addZipFile($zip, $handleRefer);
+			$zip = $this->addZipFile($zip, $handleCenter);
+			$zip = $this->addZipFile($zip, $handleHeader);
+
+			// ストリームを閉じる
+			$zip->close();
+
+			// ダウンロード
+			$response = new BinaryFileResponse($tmpFilePath);
+			$response->headers->set('Content-type', 'application/octet-stream');
+			BinaryFileResponse::trustXSendfileTypeHeader();
+			$response->setContentDisposition(
+					ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+					$outFileName
+			);*/
+
+			$this->get('logger')->info("***用語複製処理:END***");
+
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+		}
+		return $this->redirect($this->generateUrl('client.master.curriculum'));
+	}
+
+	private function openExportFile($tablename){
+		// CSV出力先の決定
+		$csvName = $tablename.'_' . date('Ymd') . '_' . date('Hi') . '.csv';
+		$csvDir = $this->container->getParameter('duplicate')['dir_path'];
+		$csv_path = $csvDir . '/' . $csvName;
+
+		// ファイル作成
+		if (!file_exists($csv_path)) {
+			// ファイルが存在しない場合作成
+			touch($csv_path);
+			// 権限変更
+			chmod($csv_path, 0666);
+		}
+
+		// CSVファイル出力
+		$handle = fopen($csv_path, "w+");
+
+		$sql = "SET NAMES utf8;";
+		fputs($handle, $sql."\n");
+
+		return array($handle,$csv_path,$csvName);
+	}
+
+	private function importSQLFile($handleMain,$handleExplain,$handleSub,$handleSyn,$handleRefer,$handleCenter,$handleHeader,$handleCenterFreqMain,$handleCenterFreqSub,$handleCenterFreqSyn){
+		// SQLファイルのインポート
+		$command_import = 'mysql -u'. $this->container->getParameter('database_user') . ' -p' . $this->container->getParameter('database_password') . ' ' . $this->container->getParameter('database_name') . ' < ';
+		$this->get('logger')->info($command_import . $handleMain);
+
+		$return_txt = exec($command_import . $handleMain,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:MAINTERM***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleExplain,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:EXPLAIN***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleSub,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:SUBTERM***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleSyn,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:SYNONYM***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleRefer,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:REFER***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleCenter,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:CENTER***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleHeader,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:HEADER***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleCenterFreqMain,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:CenterFreqMain***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleCenterFreqSub,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:CenterFreqMain***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleCenterFreqSyn,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:CenterFreqMain***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}else{
+			return true;
+		}
+
+	}
+
+
+	private function addZipFile($zip, $fileData){
+		$addFilePath = file_get_contents($fileData[1]);
+		$addFileName = $fileData[2];
+		$zip->addFromString($addFileName , $addFilePath);
+
+		return $zip;
+	}
+
+	/**
+	 * @Route("/master/curriculum/duplication/ajax", name="client.master.duplicate.ajax")
+	 */
+	public function duplicateAjaxAction(Request $request){
+		$session = $request->getSession();
+
+		// response
+		$response = new JsonResponse();
+		// set response status
+		$response->setStatusCode(JsonResponse::HTTP_OK);
+
+		/*$cur_id = $request->request->get('id');
+		$cur_name = $request->request->get('cur_name');
+		$startyear = $request->request->get('startyear');*/
+
+		$id = $request->request->get('id');
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+		$max_ver = $em->getRepository('CCKCommonBundle:Version')->getRecentVersion($id);
+
+		$maintermRecordSet = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
+				'curriculumId' => $max_ver['id'],
+				'deleteFlag' => FALSE
+		));
+
+		$headerRecordSet = $em->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'versionId' => $max_ver['id'],
+				'deleteFlag' => FALSE
+		));
+
+		try{
+			$entity = new Version();
+
+			$entity->setCurriculumId($id);
+			$entity->setName($request->request->get('cur_name'));
+			$em->persist($entity);
+			$em->flush();
+
+			$this->get('logger')->error("***用語複製処理:START***");
+
+			$record_cnt = 0;
+			foreach($maintermRecordSet as $mainterm){
+				// 用語データの複製
+				$newTermId = $this->copyMainTerm($em, $mainterm, $entity->getId());
+				$term_id = $mainterm->getTermId();
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,MAIN***");
+
+				$entityExp = $em->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($term_id);
+				$entitySub = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSubterm($term_id);
+				$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($term_id);
+				$entityRef = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($term_id);
+				$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
+						'mainTermId' => $term_id,
+						'deleteFlag' => FALSE
+				),
+						array('id' => 'ASC','yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
+
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":READ***");
+
+				$this->copyExpTerm($em, $entityExp, $newTermId);
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,EXPLAIN***");
+				$newSubId = $this->copySubTerm($em, $entitySub, $newTermId);
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,SUBTERM***");
+				$newSynId = $this->copySynTerm($em, $entitySyn, $newTermId);
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,SYNONYM***");
+				$this->copyRefTerm($em, $entityRef, $newTermId);
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,REFER***");
+				$this->copyCenterDataByYear($em, $entityCenter, $newTermId, $newSubId, $newSynId, $request->request->get('startyear'));
+				$this->get('logger')->error("***用語複製処理:用語ID=".$term_id.":COPY,CENTER***");
+
+				$record_cnt = $record_cnt + 1;
+				if($record_cnt > 99){
+					$em->getConnection()->commit();
+					$record_cnt = 0;
+					$em->getConnection()->beginTransaction();
+				}
+			}
+
+			foreach($headerRecordSet as $header){
+				// 見出しデータの複製
+				$this->copyHeader($em, $header, $entity->getId());
+			}
+
+			$this->get('logger')->error("***用語複製処理:END***");
+
+			$em->getConnection()->commit();
+		} catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$response->setContent(json_encode(array('status' => '取り込みエラーがあります。')));
+			return $response;
+		}
+
+		$response->setContent(json_encode(array('status' => '取り込み完了'.$cur_id.':'.$cur_name.':'.$startyear)));
+		return $response;
+	}
+
+	public function exportMainTerm($handle, $entityMain, $newTermId, $newCurId){
+
+		try{
+			$sql = "INSERT INTO `MainTerm` (`id`, `term_id`, `curriculum_id`, `header_id`, `print_order`, `main_term`, `red_letter`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `western_language`, `birth_year`, `kana`, `index_add_letter`, `index_kana`, `index_original`, `index_original_kana`, `index_abbreviation`, `nombre`, `term_explain`, `handover`, `illust_filename`, `illust_caption`, `illust_kana`, `illust_nombre`, `user_id`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+			$sql .= "(null,";
+			$sql .= $newTermId.",";
+			$sql .= $newCurId.",";
+			$sql .= $entityMain->getHeaderId().",";
+			$sql .= $entityMain->getPrintOrder().",";
+			$sql .= "'".$entityMain->getMainTerm()."',";
+			$sql .= (($entityMain->getRedLetter()) ? "1" : "0").",";
+			$sql .= $entityMain->getTextFrequency().",";
+			$sql .= $entityMain->getCenterFrequency().",";
+			$sql .= (($entityMain->getNewsExam()) ? "1" : "0").",";
+			$sql .= "'".$entityMain->getDelimiter()."',";
+			$sql .= "'".$entityMain->getWesternLanguage()."',";
+			$sql .= "'".$entityMain->getBirthYear()."',";
+			$sql .= "'".$entityMain->getKana()."',";
+			$sql .= "'".$entityMain->getIndexAddLetter()."',";
+			$sql .= "'".$entityMain->getIndexKana()."',";
+			$sql .= "'".$entityMain->getIndexOriginal()."',";
+			$sql .= "'".$entityMain->getIndexOriginalKana()."',";
+			$sql .= "'".$entityMain->getIndexAbbreviation()."',";
+			$sql .= $entityMain->getNombre().",";
+			$sql .= "'".$entityMain->getTermExplain()."',";
+			$sql .= "'".$entityMain->getHandover()."',";
+			$sql .= "'".$entityMain->getIllustFilename()."',";
+			$sql .= "'".$entityMain->getIllustCaption()."',";
+			$sql .= "'".$entityMain->getIllustKana()."',";
+			$sql .= $entityMain->getIllustNombre().",";
+			$sql .= "'".$entityMain->getUserId()."',";
+			$sql .= "NOW(),";
+			$sql .= "null,";
+			$sql .= "null,";
+			$sql .= "0);";
+
+			fputs($handle, $sql."\n");
+
+		} catch (\Exception $e){
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+
+		return $newTermId;
+	}
+
+	public function exportExpTerm($handle, $entityExp, $newTermId){
+
+		try{
+
+			foreach($entityExp as $entityExpRec){
+				$sql = "INSERT INTO `ExplainIndex` (`id`, `main_term_id`, `index_term`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+				$sql .= "(null,";
+				$sql .= $newTermId.",";
+				$sql .= "'".$entityExpRec['indexTerm']."',";
+				$sql .= "'".$entityExpRec['indexAddLetter']."',";
+				$sql .= "'".$entityExpRec['indexKana']."',";
+				$sql .= $entityExpRec['nombre'].",";
+				$sql .= "NOW(),";
+				$sql .= "null,";
+				$sql .= "null,";
+				$sql .= "0);";
+
+				fputs($handle, $sql."\n");
+
+			}
+
+		} catch (\Exception $e){
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	public function exportSubTerm($handle, $entitySub, $newTermId, $newId){
+
+		try{
+
+			$arr_rtn_id = array();
+			foreach($entitySub as $entitySubRec){
+				$sql = "INSERT INTO `SubTerm` (`id`, `main_term_id`, `sub_term`, `red_letter`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `kana`, `delimiter_kana`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+				$sql .= "(".$newId.",";
+				$sql .= $newTermId.",";
+				$sql .= "'".$entitySubRec['sub_term']."',";
+				$sql .= (($entitySubRec['red_letter']) ? "1" : "0").",";
+				$sql .= $entitySubRec['text_frequency'].",";
+				$sql .= $entitySubRec['center_frequency'].",";
+				$sql .= (($entitySubRec['news_exam']) ? "1" : "0").",";
+				$sql .= "'".$entitySubRec['delimiter']."',";
+				$sql .= "'".$entitySubRec['kana']."',";
+				$sql .= "'".$entitySubRec['delimiter_kana']."',";
+				$sql .= "'".$entitySubRec['index_add_letter']."',";
+				$sql .= "'".$entitySubRec['index_kana']."',";
+				$sql .= $entitySubRec['nombre'].",";
+				$sql .= "NOW(),";
+				$sql .= "null,";
+				$sql .= "null,";
+				$sql .= "0);";
+
+				fputs($handle, $sql."\n");
+
+				array_push($arr_rtn_id, $newId);
+				$newId++;
+			}
+
+		} catch (\Exception $e){
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+		return $arr_rtn_id;
+	}
+
+	public function exportSynTerm($handle, $entitySyn, $newTermId, $newId){
+
+		try{
+
+			$arr_rtn_id = array();
+			foreach($entitySyn as $entitySynRec){
+				$sql = "INSERT INTO `Synonym` (`id`, `main_term_id`, `term`, `red_letter`, `synonym_id`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `kana`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+				$sql .= "(".$newId.",";
+				$sql .= $newTermId.",";
+				$sql .= "'".$entitySynRec['term']."',";
+				$sql .= (($entitySynRec['red_letter']) ? "1" : "0").",";
+				$sql .= $entitySynRec['synonym_id'].",";
+				$sql .= $entitySynRec['text_frequency'].",";
+				$sql .= $entitySynRec['center_frequency'].",";
+				$sql .= (($entitySynRec['news_exam']) ? "1" : "0").",";
+				$sql .= "'".$entitySynRec['delimiter']."',";
+				$sql .= "'',";
+				$sql .= "'".$entitySynRec['index_add_letter']."',";
+				$sql .= "'".$entitySynRec['index_kana']."',";
+				$sql .= $entitySynRec['nombre'].",";
+				$sql .= "NOW(),";
+				$sql .= "null,";
+				$sql .= "null,";
+				$sql .= "0);";
+
+				fputs($handle, $sql."\n");
+
+				array_push($arr_rtn_id, $newId);
+				$newId++;
+			}
+
+		} catch (\Exception $e){
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+		return $arr_rtn_id;
+	}
+
+	public function exportRefTerm($handle, $entityRef, $newTermId, $newTermIdStart){
+
+		try{
+
+			foreach($entityRef as $entityRefRec){
+				$sql = "INSERT INTO `Refer` (`id`, `main_term_id`, `refer_term_id`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+				$sql .= "(null,";
+				$sql .= $newTermId.",";
+				$sql .= ($entityRefRec['refer_term_id'] + $newTermIdStart).",";
+				$sql .= $entityRefRec['nombre'].",";
+				$sql .= "NOW(),";
+				$sql .= "null,";
+				$sql .= "null,";
+				$sql .= "0);";
+
+				fputs($handle, $sql."\n");
+			}
+		} catch (\Exception $e){
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	public function exportCenterDataByYear($handle, $entityCenter, $newTermId, $newSubId, $newSynId, $wkYear){
+
+		try{
+			$idx = 0;
+			$idx_sub = 0;
+			$idx_syn = 0;
+
+			$wkSubTermId = 'null';
+			$wkYougoFlag = 1;
+
+			$wkStartYear = $wkYear;
+			$wkEndYear = $wkYear + 10;
+
+			$arr_freq_main = array();
+			$arr_freq_sub = array();
+			$arr_freq_syn = array();
+
+			foreach($entityCenter as $entityCenterRec){
+				$idx++;
+
+				if($idx > 10){
+					// DBから10件読み込んだ後、対象年がある場合は、初期データを登録する
+					for($i = $wkYear; $wkYear < $wkEndYear; $wkYear++){
+						$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+						$sql .= "(null,";
+						$sql .= $newTermId.",";
+						$sql .= $wkSubTermId.",";
+						$sql .= $wkYougoFlag.",";
+						$sql .= $wkYear.",";
+						$sql .= "0,";
+						$sql .= "0,";
+						$sql .= "NOW(),";
+						$sql .= "null,";
+						$sql .= "null,";
+						$sql .= "0);";
+
+						fputs($handle, $sql."\n");
+					}
+
+					$wkYear = $wkStartYear;
+					$idx = 1;
+
+				}
+
+				if($idx < 11){
+					if($wkYear > $entityCenterRec->getYear()){
+						// DBの実施年より対象年が大きい場合、スキップ
+					}else{
+						// DBの実施年と対象年が等しい場合、元データを複製する
+						if($entityCenterRec->getYougoFlag() == 1){
+							$wkSubTermId = 'null';
+
+							if(isset($arr_freq_main[$newTermId])){
+								$arr_freq_main[$newTermId] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+							}else{
+								$arr_freq_main[$newTermId] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+							}
+
+						}elseif($entityCenterRec->getYougoFlag() == 2){
+							$wkSubTermId = $newSubId[$idx_sub];
+
+							if(isset($arr_freq_sub[$wkSubTermId])){
+								$arr_freq_sub[$wkSubTermId] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+							}else{
+								$arr_freq_sub[$wkSubTermId] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+							}
+
+							if($idx == 10){
+								$idx_sub++;
+							}
+
+						}else{
+							$wkSubTermId = $newSynId[$idx_syn];
+
+							if(isset($arr_freq_syn[$wkSubTermId])){
+								$arr_freq_syn[$wkSubTermId] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+							}else{
+								$arr_freq_syn[$wkSubTermId] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+							}
+
+							if($idx == 10){
+								$idx_syn++;
+							}
+
+						}
+
+						$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+						$sql .= "(null,";
+						$sql .= $newTermId.",";
+						$sql .= $wkSubTermId.",";
+						$sql .= $entityCenterRec->getYougoFlag().",";
+						$sql .= $entityCenterRec->getYear().",";
+						$sql .= $entityCenterRec->getMainExam().",";
+						$sql .= $entityCenterRec->getSubExam().",";
+						$sql .= "NOW(),";
+						$sql .= "null,";
+						$sql .= "null,";
+						$sql .= "0);";
+
+						fputs($handle, $sql."\n");
+						$wkYear++;
+
+					}
+				}
+			}
+
+			// DBから10件読み込んだ後、対象年がある場合は、初期データを登録する
+			for($i = $wkYear; $wkYear < $wkEndYear; $wkYear++){
+				$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+				$sql .= "(null,";
+				$sql .= $newTermId.",";
+				$sql .= $wkSubTermId.",";
+				$sql .= $wkYougoFlag.",";
+				$sql .= $wkYear.",";
+				$sql .= "0,";
+				$sql .= "0,";
+				$sql .= "NOW(),";
+				$sql .= "null,";
+				$sql .= "null,";
+				$sql .= "0);";
+
+				fputs($handle, $sql."\n");
+			}
+
+		} catch (\Exception $e){
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+		return array($arr_freq_main,$arr_freq_sub,$arr_freq_syn);
+	}
+
+	public function exportHeader($handle, $entityHeader, $newCurId){
+
+		try{
+			$sql = "SET NAMES utf8;";
+			fputs($handle, $sql."\n");
+
+			$sql = "INSERT INTO `Header` (`id`, `version_id`, `header_id`, `hen`, `sho`, `dai`, `chu`, `ko`, `name`, `sort`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES ";
+			$sql .= "(null,";
+			$sql .= $newCurId.",";
+			$sql .= $entityHeader->getHeaderId().",";
+			$sql .= $entityHeader->getHen().",";
+			$sql .= $entityHeader->getSho().",";
+			$sql .= $entityHeader->getDai().",";
+			$sql .= $entityHeader->getChu().",";
+			$sql .= $entityHeader->getKo().",";
+			$sql .= "'".$entityHeader->getName()."',";
+			$sql .= $entityHeader->getSort().",";
+			$sql .= "NOW(),";
+			$sql .= "null,";
+			$sql .= "null,";
+			$sql .= "0);";
+
+			fputs($handle, $sql."\n");
+
+		} catch (\Exception $e){
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	public function exportCenterFreqMain($handle, $arr_freq){
+
+		try{
+			$sql = "UPDATE `MainTerm` SET `center_frequency` = " . array_values($arr_freq)[0] . " WHERE `term_id` = ".array_keys($arr_freq)[0].";";
+			fputs($handle, $sql."\n");
+		} catch (\Exception $e){
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	public function exportCenterFreqSub($handle, $arr_freq){
+
+		try{
+			foreach($arr_freq as $key=>$val) {
+				$sql = "UPDATE `SubTerm` SET `center_frequency` = " . $val . " WHERE `id` = ".$key.";";
+				fputs($handle, $sql."\n");
+			}
+		} catch (\Exception $e){
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	public function exportCenterFreqSyn($handle, $arr_freq){
+
+		try{
+			foreach($arr_freq as $key=>$val) {
+				$sql = "UPDATE `Synonym` SET `center_frequency` = " . $val . " WHERE `id` = ".$key.";";
+				fputs($handle, $sql."\n");
+			}
+		} catch (\Exception $e){
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
 	}
 
 	/**
@@ -720,7 +1587,6 @@ class MasterController extends BaseController {
 
 		return $this->redirect($this->generateUrl('client.master.user'));
 	}
-
 
 	/**
 	 * @Route("/master/user/update", name="client.master.user.update")
