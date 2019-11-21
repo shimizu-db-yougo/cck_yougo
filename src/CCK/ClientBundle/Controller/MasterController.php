@@ -919,7 +919,7 @@ class MasterController extends BaseController {
 
 	private function importSQLFile($handleMain,$handleExplain,$handleSub,$handleSyn,$handleRefer,$handleCenter,$handleHeader,$handleCenterFreqMain,$handleCenterFreqSub,$handleCenterFreqSyn){
 		// SQLファイルのインポート
-		$command_import = 'mysql -u'. $this->container->getParameter('database_user') . ' -p' . $this->container->getParameter('database_password') . ' ' . $this->container->getParameter('database_name') . ' < ';
+		$command_import = 'mysql -h'. $this->container->getParameter('database_host') . ' -u'. $this->container->getParameter('database_user') . ' -p' . $this->container->getParameter('database_password') . ' ' . $this->container->getParameter('database_name') . ' < ';
 		$this->get('logger')->info($command_import . $handleMain);
 
 		$return_txt = exec($command_import . $handleMain,$output,$retrun_ver);
