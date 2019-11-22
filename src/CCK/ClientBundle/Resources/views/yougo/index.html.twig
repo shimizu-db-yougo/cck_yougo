@@ -29,6 +29,7 @@
 
 {% block contents %}
 <header class="site-header">
+<nav>
 
 <!-- yougo search area -->
 <form action="{{ path('client.yougo.index') }}" class="form-horizontal" method="GET" autocomplete="off">
@@ -161,11 +162,17 @@
 </div>
 </form>
 
-
+</nav>
 </header>
 
 <!-- yougo list area -->
 <div class="content">
+<header class="site-header-list">
+<div class="row">
+	<div class="col-xs-12">
+	&nbsp;
+	</div>
+</div>
 <div class="row">
 	<div class="col-xs-2 text-center">
 		{{"検索件数："~term_cnt~"件"}}
@@ -192,11 +199,12 @@
 	</form>
 	</div>
 </div>
+</header>
 
 <div class="row">
-	<div class="col-xs-12">
+	<div class="col-xs-12" style="top:64px;">
 		<table class="table table-yougo table-striped">
-			<thead>
+			<thead class="site-header-field">
 				<tr class="text-center">
 					<th width="68px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.term_id"}) }}">{{ 'text.yougo.term_id'|trans }}{% if sort_field == "MainTerm.term_id" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.main_term"}) }}">{{ 'text.yougo.term'|trans }}{% if sort_field == "MainTerm.main_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>

@@ -4,18 +4,30 @@
 	background: #F8F7F2;
 	position: fixed;
 	width: 1800px;
+	height: 308px;
 	justify-content: space-between;
 	left: 90px;
 	top: 30px;
 }
-.site-header-div {
+.site-header-list {
 	z-index: 30;
 	background: #F8F7F2;
-	width: 1800px;
-	height: 20px;
+	position: fixed;
+	width: 1600px;
 	justify-content: space-between;
 	left: 90px;
-	top: 30px;
+	top: 336px;
+	height: 80px;
+}
+.site-header-field {
+	z-index: 30;
+	background: #F8F7F2;
+	position: fixed;
+	width: 1880px;
+	justify-content: space-between;
+	/*left: 90px;*/
+	top: 412px;
+	/*height: 80px;*/
 }
 .content {
 	line-height: 1.6;
@@ -24,8 +36,9 @@
 }
 .panel-search {
 	width: 1200px;
-	margin-left: 60px; /*削除対象*/
-	margin-top: 20px; /*削除対象*/
+	position: relative;
+	left: 60px;
+	top: 20px;
 }
 .panel-search field_title {
 	height: 20px;
@@ -34,6 +47,7 @@
 	overflow-x: scroll;
 	overflow-y: hidden;
 	width: 1880px;
+	position: relative;
 }
 thead, tbody {
 	display: block;

@@ -185,7 +185,7 @@ text:
         nombre.bold: ノンブル太字
         freq.text: 教科書頻度
         freq.center: センター頻度
-        news.exam: 検定出題
+        news.exam: N検定頻度
         term: 用語
         term_id: 用語ID
         kana: 主用語読み
