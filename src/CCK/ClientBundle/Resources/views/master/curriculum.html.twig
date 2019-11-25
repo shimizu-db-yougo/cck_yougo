@@ -80,7 +80,7 @@
 				<td>
 					<div class="form-inline">
 						<!-- <button class="btn btn-primary btn-sm button_yougo_list js-curriculum-target" curriculum-key = "{{ cur_elem.id }}" data-toggle="modal" master-target="#curriculumModal">{{ cur_elem.name~'btn.duplication'|trans }}</button> -->
-						<button class="btn btn-primary btn-sm button_yougo_list js-curexport-target" curriculum-key = "{{ cur_elem.id }}" data-toggle="modal" master-target="#curexportModal">{{ cur_elem.name~'btn.duplication'|trans }}</button>
+						<button class="btn btn-primary btn-sm button_yougo_list js-curexport-target" curriculum-key = "{{ cur_elem.id }}" curriculum-year = "{{ cur_elem.year }}" data-toggle="modal" master-target="#curexportModal">{{ cur_elem.name~'btn.duplication'|trans }}</button>
 					</div>
 				</td>
 			</tr>
@@ -120,6 +120,15 @@
 						<div class="col-sm-4">
 							<span id="version_n-err" class="version-err wine-red msgErr"></span>
 							<input type="text" class="form-control col-sm-3" id="version_n" name="version_n" >
+						</div>
+					</div>
+				</div>
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.curriculum.startyear'|trans }}</label>
+						<div class="col-sm-4">
+							<span id="startyear_n-err" class="startyear-err wine-red msgErr"></span>
+							<input type="text" class="form-control col-sm-3" id="startyear_n" name="startyear_n">
 						</div>
 					</div>
 				</div>
@@ -209,7 +218,7 @@
 						<label class="col-sm-4">{{ 'text.curriculum.startyear'|trans }}</label>
 						<div class="col-sm-6">
 							<span id="startyear-err" class="startyear-err wine-red msgErr"></span>
-							<input type="text" class="form-control col-sm-3" id="startyear_exp" name="startyear" value="{{ 'now'|date('Y')-10 }}">
+							<input type="text" class="form-control col-sm-3" id="startyear_exp" name="startyear">
 						</div>
 					</div>
 				</div>
@@ -232,9 +241,11 @@
 		$('.js-cur-cancel').bind('click', function(e){
 			$('#curriculum_n').val('');
 			$('#version_n').val('');
+			$('#startyear_n').val('');
 
 			$('.curriculum-err').text('');
 			$('.version-err').text('');
+			$('.startyear-err').text('');
 		});
 
 		// ユーザマスタ新規登録
@@ -262,6 +273,7 @@
 
 			var cur_name = $('#curriculum_n').val();
 			var ver_name = $('#version_n').val();
+			var start_year = $('#startyear_n').val();
 
 			if(cur_name == ''){
 				$('.curriculum-err').text('必須項目です');
@@ -273,9 +285,20 @@
 				return false;
 			}
 
+			if(start_year == ''){
+				$('.startyear-err').text('必須項目です');
+				return false;
+			}
+
+			if(start_year.length != 4){
+				$('.startyear-err').text('開始年は4桁で入力してください');
+				return false;
+			}
+
 			var str_html = '';
 			str_html = "<input type='hidden' name='cur_name' value=\"" + cur_name.replace(/"/i, "&quot;") + "\">" +
-			"<input type='hidden' name='ver_name' value=\"" + ver_name.replace(/"/i, "&quot;") + "\">";
+			"<input type='hidden' name='ver_name' value=\"" + ver_name.replace(/"/i, "&quot;") + "\">" +
+			"<input type='hidden' name='start_year' value=\"" + start_year.replace(/"/i, "&quot;") + "\">";
 
 			// create form
 			$('<form>', {
@@ -316,6 +339,9 @@
 			var target = $(e.currentTarget);
 
 			cur_id = target.attr('curriculum-key');
+			var cur_year = target.attr('curriculum-year');
+
+			$('#startyear_exp').val(cur_year);
 
 			$('#curexportModal').modal();
 

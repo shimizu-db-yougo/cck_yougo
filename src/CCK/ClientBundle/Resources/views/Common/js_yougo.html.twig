@@ -608,6 +608,7 @@
 			var term_id = target.attr('term-id');
 			var main_term_id = target.attr('main-term-id');
 			var yougo_flag = target.attr('yougo-flag');
+			var cur_id = $('#form_mainterm [name=curriculum]').val();
 
 			$('#term_id').val(term_id);
 			$('#yougo_flag').val(yougo_flag);
@@ -617,7 +618,8 @@
 			var data = {
 				'term_id': term_id,
 				'main_term_id': main_term_id,
-				'yougo_flag': yougo_flag
+				'yougo_flag': yougo_flag,
+				'cur_id': cur_id
 			};
 			$.ajax({
 				url: "{{ path('client.yougo.center.ajax') }}",

@@ -514,9 +514,11 @@ class MasterController extends BaseController {
 		try {
 			$cur_name = $request->request->get('cur_name');
 			$ver_name = $request->request->get('ver_name');
+			$start_year = $request->request->get('start_year');
 
 			$cur_obj = new Curriculum();
 			$cur_obj->setName($cur_name);
+			$cur_obj->setYear($start_year);
 			$em->persist($cur_obj);
 			$em->flush();
 
@@ -733,6 +735,13 @@ class MasterController extends BaseController {
 		));
 
 		try{
+			// センター頻度開始年の更新
+			$entityCurriculum = $em->getRepository('CCKCommonBundle:Curriculum')->findOneBy(array(
+					'id' => $id,
+					'deleteFlag' => FALSE
+			));
+			$entityCurriculum->setYear($request->request->get('startyear'));
+
 			$entity = new Version();
 
 			$entity->setCurriculumId($id);
@@ -847,37 +856,6 @@ class MasterController extends BaseController {
 			if($rtn_cd == false){
 				throw new \Exception("importSQL error");
 			}
-
-			/*// SQLファイルの圧縮
-			$zip = new \ZipArchive();
-			$outFileName = 'duplicatedData.zip';
-			$tmpFilePath = tempnam(sys_get_temp_dir(), 'tmp');
-			// 作業ファイルをオープン
-			$result = $zip->open($tmpFilePath, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE);
-			if($result !== true) {
-				return false;
-			}
-
-			// 圧縮するファイルを定義
-			$zip = $this->addZipFile($zip, $handleMain);
-			$zip = $this->addZipFile($zip, $handleExplain);
-			$zip = $this->addZipFile($zip, $handleSub);
-			$zip = $this->addZipFile($zip, $handleSyn);
-			$zip = $this->addZipFile($zip, $handleRefer);
-			$zip = $this->addZipFile($zip, $handleCenter);
-			$zip = $this->addZipFile($zip, $handleHeader);
-
-			// ストリームを閉じる
-			$zip->close();
-
-			// ダウンロード
-			$response = new BinaryFileResponse($tmpFilePath);
-			$response->headers->set('Content-type', 'application/octet-stream');
-			BinaryFileResponse::trustXSendfileTypeHeader();
-			$response->setContentDisposition(
-					ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-					$outFileName
-			);*/
 
 			$this->get('logger')->info("***用語複製処理:END***");
 

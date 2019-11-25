@@ -59,6 +59,13 @@ class Curriculum
     private $deleteFlag;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="year", type="integer", length=4, nullable=true)
+     */
+    private $year;
+
+    /**
      * construct
      */
     public function __construct(){
@@ -212,5 +219,29 @@ class Curriculum
     public function getDeleteFlag()
     {
         return $this->deleteFlag;
+    }
+
+    /**
+     * Set year.
+     *
+     * @param int|null $year
+     *
+     * @return Curriculum
+     */
+    public function setYear($year = null)
+    {
+        $this->year = $year;
+
+        return $this;
+    }
+
+    /**
+     * Get year.
+     *
+     * @return int|null
+     */
+    public function getYear()
+    {
+        return $this->year;
     }
 }

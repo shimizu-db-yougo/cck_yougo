@@ -1035,7 +1035,7 @@ class YougoController extends BaseController {
 		return $return_flag;
 	}
 
-	private function saveCenterFrequency($term_id,$main_term_id,$sub){
+	private function saveCenterFrequency($term_id,$main_term_id,$sub,$cur_id){
 		$return_flag = true;
 
 		$em = $this->get('doctrine.orm.entity_manager');
@@ -1047,7 +1047,19 @@ class YougoController extends BaseController {
 			$main_term_id = ltrim(substr($main_term_id, 1),'0'); // 用語ID"M00XXXX"先頭の"M00"を削除
 		}
 
-		$year = date('Y')-10;
+		//センター頻度開始年の取得
+		$entityCurriculum = $em->getRepository('CCKCommonBundle:Curriculum')->findOneBy(array(
+				'id' => $cur_id,
+				'deleteFlag' => FALSE
+		));
+
+		if(!$entityCurriculum){
+			$return_flag = false;
+			return $return_flag;
+		}
+
+		$year = $entityCurriculum->getYear();
+
 		for ($idx=0;$idx<10;$idx++){
 
 			try{
@@ -1354,10 +1366,11 @@ class YougoController extends BaseController {
 			$term_id = $request->request->get('term_id');
 			$main_term_id = $request->request->get('main_term_id');
 			$yougo_flag = $request->request->get('yougo_flag');
+			$cur_id = $request->request->get('cur_id');
 			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
 
 			if(count($center_point)==0){
-				if($this->saveCenterFrequency($term_id,$main_term_id,$yougo_flag) == false){
+				if($this->saveCenterFrequency($term_id,$main_term_id,$yougo_flag,$cur_id) == false){
 					$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
 					return $response;
 				}
