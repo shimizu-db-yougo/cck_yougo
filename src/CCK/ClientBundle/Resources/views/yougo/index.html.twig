@@ -166,8 +166,7 @@
 </header>
 
 <!-- yougo list area -->
-<div class="content">
-<header class="site-header-list">
+<div class="site-header-list">
 <div class="row">
 	<div class="col-xs-12">
 	&nbsp;
@@ -199,12 +198,13 @@
 	</form>
 	</div>
 </div>
-</header>
+</div>
 
+<div class="content">
 <div class="row">
-	<div class="col-xs-12" style="top:64px;">
-		<table class="table table-yougo table-striped">
-			<thead class="site-header-field">
+	<div class="col-xs-12">
+		<header class="site-header-field">
+			<table>
 				<tr class="text-center">
 					<th width="68px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.term_id"}) }}">{{ 'text.yougo.term_id'|trans }}{% if sort_field == "MainTerm.term_id" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.main_term"}) }}">{{ 'text.yougo.term'|trans }}{% if sort_field == "MainTerm.main_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
@@ -227,7 +227,9 @@
 					<th width="60px" class="text-left"></th>
 					<th width="20px" class="text-left"></th>
 				</tr>
-			</thead>
+			</table>
+		</header>
+		<table class="table table-yougo table-striped" style="z-index:20;">
 			<tbody>
 				{% for yougo in pagination %}
 				<tr class="text-center">
@@ -302,6 +304,7 @@
 </div>
 
 </div>
+
 
 {% endblock %}
 
