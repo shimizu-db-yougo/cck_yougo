@@ -2,6 +2,13 @@
 
 {% block stylesheets %}
 	{{ parent() }}
+	<style>
+	.master_index{
+		font-size: 15px;
+		line-height: 30px;
+		margin-left: 8px;
+	}
+	</style>
 {% endblock %}
 
 {% block contents %}
@@ -11,7 +18,7 @@
 </blockquote>
 </div>
 
-<div class="row">
+<div class="row master_index">
 	<div class="form-inline">
 		<div class="form-group">
 			<a href="{{ path('client.master.user') }}">{{ 'text.master.user'|trans }}</a>
