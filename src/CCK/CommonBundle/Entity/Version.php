@@ -66,6 +66,13 @@ class Version
     private $deleteFlag;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="year", type="integer", length=4, nullable=true)
+     */
+    private $year;
+
+    /**
      * construct
      */
     public function __construct(){
@@ -242,5 +249,29 @@ class Version
     public function getDeleteFlag()
     {
         return $this->deleteFlag;
+    }
+
+    /**
+     * Set year.
+     *
+     * @param int|null $year
+     *
+     * @return Version
+     */
+    public function setYear($year = null)
+    {
+        $this->year = $year;
+
+        return $this;
+    }
+
+    /**
+     * Get year.
+     *
+     * @return int|null
+     */
+    public function getYear()
+    {
+        return $this->year;
     }
 }

@@ -1035,7 +1035,7 @@ class YougoController extends BaseController {
 		return $return_flag;
 	}
 
-	private function saveCenterFrequency($term_id,$main_term_id,$sub,$cur_id){
+	private function saveCenterFrequency($term_id,$main_term_id,$sub,$ver_id){
 		$return_flag = true;
 
 		$em = $this->get('doctrine.orm.entity_manager');
@@ -1048,38 +1048,62 @@ class YougoController extends BaseController {
 		}
 
 		//センター頻度開始年の取得
-		$entityCurriculum = $em->getRepository('CCKCommonBundle:Curriculum')->findOneBy(array(
-				'id' => $cur_id,
+		$entityVersion = $em->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+				'id' => $ver_id,
 				'deleteFlag' => FALSE
 		));
 
-		if(!$entityCurriculum){
+		if(!$entityVersion){
 			$return_flag = false;
 			return $return_flag;
 		}
 
-		$year = $entityCurriculum->getYear();
+		$year = $entityVersion->getYear();
+
+		// センター頻度開始年より古いデータを削除
+		$rtncd = $em->getRepository('CCKCommonBundle:Center')->deleteOldData($main_term_id,$term_id,$sub,$year);
 
 		for ($idx=0;$idx<10;$idx++){
 
 			try{
-				$entity = new Center();
-
-				$entity->setMainTermId($main_term_id);
-
+				// 存在チェック
 				if($sub == '1'){
-					$entity->setSubTermId(null);
+					$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+							'mainTermId' => $main_term_id,
+							'yougoFlag' =>  $sub,
+							'year' => $year+$idx,
+							'deleteFlag' => FALSE
+					));
 				}else{
-					$entity->setSubTermId($term_id);
+					$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+							'mainTermId' => $main_term_id,
+							'subTermId' => $term_id,
+							'yougoFlag' =>  $sub,
+							'year' => $year+$idx,
+							'deleteFlag' => FALSE
+					));
 				}
 
-				$entity->setYougoFlag($sub);
-				$entity->setYear($year+$idx);
-				$entity->setMainExam(0);
-				$entity->setSubExam(0);
+				if(!$entityCenter){
+					$entity = new Center();
 
-				$em->persist($entity);
-				$em->flush();
+					$entity->setMainTermId($main_term_id);
+
+					if($sub == '1'){
+						$entity->setSubTermId(null);
+					}else{
+						$entity->setSubTermId($term_id);
+					}
+
+					$entity->setYougoFlag($sub);
+					$entity->setYear($year+$idx);
+					$entity->setMainExam(0);
+					$entity->setSubExam(0);
+
+					$em->persist($entity);
+					$em->flush();
+				}
+
 			} catch (\Exception $e){
 				$em->getConnection()->rollback();
 				$em->close();
@@ -1092,6 +1116,10 @@ class YougoController extends BaseController {
 				return $return_flag;
 			}
 		}
+
+		// センター頻度開始年+10年後より新しいデータを削除
+		$rtncd = $em->getRepository('CCKCommonBundle:Center')->deleteOverData($main_term_id,$term_id,$sub,$year+9);
+
 		$em->getConnection()->commit();
 
 		return $return_flag;
@@ -1366,16 +1394,16 @@ class YougoController extends BaseController {
 			$term_id = $request->request->get('term_id');
 			$main_term_id = $request->request->get('main_term_id');
 			$yougo_flag = $request->request->get('yougo_flag');
-			$cur_id = $request->request->get('cur_id');
-			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
+			$ver_id = $request->request->get('ver_id');
+			//$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
 
-			if(count($center_point)==0){
-				if($this->saveCenterFrequency($term_id,$main_term_id,$yougo_flag,$cur_id) == false){
+			//if(count($center_point)==0){
+				if($this->saveCenterFrequency($term_id,$main_term_id,$yougo_flag,$ver_id) == false){
 					$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
 					return $response;
 				}
 				$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
-			}
+			//}
 
 			$response = new JsonResponse($center_point);
 		}else{

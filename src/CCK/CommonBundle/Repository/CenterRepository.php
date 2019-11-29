@@ -37,4 +37,38 @@ class CenterRepository extends EntityRepository
 
 		return $qb->getQuery()->getResult();
 	}
+
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function deleteOldData($main_term_id,$term_id,$yougo_flag,$year){
+
+		$sql = "UPDATE Center SET Center.delete_flag = 1, Center.delete_date='". date("Y-m-d H:i:s") .
+		"' WHERE Center.year < " . $year . " AND Center.main_term_id = '" . $main_term_id ."' AND Center.yougo_flag = ".$yougo_flag;
+
+		if($yougo_flag != '1'){
+			$sql .= " AND Center.sub_term_id = ".$term_id;
+		}
+
+		$result = $this->getEntityManager()->getConnection()->executeUpdate($sql);
+
+		return $result;
+	}
+
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function deleteOverData($main_term_id,$term_id,$yougo_flag,$year){
+
+		$sql = "UPDATE Center SET Center.delete_flag = 1, Center.delete_date='". date("Y-m-d H:i:s") .
+		"' WHERE Center.year > " . $year . " AND Center.main_term_id = '" . $main_term_id ."' AND Center.yougo_flag = ".$yougo_flag;
+
+		if($yougo_flag != '1'){
+			$sql .= " AND Center.sub_term_id = ".$term_id;
+		}
+
+		$result = $this->getEntityManager()->getConnection()->executeUpdate($sql);
+
+		return $result;
+	}
 }

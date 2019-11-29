@@ -613,6 +613,51 @@ class MasterController extends BaseController {
 	}
 
 	/**
+	 * @Route("/master/version/update", name="client.master.ver.update")
+	 * @Method("POST|GET")
+	 * @Template("CCKClientBundle:master:curriculum.html.twig")
+	 */
+	public function updateVersionAction(Request $request){
+		$session = $request->getSession();
+		if(!$request->request->has('id')){
+			return $this->redirect($this->generateUrl('client.master.curriculum'));
+		}
+
+		$id = (int) $request->request->get('id');
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+				'id' =>$id,
+				'deleteFlag' => FALSE
+		));
+		if(!$entity){
+			return $this->redirect($this->generateUrl('client.master.curriculum'));
+		}
+
+		// transaction
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
+		try {
+			if($request->request->has('startyear')){
+				$entity->setYear($request->request->get('startyear'));
+			}
+
+			$em->flush();
+			$em->getConnection()->commit();
+
+		} catch (\Exception $e){
+			// もし、DBに登録失敗した場合rollbackする
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+		}
+
+		return $this->redirect($this->generateUrl('client.master.curriculum'));
+	}
+
+	/**
 	 * @Route("/master/curriculum/duplication", name="client.master.cur.duplication")
 	 * @Method("POST|GET")
 	 * @Template("CCKClientBundle:master:curriculum.html.twig")
@@ -746,6 +791,7 @@ class MasterController extends BaseController {
 
 			$entity->setCurriculumId($id);
 			$entity->setName($request->request->get('cur_name'));
+			$entity->setYear($request->request->get('startyear'));
 			$em->persist($entity);
 			$em->flush();
 
