@@ -245,6 +245,7 @@ delimiter:
     newline: <br/>
     newline_paren_start: <br/>（
     newline_paren_end: ）<br/>
+    paren_end_to: ）と
     
 icon:
     ari: 有
