@@ -538,6 +538,18 @@ class YougoController extends BaseController {
 				'deleteFlag' => FALSE
 		));
 
+		// センター頻度　Centerテーブルより取得
+		$entityVer = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+				'id' => $entity['curriculum_id'],
+				'deleteFlag' => FALSE
+		));
+
+		$sum_center_main = $this->summaryCenterFreqMain($entity['term_id'], $entityVer->getYear());
+
+		$arr_sub = $this->summaryCenterFreqSub($entity['term_id'], '2', $entityVer->getYear(), $entitySub);
+
+		$arr_syn = $this->summaryCenterFreqSub($entity['term_id'], '3', $entityVer->getYear(), $entitySyn);
+
 		return array(
 				'yougo' => $entity,
 				'subterm' => $entitySub,
@@ -545,6 +557,9 @@ class YougoController extends BaseController {
 				'refer' => $entityRef,
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
+				'center_main' => $sum_center_main,
+				'center_sub' => $arr_sub,
+				'center_syn' => $arr_syn,
 		);
 	}
 
@@ -564,6 +579,10 @@ class YougoController extends BaseController {
 		$arr_subterm_entity = array();
 		$arr_refterm_entity = array();
 		$arr_synterm_entity = array();
+
+		$arr_main_center = array();
+		$arr_sub_center = array();
+		$arr_syn_center = array();
 		foreach($arr_term_id as $term_id){
 			// 主用語
 			$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetail($term_id);
@@ -585,6 +604,21 @@ class YougoController extends BaseController {
 			// 同対類
 			$entitySyn = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfSynonym($term_id);
 			array_push($arr_synterm_entity, $entitySyn);
+
+			// センター頻度　Centerテーブルより取得
+			$entityVer = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+					'id' => $entity['curriculum_id'],
+					'deleteFlag' => FALSE
+			));
+
+			$sum_center_main = $this->summaryCenterFreqMain($entity['term_id'], $entityVer->getYear());
+			array_push($arr_main_center,$sum_center_main);
+
+			$arr_sub = $this->summaryCenterFreqSub($entity['term_id'], '2', $entityVer->getYear(), $entitySub);
+			array_push($arr_sub_center,$arr_sub);
+
+			$arr_syn = $this->summaryCenterFreqSub($entity['term_id'], '3', $entityVer->getYear(), $entitySyn);
+			array_push($arr_syn_center,$arr_syn);
 		}
 
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
@@ -601,6 +635,9 @@ class YougoController extends BaseController {
 				'arr_refer' => $arr_refterm_entity,
 				'cur_list' => $cur_list,
 				'ver_list' => $ver_list,
+				'center_main' => $arr_main_center,
+				'center_sub' => $arr_sub_center,
+				'center_syn' => $arr_syn_center,
 		);
 	}
 
@@ -1273,6 +1310,13 @@ class YougoController extends BaseController {
 				'deleteFlag' => false
 		));
 
+		// センター頻度　Centerテーブルより取得
+		$sum_center_main = $this->summaryCenterFreqMain($entityMain->getTermId(), $entityVersion->getYear());
+
+		$arr_sub = $this->summaryCenterFreqSub($entityMain->getTermId(), '2', $entityVersion->getYear(), $entitySub);
+
+		$arr_syn = $this->summaryCenterFreqSub($entityMain->getTermId(), '3', $entityVersion->getYear(), $entitySyn);
+
 		return array(
 				'term_id' => $id,
 				'yougo' => $entityMain,
@@ -1295,7 +1339,37 @@ class YougoController extends BaseController {
 				'select_ko' => $entityHeader->getKo(),
 				'print_order_list' => $printOrderList,
 				'main_term_list' => $mainTermList,
+				'center_main' => $sum_center_main,
+				'center_sub' => $arr_sub,
+				'center_syn' => $arr_syn,
 		);
+	}
+
+	private function summaryCenterFreqMain($main_term_id, $start_year){
+		$rtncd = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->deleteOldData($main_term_id,'','1',$start_year);
+
+		$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($main_term_id,'1');
+		$sum_center_main = 0;
+		foreach ($center_point as $rec_center_point){
+			$sum_center_main += $rec_center_point['mainExam'] + $rec_center_point['subExam'];
+		}
+		return $sum_center_main;
+	}
+
+	private function summaryCenterFreqSub($main_term_id, $yougo_flag, $start_year,$entitySub){
+		$arr_sub = array();
+		foreach ($entitySub as $rec_sub){
+			$sum_center = 0;
+
+			$rtncd = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->deleteOldData($main_term_id,$rec_sub['id'],$yougo_flag,$start_year);
+
+			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($rec_sub['id'],$yougo_flag);
+			foreach ($center_point as $rec_center_point){
+				$sum_center += $rec_center_point['mainExam'] + $rec_center_point['subExam'];
+			}
+			$arr_sub += array_merge($arr_sub,array($rec_sub['id'] => $sum_center));
+		}
+		return $arr_sub;
 	}
 
 	/**

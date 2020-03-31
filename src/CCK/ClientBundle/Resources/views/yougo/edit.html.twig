@@ -70,6 +70,19 @@
 				// 教科書頻度
 				getTextPoint("{{ yougo.textFrequency }}","{{ yougo.termId }}");
 
+				// センター頻度
+				var arr_center_sub = '{{ center_sub|json_encode|raw }}';
+				console.log("**サブ用語_センター頻度**");
+				console.log(arr_center_sub);
+				var center_sub_parse = JSON.parse(arr_center_sub);
+				console.log(center_sub_parse);
+
+				var arr_center_syn = '{{ center_syn|json_encode|raw }}';
+				console.log("**同対類用語_センター頻度**");
+				console.log(arr_center_syn);
+				var center_syn_parse = JSON.parse(arr_center_syn);
+				console.log(center_syn_parse);
+
 				// サブ用語取得
 				var yougo_sub = '{{ yougo_sub|json_encode|raw }}';
 				console.log("**サブ用語**");
@@ -87,7 +100,7 @@
 
 					$('#form_subterms').append(
 						header_sub
-						+ constructSubForm(yougo_sub_parse[i])
+						+ constructSubForm(yougo_sub_parse[i],center_sub_parse[i])
 					);
 
 					getTextPoint(yougo_sub_parse[i].text_frequency,yougo_sub_parse[i].id);
@@ -101,9 +114,12 @@
 
 				for(var i=0; i<yougo_syn_parse.length; i++){
 					if(i>0){header_syn = ''};
+
+					console.log("**センター頻度**[" + i  + "]"+center_syn_parse[i]);
+
 					$('#form_synterms').append(
 						header_syn
-						+ constructSynForm(yougo_syn_parse[i])
+						+ constructSynForm(yougo_syn_parse[i],center_syn_parse[i])
 					);
 
 					getTextPoint(yougo_syn_parse[i].text_frequency,yougo_syn_parse[i].id);

@@ -372,7 +372,7 @@
 			return err_filed;
 		}
 
-		function constructSubForm(record){
+		function constructSubForm(record,center_sum){
 			var html =
 			'<div class="form-horizontal form_subterm">'
 			+'<div class="form-group"><div class="col-xs-12">'
@@ -388,7 +388,7 @@
 			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-xs-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
 			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + (((record)&&(record.center_frequency)) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
+			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((center_sum)||(center_sum==0) ? center_sum : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
 			+'<label class="col-xs-1">{{ "text.yougo.news.exam"|trans }}</label>'
 			+'<div class="col-xs-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
@@ -437,7 +437,7 @@
 			return html;
 		}
 
-		function constructSynForm(record){
+		function constructSynForm(record,center_sum){
 			var html =
 			'<div class="form-horizontal form_synterm">'
 			+'<div class="form-group"><div class="col-xs-12">'
@@ -457,7 +457,7 @@
 			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-xs-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
 			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target3" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="3" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + (((record)&&(record.center_frequency)) ? record.center_frequency : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
+			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((center_sum)||(center_sum==0) ? center_sum : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
 			+'<label class="col-xs-1">{{ "text.yougo.news.exam"|trans }}</label>'
 			+'<div class="col-xs-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'

@@ -252,6 +252,7 @@ class MainTermRepository extends EntityRepository
 			SELECT
 				MainTerm.id,
 				MainTerm.term_id,
+				MainTerm.curriculum_id,
 				MainTerm.main_term,
 				MainTerm.red_letter,
 				MainTerm.text_frequency,
