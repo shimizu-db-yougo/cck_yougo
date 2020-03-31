@@ -624,6 +624,8 @@ class DownloadController extends BaseController {
 			$sub['delimiter'] = '（';
 		}elseif($sub['delimiter'] == '6'){
 			$sub['delimiter'] = '）';
+		}elseif($sub['delimiter'] == '8'){
+			$sub['delimiter'] = '）と';
 		}
 
 		if($sub['delimiter_kana'] == '0'){
@@ -642,6 +644,8 @@ class DownloadController extends BaseController {
 			$sub['delimiter_kana'] = '）';
 		}elseif($sub['delimiter_kana'] == '7'){
 			$sub['delimiter_kana'] = '）（';
+		}elseif($sub['delimiter_kana'] == '8'){
+			$sub['delimiter_kana'] = '）と';
 		}
 	}
 
