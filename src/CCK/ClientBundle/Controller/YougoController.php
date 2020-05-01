@@ -743,6 +743,9 @@ class YougoController extends BaseController {
 				'select_ko' => '',
 				'print_order_list' => $printOrderList,
 				'main_term_list' => '',
+				'center_main' => '',
+				'center_sub' => '',
+				'center_syn' => '',
 		);
 	}
 
