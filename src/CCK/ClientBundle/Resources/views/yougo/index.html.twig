@@ -146,7 +146,11 @@
 								<div class="col-xs-4">
 									<input type="text" class="form-control input-sm" name="term" value="{{ term }}">
 								</div>
-								<div class="col-xs-1">
+								<label class="col-xs-1 text-right">{{ 'text.yougo.sub_term'|trans }}</label>
+								<div class="col-xs-4">
+									<input type="text" class="form-control input-sm" name="sub_term" value="{{ sub_term }}">
+								</div>
+								<div class="col-xs-1 text-right">
 									<button class="btn btn-primary button_text_align input-sm" type="submit" OnClick="loading('処理中...');">{{ 'btn.search'|trans }}</button>
 								</div>
 								<div class="col-xs-1">

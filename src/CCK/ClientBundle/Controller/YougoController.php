@@ -49,6 +49,7 @@ class YougoController extends BaseController {
 	const SES_SEARCH_CENTER_FREQ_KEY = "ses_search_center_freq_key";
 	const SES_SEARCH_NEWS_EXAM_KEY = "ses_search_news_exam_key";
 	const SES_SEARCH_TERM_KEY = "ses_search_term_key";
+	const SES_SEARCH_SUB_TERM_KEY = "ses_search_sub_term_key";
 	const SES_SEARCH_LIST_COUNT_KEY = "ses_search_list_count_key";
 	const SES_SORT_ORDER_KEY = "ses_sort_order_key";
 	const SES_SORT_FIELD_KEY = "ses_sort_field_key";
@@ -171,6 +172,13 @@ class YougoController extends BaseController {
 			$term = $session->get(self::SES_SEARCH_TERM_KEY);
 		}
 
+		// サブ用語
+		if($request->query->has('sub_term')){
+			$sub_term = $request->query->get('sub_term');
+		}else{
+			$sub_term = $session->get(self::SES_SEARCH_SUB_TERM_KEY);
+		}
+
 		// 一覧表示件数
 		if($request->query->has('list_count')){
 			$list_count = $request->query->get('list_count');
@@ -211,7 +219,7 @@ class YougoController extends BaseController {
 		}
 
 		$entities = array();
-		$entities = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoList($curriculum, $version, $hen, $sho, $dai, $chu, $ko, $nombre, $text_freq, $center_freq, $news_exam, $term, $sort_field, $sort_order);
+		$entities = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->getYougoList($curriculum, $version, $hen, $sho, $dai, $chu, $ko, $nombre, $text_freq, $center_freq, $news_exam, $term, $sort_field, $sort_order, null, $sub_term);
 
 		// pagination
 		$pagination = $this->createPagination($request, $entities, $list_count, $page);
@@ -229,6 +237,7 @@ class YougoController extends BaseController {
 		$session->set(self::SES_SEARCH_CENTER_FREQ_KEY, $center_freq);
 		$session->set(self::SES_SEARCH_NEWS_EXAM_KEY, $news_exam);
 		$session->set(self::SES_SEARCH_TERM_KEY, $term);
+		$session->set(self::SES_SEARCH_SUB_TERM_KEY, $sub_term);
 		$session->set(self::SES_SEARCH_LIST_COUNT_KEY, $list_count);
 		$session->set(self::SES_SORT_ORDER_KEY, $sort_order_link);
 		$session->set(self::SES_SORT_FIELD_KEY, $sort_field);
@@ -322,6 +331,7 @@ class YougoController extends BaseController {
 				'center_freq' => $center_freq,
 				'news_exam' => ($news_exam) ? true : false,
 				'term' => $term,
+				'sub_term' => $sub_term,
 				'list_count' => $list_count,
 				'sort_order' => $sort_order_link,
 				'sort_field' => $sort_field,
@@ -1972,6 +1982,7 @@ class YougoController extends BaseController {
 		$session->remove(self::SES_SEARCH_CENTER_FREQ_KEY);
 		$session->remove(self::SES_SEARCH_NEWS_EXAM_KEY);
 		$session->remove(self::SES_SEARCH_TERM_KEY);
+		$session->remove(self::SES_SEARCH_SUB_TERM_KEY);
 		$session->remove(self::SES_SEARCH_LIST_COUNT_KEY);
 		$session->remove(self::SES_SORT_ORDER_KEY);
 		$session->remove(self::SES_SORT_FIELD_KEY);
