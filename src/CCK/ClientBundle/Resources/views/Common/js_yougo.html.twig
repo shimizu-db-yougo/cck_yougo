@@ -2,7 +2,7 @@
 		// 教科書頻度
 		$('.js-text-freq').bind('keydown keyup keypress change', function () {
 
-			getTextPoint($(this).val(),"{{ yougo.termId }}");
+			getTextPoint($(this).val(),"{{ yougo.termId }}","{{ curriculum }}");
 
 		});
 
@@ -592,14 +592,25 @@
 
 		});
 
-		function getTextPoint(value,term_id){
+		function getTextPoint(value,term_id,curriculum){
 			var rank = '';
-			if(value >= 6){
-				rank = 'A';
-			}else if((value >= 3)&&(value <= 5)){
-				rank = 'B';
-			}else if((value >= 1)&&(value <= 2)){
-				rank = 'C';
+			if(curriculum == '1'){
+				// 教科「現社」の場合
+				if(value >= 8){
+					rank = 'A';
+				}else if((value >= 4)&&(value <= 7)){
+					rank = 'B';
+				}else if((value >= 1)&&(value <= 3)){
+					rank = 'C';
+				}
+			}else{
+				if(value >= 6){
+					rank = 'A';
+				}else if((value >= 3)&&(value <= 5)){
+					rank = 'B';
+				}else if((value >= 1)&&(value <= 2)){
+					rank = 'C';
+				}
 			}
 			$('#text_rank' + term_id + ' #text_rank').text(rank);
 		}
@@ -683,7 +694,7 @@
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
 
-				getTextPoint(e.currentTarget.value,term_id);
+				getTextPoint(e.currentTarget.value,term_id,"{{ curriculum }}");
 			});
 			// サブ用語　センター頻度　イベント設定
 			$(document).on("click", ".js-center-target2", function (e) {
@@ -723,7 +734,7 @@
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
 
-				getTextPoint(e.currentTarget.value,term_id);
+				getTextPoint(e.currentTarget.value,term_id,"{{ curriculum }}");
 			});
 			// 同対類用語　センター頻度　イベント設定
 			$(document).on("click", ".js-center-target3", function (e) {

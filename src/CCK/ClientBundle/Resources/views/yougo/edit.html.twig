@@ -68,7 +68,7 @@
 				buttonStyle(document.getElementById('print_order'));
 
 				// 教科書頻度
-				getTextPoint("{{ yougo.textFrequency }}","{{ yougo.termId }}");
+				getTextPoint("{{ yougo.textFrequency }}","{{ yougo.termId }}","{{ curriculum }}");
 
 				// センター頻度
 				var arr_center_sub = '{{ center_sub|json_encode|raw }}';
@@ -103,7 +103,7 @@
 						+ constructSubForm(yougo_sub_parse[i],center_sub_parse[i])
 					);
 
-					getTextPoint(yougo_sub_parse[i].text_frequency,yougo_sub_parse[i].id);
+					getTextPoint(yougo_sub_parse[i].text_frequency,yougo_sub_parse[i].id,"{{ curriculum }}");
 
 				}
 
@@ -122,7 +122,7 @@
 						+ constructSynForm(yougo_syn_parse[i],center_syn_parse[i])
 					);
 
-					getTextPoint(yougo_syn_parse[i].text_frequency,yougo_syn_parse[i].id);
+					getTextPoint(yougo_syn_parse[i].text_frequency,yougo_syn_parse[i].id,"{{ curriculum }}");
 				}
 
 				// 指矢印用語取得
