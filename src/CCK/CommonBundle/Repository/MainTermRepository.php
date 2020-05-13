@@ -15,7 +15,7 @@ class MainTermRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
-	public function getYougoList($curriculum = null, $version = null, $hen = null, $sho = null, $dai = null, $chu = null, $ko = null, $nombre = null, $text_freq = null, $center_freq = null, $news_exam = null, $term = null, $sort_field = null, $sort_order = null, $term_id = null){
+	public function getYougoList($curriculum = null, $version = null, $hen = null, $sho = null, $dai = null, $chu = null, $ko = null, $nombre = null, $text_freq = null, $center_freq = null, $news_exam = null, $term = null, $sort_field = null, $sort_order = null, $term_id = null, $sub_term = null){
 		$sql = "
 			SELECT
 				MainTerm.id,
@@ -110,24 +110,24 @@ class MainTermRepository extends EntityRepository
 		}
 
 		if($nombre){
-			$sql .= " AND MainTerm.nombre = '" . str_replace("'", "''", $nombre) . "'";
+			$sql .= " AND MainTerm.nombre collate utf8_unicode_ci = '" . str_replace("'", "''", $nombre) . "'";
 		}
 
 		if($text_freq){
 			if($text_freq == '1'){
 				// A
-				$sql .= " AND MainTerm.text_frequency >= 6";
+				$sql .= " AND IF(Curriculum.id = 1, MainTerm.text_frequency >= 8, MainTerm.text_frequency >= 6)";
 			}elseif($text_freq == '2'){
 				// B
-				$sql .= " AND (MainTerm.text_frequency >= 3 AND MainTerm.text_frequency <= 5)";
+				$sql .= " AND IF(Curriculum.id = 1, (MainTerm.text_frequency >= 4 AND MainTerm.text_frequency <= 7), (MainTerm.text_frequency >= 3 AND MainTerm.text_frequency <= 5))";
 			}else{
 				// C
-				$sql .= " AND MainTerm.text_frequency <= 2";
+				$sql .= " AND IF(Curriculum.id = 1, MainTerm.text_frequency <= 3, MainTerm.text_frequency <= 2)";
 			}
 		}
 
 		if($center_freq){
-			$sql .= " AND MainTerm.center_frequency = '" . str_replace("'", "''", $center_freq) . "'";
+			$sql .= " AND MainTerm.center_frequency collate utf8_unicode_ci = '" . str_replace("'", "''", $center_freq) . "'";
 		}
 
 		if($news_exam){
@@ -135,7 +135,11 @@ class MainTermRepository extends EntityRepository
 		}
 
 		if($term){
-			$sql .= " AND REPLACE_TAGS(MainTerm.main_term) LIKE '%" . str_replace("'", "''", $term) . "%'";
+			$sql .= " AND REPLACE_TAGS(MainTerm.main_term) collate utf8_unicode_ci LIKE '%" . str_replace("'", "''", $term) . "%'";
+		}
+
+		if($sub_term){
+			$sql .= " AND REPLACE_TAGS(SubTerm.sub_term) collate utf8_unicode_ci LIKE '%" . str_replace("'", "''", $sub_term) . "%'";
 		}
 
 		if($term_id){
