@@ -89,7 +89,7 @@ class Synonym
     /**
      * @var string
      *
-     * @ORM\Column(name="index_add_letter", type="string", length=4, nullable=true)
+     * @ORM\Column(name="index_add_letter", type="text", nullable=true)
      */
     private $indexAddLetter;
 

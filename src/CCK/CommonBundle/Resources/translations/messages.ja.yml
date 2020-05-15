@@ -207,6 +207,7 @@ text:
         western_language: 欧文
         birth_year: 年月日
         index_add_letter: 索引追加文字
+        index_letter: 索引文字
         term_explain: 解説
         yomigana: 読み仮名
         syn_term: 同対類用語
