@@ -838,6 +838,7 @@ class YougoController extends BaseController {
 			$entity->setMainTerm($main_term);
 			$entity->setRedLetter(($request->request->get('red_letter') == 'true') ? true : false);
 			$entity->setKana($request->request->get('kana'));
+			$entity->setKanaExistFlag(($request->request->get('kana_exist') == 'true') ? true : false);
 			$entity->setTextFrequency($request->request->get('text_freq'));
 			$entity->setCenterFrequency($request->request->get('center_freq'));
 			$entity->setNewsExam(($request->request->get('news_exam') == 'true') ? true : false);
@@ -904,6 +905,7 @@ class YougoController extends BaseController {
 				$entity->setSubTerm($subterm['sub_term'][$idx]);
 				$entity->setRedLetter(($subterm['red_letter'][$idx] == 'true') ? true : false);
 				$entity->setKana($subterm['kana'][$idx]);
+				$entity->setKanaExistFlag(($subterm['kana_exist'][$idx] == 'true') ? true : false);
 				$entity->setTextFrequency($subterm['text_freq'][$idx]);
 				$entity->setCenterFrequency($subterm['center_freq'][$idx]);
 				$entity->setNewsExam(($subterm['news_exam'][$idx] == 'true') ? true : false);
@@ -1400,6 +1402,7 @@ class YougoController extends BaseController {
 			$entitySub->setMainTermId(0);
 			$entitySub->setSubTerm("");
 			$entitySub->setRedLetter(0);
+			$entitySub->setKanaExistFlag(0);
 			$entitySub->setTextFrequency(0);
 			$entitySub->setCenterFrequency(0);
 			$entitySub->setNewsExam(0);

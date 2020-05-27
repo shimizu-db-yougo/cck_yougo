@@ -234,6 +234,13 @@ class MainTerm
     private $deleteFlag;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="kana_exist_flag", type="boolean", nullable=true, options={"default" = 0})
+     */
+    private $kanaExistFlag;
+
+    /**
      * construct
      */
     public function __construct(){
@@ -986,5 +993,29 @@ class MainTerm
     public function getUserId()
     {
         return $this->user_id;
+    }
+
+    /**
+     * Set kanaExistFlag.
+     *
+     * @param bool|null $kanaExistFlag
+     *
+     * @return MainTerm
+     */
+    public function setKanaExistFlag($kanaExistFlag = null)
+    {
+        $this->kanaExistFlag = $kanaExistFlag;
+
+        return $this;
+    }
+
+    /**
+     * Get kanaExistFlag.
+     *
+     * @return bool|null
+     */
+    public function getKanaExistFlag()
+    {
+        return $this->kanaExistFlag;
     }
 }

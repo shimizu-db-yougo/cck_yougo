@@ -227,6 +227,7 @@ text:
         upload_date: アップロード日時
         upload_user: ユーザー
         upload_file: ファイル名
+        kana_exist: かな有
     header:
         name: 見出し名前
         level: 見出し種類
@@ -274,6 +275,7 @@ csv:
         center_frequency: 主用語_センター頻度
         news_exam: 主用語_検定出題
         kana: 主用語_読み仮名
+        kana_exist_flag: 主用語_読み有
         index_kana: 主用語_さくいん用語読み仮名
         index_add_letter: 主用語_さくいん時追加文字
         index_original: 原典資料さくいん
@@ -299,6 +301,7 @@ csv:
         sub_term: サブ用語
         sub_red_letter: サブ用語_赤文字
         sub_kana: サブ用語_読み仮名
+        sub_kana_exist_flag: サブ用語_読み有
         sub_text_frequency: サブ用語_教科書頻度
         sub_center_frequency: サブ用語_センター頻度
         sub_news_exam: サブ用語_検定出題

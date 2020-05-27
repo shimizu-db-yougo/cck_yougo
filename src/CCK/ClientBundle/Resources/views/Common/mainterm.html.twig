@@ -1,7 +1,7 @@
 					<div class="form-group">
 						<div class="col-xs-12">
 							<label class="col-xs-1">{{ 'text.yougo.main.term'|trans }}</label>
-							<div class="col-xs-4">
+							<div class="col-xs-3">
 								<input type="text" class="form-control input-sm" name="main_term" value="{{ yougo.mainTerm }}">
 							</div>
 							<label class="col-xs-1">{{ 'text.yougo.red_letter'|trans }}</label>
@@ -11,6 +11,10 @@
 							<label class="col-xs-1">{{ 'text.yougo.kana'|trans }}</label>
 							<div class="col-xs-3">
 								<input type="text" class="form-control input-sm" name="kana" value="{{ yougo.kana }}">
+							</div>
+							<label class="col-xs-1">{{ 'text.yougo.kana_exist'|trans }}</label>
+							<div class="col-xs-1">
+								<input type="checkbox" name="kana_exist" {{ (yougo.kanaExistFlag == '1') ? ' checked ' : '' }}>
 							</div>
 						</div>
 					</div>

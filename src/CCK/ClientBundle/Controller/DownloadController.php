@@ -42,6 +42,7 @@ class DownloadController extends BaseController {
 			'western_language',
 			'birth_year',
 			'kana',
+			'kana_exist_flag',
 			'index_add_letter',
 			'index_kana',
 			'index_original_kana',
@@ -58,6 +59,7 @@ class DownloadController extends BaseController {
 			'sub_term',
 			'sub_red_letter',
 			'sub_kana',
+			'sub_kana_exist_flag',
 			'sub_text_frequency',
 			'sub_center_frequency',
 			'sub_news_exam',
@@ -322,6 +324,7 @@ class DownloadController extends BaseController {
 		$result['sub_term'] = $translator->trans('csv.term.sub_term');
 		$result['sub_red_letter'] = $translator->trans('csv.term.sub_red_letter');
 		$result['sub_kana'] = $translator->trans('csv.term.sub_kana');
+		$result['sub_kana_exist_flag'] = $translator->trans('csv.term.sub_kana_exist_flag');
 		$result['sub_text_frequency'] = $translator->trans('csv.term.sub_text_frequency');
 		$result['sub_center_frequency'] = $translator->trans('csv.term.sub_center_frequency');
 		$result['sub_news_exam'] = $translator->trans('csv.term.sub_news_exam');
@@ -413,6 +416,7 @@ class DownloadController extends BaseController {
 		$sub['sub_term'] = "";
 		$sub['sub_red_letter'] = "";
 		$sub['sub_kana'] = "";
+		$sub['sub_kana_exist_flag'] = "";
 		$sub['sub_text_frequency'] = "";
 		$sub['sub_center_frequency'] = "";
 		$sub['sub_news_exam'] = "";
@@ -430,6 +434,7 @@ class DownloadController extends BaseController {
 				$sub['sub_term'] .= $subtermRec['sub_term'] . '\v';
 				$sub['sub_red_letter'] .= $subtermRec['red_letter'] . '\v';
 				$sub['sub_kana'] .= $subtermRec['kana'] . '\v';
+				$sub['sub_kana_exist_flag'] .= $subtermRec['kana_exist_flag'] . '\v';
 				$sub['sub_text_frequency'] .= $subtermRec['text_frequency'] . '\v';
 				$sub['sub_center_frequency'] .= $subtermRec['center_frequency'] . '\v';
 				$sub['sub_news_exam'] .= $subtermRec['news_exam'] . '\v';
@@ -544,6 +549,12 @@ class DownloadController extends BaseController {
 			$main['red_letter'] = '';
 		}
 
+		if($main['kana_exist_flag'] == '1'){
+			$main['kana_exist_flag'] = '●';
+		}else{
+			$main['kana_exist_flag'] = '';
+		}
+
 		if($main['text_frequency'] >= 6){
 			$main['text_frequency'] = 'A';
 		}elseif(($main['text_frequency'] >= 3)&&($main['text_frequency'] <= 5)){
@@ -588,6 +599,12 @@ class DownloadController extends BaseController {
 			$sub['red_letter'] = '●';
 		}else{
 			$sub['red_letter'] = '';
+		}
+
+		if($sub['kana_exist_flag'] == '1'){
+			$sub['kana_exist_flag'] = '●';
+		}else{
+			$sub['kana_exist_flag'] = '';
 		}
 
 		if($sub['text_frequency'] >= 6){

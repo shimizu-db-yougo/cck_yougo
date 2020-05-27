@@ -136,6 +136,13 @@ class SubTerm
     private $deleteFlag;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="kana_exist_flag", type="boolean", nullable=true, options={"default" = 0})
+     */
+    private $kanaExistFlag;
+
+    /**
      * construct
      */
     public function __construct(){
@@ -552,5 +559,29 @@ class SubTerm
     public function getDeleteFlag()
     {
         return $this->deleteFlag;
+    }
+
+    /**
+     * Set kanaExistFlag.
+     *
+     * @param bool|null $kanaExistFlag
+     *
+     * @return SubTerm
+     */
+    public function setKanaExistFlag($kanaExistFlag = null)
+    {
+        $this->kanaExistFlag = $kanaExistFlag;
+
+        return $this;
+    }
+
+    /**
+     * Get kanaExistFlag.
+     *
+     * @return bool|null
+     */
+    public function getKanaExistFlag()
+    {
+        return $this->kanaExistFlag;
     }
 }
