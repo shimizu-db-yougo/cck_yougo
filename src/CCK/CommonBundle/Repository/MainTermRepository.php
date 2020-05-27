@@ -139,7 +139,8 @@ class MainTermRepository extends EntityRepository
 		}
 
 		if($sub_term){
-			$sql .= " AND REPLACE_TAGS(SubTerm.sub_term) collate utf8_unicode_ci LIKE '%" . str_replace("'", "''", $sub_term) . "%'";
+			//$sql .= " AND REPLACE_TAGS(SubTerm.sub_term) collate utf8_unicode_ci LIKE '%" . str_replace("'", "''", $sub_term) . "%'";
+			$sql .= " AND REPLACE_TAGS(SubTerm.sub_term) = any (select `sub_term` from `SubTerm` where `main_term_id` = any (select `term_id` from `MainTerm` where `term_id` = any (select `main_term_id` from `SubTerm` where `sub_term` collate utf8_unicode_ci LIKE '%" . str_replace("'", "''", $sub_term) . "%')))";
 		}
 
 		if($term_id){
@@ -308,6 +309,7 @@ class MainTermRepository extends EntityRepository
 				MainTerm.center_frequency,
 				MainTerm.news_exam,
 				MainTerm.kana,
+				MainTerm.kana_exist_flag,
 				MainTerm.index_kana,
 				MainTerm.index_add_letter,
 				MainTerm.index_original,
@@ -385,6 +387,7 @@ class MainTermRepository extends EntityRepository
 				SubTerm.center_frequency,
 				SubTerm.news_exam,
 				SubTerm.kana,
+				SubTerm.kana_exist_flag,
 				SubTerm.index_kana,
 				SubTerm.index_add_letter,
 				SubTerm.delimiter,
