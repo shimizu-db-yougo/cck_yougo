@@ -221,7 +221,7 @@ text:
         explain.index: 解説内さくいん用語設定
         explain.term: 用語
         explain.index.kana: さくいん読み仮名
-        explain.index.add: さくいん時追加文字
+        explain.index.add: さくいん文字
         explain.nombre: ノンブル
         explain_term: 解説内索引用語
         upload_date: アップロード日時
@@ -277,7 +277,7 @@ csv:
         kana: 主用語_読み仮名
         kana_exist_flag: 主用語_読み有
         index_kana: 主用語_さくいん用語読み仮名
-        index_add_letter: 主用語_さくいん時追加文字
+        index_add_letter: 主用語_さくいん文字
         index_original: 原典資料さくいん
         index_original_kana: 原典資料さくいんよみ
         index_abbreviation: 欧文略語さくいん
@@ -295,7 +295,7 @@ csv:
         exp_id: 解説内さくいん用語ID
         exp_term: 主用語_解説内さくいん用語
         exp_index_kana: 解説内用語_さくいん読み仮名
-        exp_index_add_letter: 解説内用語_さくいん時追加文字
+        exp_index_add_letter: 解説内用語_さくいん文字
         exp_nombre: 解説内用語_ノンブル
         sub_id: サブ用語ID
         sub_term: サブ用語
@@ -307,7 +307,7 @@ csv:
         sub_news_exam: サブ用語_検定出題
         sub_delimiter: サブ用語_区切り文字
         sub_delimiter_kana: サブ用語_読み区切り文字
-        sub_index_add_letter: サブ用語_さくいん時追加文字
+        sub_index_add_letter: サブ用語_さくいん文字
         sub_index_kana: サブ用語_さくいん用語読み仮名
         sub_nombre: サブ用語_ノンブル
         syn_id: 同対類用語ID
@@ -319,7 +319,7 @@ csv:
         syn_center_frequency: 同対類用語_センター頻度
         syn_news_exam: 同対類用語_検定出題
         syn_delimiter: 同対類用語_区切り文字
-        syn_index_add_letter: 同対類用語_さくいん時追加文字
+        syn_index_add_letter: 同対類用語_さくいん文字
         syn_index_kana: 同対類用語_さくいん用語読み仮名
         syn_nombre: 同対類用語_ノンブル
         ref_hen: 指矢印_編見出し
