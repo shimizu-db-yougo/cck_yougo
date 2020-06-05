@@ -42,13 +42,13 @@
 						{% for yougo in arr_yougo %}
 
 						<div>
-							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (yougo.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ yougo.main_term }}　{{ getTextFreqIcon(yougo.text_frequency)|raw }}{{ getCenterFreqIcon(center_main[record])|raw }}{{ getNewsExamIcon(yougo.news_exam)|raw }}</span>
+							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (yougo.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ yougo.main_term }}　{{ getTextFreqIcon(yougo.text_frequency,yougo.ranka,yougo.rankb)|raw }}{{ getCenterFreqIcon(center_main[record])|raw }}{{ getNewsExamIcon(yougo.news_exam)|raw }}</span>
 
 							{% set sub_kana = '' %}
 							{% set i = 0 %}
 							{% for rec_sub_term in arr_subterm[record] %}
 								{% if i == 0 %}<span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(yougo.delimiter)|trans }}</span>{% endif %}
-								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (rec_sub_term.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_sub_term.sub_term }}{{ getTextFreqIcon(rec_sub_term.text_frequency)|raw }}{{ getCenterFreqIcon(center_sub[record][i])|raw }}{{ getNewsExamIcon(rec_sub_term.news_exam)|raw }}</span><span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(rec_sub_term.delimiter)|trans }}</span>
+								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (rec_sub_term.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_sub_term.sub_term }}{{ getTextFreqIcon(rec_sub_term.text_frequency,yougo.ranka,yougo.rankb)|raw }}{{ getCenterFreqIcon(center_sub[record][i])|raw }}{{ getNewsExamIcon(rec_sub_term.news_exam)|raw }}</span><span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(rec_sub_term.delimiter)|trans }}</span>
 								{% if rec_sub_term.kana != '' %}{% set sub_kana = sub_kana~rec_sub_term.kana~'）' %}{% endif %}
 								{% set i = i + 1 %}
 							{% endfor %}
@@ -66,7 +66,7 @@
 						{% set i = 0 %}
 						{% for rec_synonym in arr_synonym[record] %}
 							<div class="text-right">
-								{{ getSynonymIcon(rec_synonym.synonym_id)|raw }}<span style="font-size: 14px; font-weight: bold; {{ (rec_synonym.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_synonym.term }}{{ getTextFreqIcon(rec_synonym.text_frequency)|raw }}{{ getCenterFreqIcon(center_syn[record][i])|raw }}{{ getNewsExamIcon(rec_synonym.news_exam)|raw }}</span>
+								{{ getSynonymIcon(rec_synonym.synonym_id)|raw }}<span style="font-size: 14px; font-weight: bold; {{ (rec_synonym.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_synonym.term }}{{ getTextFreqIcon(rec_synonym.text_frequency,yougo.ranka,yougo.rankb)|raw }}{{ getCenterFreqIcon(center_syn[record][i])|raw }}{{ getNewsExamIcon(rec_synonym.news_exam)|raw }}</span>
 								{% set i = i + 1 %}
 							</div>
 						{% endfor %}

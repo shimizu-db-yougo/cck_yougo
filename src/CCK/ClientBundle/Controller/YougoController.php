@@ -570,6 +570,8 @@ class YougoController extends BaseController {
 				'center_main' => $sum_center_main,
 				'center_sub' => $arr_sub,
 				'center_syn' => $arr_syn,
+				'ranka' => $entityVer->getRankA(),
+				'rankb' => $entityVer->getRankB(),
 		);
 	}
 
@@ -600,6 +602,14 @@ class YougoController extends BaseController {
 			if(!$entity){
 				return $this->redirect($this->generateUrl('client.yougo.list'));
 			}else{
+				$entityVer = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+						'id' => $entity['curriculum_id'],
+						'deleteFlag' => FALSE
+				));
+
+				$entity['ranka'] = $entityVer->getRankA();
+				$entity['rankb'] = $entityVer->getRankB();
+
 				array_push($arr_mainterm_entity, $entity);
 			}
 
@@ -616,11 +626,6 @@ class YougoController extends BaseController {
 			array_push($arr_synterm_entity, $entitySyn);
 
 			// センター頻度　Centerテーブルより取得
-			$entityVer = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
-					'id' => $entity['curriculum_id'],
-					'deleteFlag' => FALSE
-			));
-
 			$sum_center_main = $this->summaryCenterFreqMain($entity['term_id'], $entityVer->getYear());
 			array_push($arr_main_center,$sum_center_main);
 
@@ -1357,6 +1362,8 @@ class YougoController extends BaseController {
 				'center_main' => $sum_center_main,
 				'center_sub' => $arr_sub,
 				'center_syn' => $arr_syn,
+				'ranka' => $entityVersion->getRankA(),
+				'rankb' => $entityVersion->getRankB(),
 		);
 	}
 

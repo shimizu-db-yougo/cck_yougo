@@ -2,7 +2,7 @@
 		// 教科書頻度
 		$('.js-text-freq').bind('keydown keyup keypress change', function () {
 
-			getTextPoint($(this).val(),"{{ yougo.termId }}","{{ curriculum }}");
+			getTextPoint($(this).val(),"{{ yougo.termId }}","{{ ranka }}","{{ rankb }}");
 
 		});
 
@@ -607,25 +607,17 @@
 
 		});
 
-		function getTextPoint(value,term_id,curriculum){
+		function getTextPoint(value,term_id,ranka,rankb){
 			var rank = '';
-			if(curriculum == '1'){
-				// 教科「現社」の場合
-				if(value >= 8){
-					rank = 'A';
-				}else if((value >= 4)&&(value <= 7)){
-					rank = 'B';
-				}else if((value >= 1)&&(value <= 3)){
-					rank = 'C';
-				}
-			}else{
-				if(value >= 6){
-					rank = 'A';
-				}else if((value >= 3)&&(value <= 5)){
-					rank = 'B';
-				}else if((value >= 1)&&(value <= 2)){
-					rank = 'C';
-				}
+			var num_ranka = Number(ranka);
+			var num_rankb = Number(rankb);
+
+			if(value >= num_ranka){
+				rank = 'A';
+			}else if((value >= num_rankb)&&(value <= num_ranka-1)){
+				rank = 'B';
+			}else if((value >= 1)&&(value <= num_rankb-1)){
+				rank = 'C';
 			}
 			$('#text_rank' + term_id + ' #text_rank').text(rank);
 		}
@@ -709,7 +701,7 @@
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
 
-				getTextPoint(e.currentTarget.value,term_id,"{{ curriculum }}");
+				getTextPoint(e.currentTarget.value,term_id,"{{ ranka }}","{{ rankb }}");
 			});
 			// サブ用語　センター頻度　イベント設定
 			$(document).on("click", ".js-center-target2", function (e) {
@@ -749,7 +741,7 @@
 				var target = $(e.currentTarget);
 				var term_id = target.attr('term-id');
 
-				getTextPoint(e.currentTarget.value,term_id,"{{ curriculum }}");
+				getTextPoint(e.currentTarget.value,term_id,"{{ ranka }}","{{ rankb }}");
 			});
 			// 同対類用語　センター頻度　イベント設定
 			$(document).on("click", ".js-center-target3", function (e) {

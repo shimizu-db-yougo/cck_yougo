@@ -198,9 +198,14 @@ class DownloadController extends BaseController {
 
 		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($versionId,$term_id,$hen,$sho,$type);
 
+		$entityVer = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+				'id' => $entity[0]['ver_id'],
+				'deleteFlag' => FALSE
+		));
+
 		// 原稿データCSV生成
 		if($entity){
-			$body_list = $this->constructManuscriptCSV($term_id, $request, $entity, $outFileName);
+			$body_list = $this->constructManuscriptCSV($term_id, $request, $entity, $outFileName, $entityVer);
 		}else{
 			$body_list = false;
 		}
@@ -268,7 +273,7 @@ class DownloadController extends BaseController {
 	}
 
 	// 原稿データCSV生成
-	private function constructManuscriptCSV($genkoId, $request, $entity, $outFileName) {
+	private function constructManuscriptCSV($genkoId, $request, $entity, $outFileName, $entityVer) {
 		$em = $this->getDoctrine()->getManager();
 
 		$type = $request->query->get('type');
@@ -283,7 +288,7 @@ class DownloadController extends BaseController {
 			$entity_ref = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($mainTermRec['term_id']);
 
 			// body
-			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref, $type, $generic_value), $request);
+			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref, $type, $generic_value, $entityVer), $request);
 			array_push($body_list,$body);
 		}
 
@@ -372,7 +377,7 @@ class DownloadController extends BaseController {
 	 * @param  array $coupons
 	 * @return array $body
 	 */
-	private function generateBody($main, $expterm, $subterm, $synterm, $refterm, $type, $generic){
+	private function generateBody($main, $expterm, $subterm, $synterm, $refterm, $type, $generic, $entityVer){
 		$body = [];
 		$result = [];
 
@@ -382,7 +387,7 @@ class DownloadController extends BaseController {
 		$search_newline = '/\r\n|\r|\n/';
 
 		// 主用語
-		$this->replaceMainField($main);
+		$this->replaceMainField($main,$entityVer);
 
 		$main['nombre'] = (($type == '1') ? $main['nombre'] : '');
 		$main['illust_nombre'] = (($type == '1') ? $main['illust_nombre'] : '');
@@ -428,7 +433,7 @@ class DownloadController extends BaseController {
 
 		if($subterm){
 			foreach ($subterm as $subtermRec) {
-				$this->replaceSubField($subtermRec);
+				$this->replaceSubField($subtermRec,$entityVer);
 
 				$sub['sub_id'] .= $subtermRec['id'] . '\v';
 				$sub['sub_term'] .= $subtermRec['sub_term'] . '\v';
@@ -466,7 +471,7 @@ class DownloadController extends BaseController {
 
 		if($synterm){
 			foreach ($synterm as $syntermRec) {
-				$this->replaceSynField($syntermRec);
+				$this->replaceSynField($syntermRec,$entityVer);
 
 				$syn['syn_id'] .= $syntermRec['id'] . '\v';
 				$syn['syn_synonym_id'] .= $syntermRec['synonym_id'] . '\v';
@@ -536,7 +541,7 @@ class DownloadController extends BaseController {
 		return $trans;
 	}
 
-	private function replaceMainField(&$main){
+	private function replaceMainField(&$main,$entityVer){
 		$main['header_position'] = "";
 		// 主用語　見出し名称の取得
 		$this->getHeaderName($main);
@@ -555,11 +560,11 @@ class DownloadController extends BaseController {
 			$main['kana_exist_flag'] = '';
 		}
 
-		if($main['text_frequency'] >= 6){
+		if($main['text_frequency'] >= $entityVer->getRankA()){
 			$main['text_frequency'] = 'A';
-		}elseif(($main['text_frequency'] >= 3)&&($main['text_frequency'] <= 5)){
+		}elseif(($main['text_frequency'] >= $entityVer->getRankB())&&($main['text_frequency'] <= ($entityVer->getRankA()-1))){
 			$main['text_frequency'] = 'B';
-		}elseif(($main['text_frequency'] >= 1)&&($main['text_frequency'] <= 2)){
+		}elseif(($main['text_frequency'] >= 1)&&($main['text_frequency'] <= ($entityVer->getRankB()-1))){
 			$main['text_frequency'] = 'C';
 		}else{
 			$main['text_frequency'] = '';
@@ -592,7 +597,7 @@ class DownloadController extends BaseController {
 		}
 	}
 
-	private function replaceSubField(&$sub){
+	private function replaceSubField(&$sub,$entityVer){
 		$sub['id'] = 'S'.str_pad($sub['id'], 6, 0, STR_PAD_LEFT);
 
 		if($sub['red_letter'] == '1'){
@@ -607,11 +612,11 @@ class DownloadController extends BaseController {
 			$sub['kana_exist_flag'] = '';
 		}
 
-		if($sub['text_frequency'] >= 6){
+		if($sub['text_frequency'] >= $entityVer->getRankA()){
 			$sub['text_frequency'] = 'A';
-		}elseif(($sub['text_frequency'] >= 3)&&($sub['text_frequency'] <= 5)){
+		}elseif(($sub['text_frequency'] >= $entityVer->getRankB())&&($sub['text_frequency'] <= ($entityVer->getRankA()-1))){
 			$sub['text_frequency'] = 'B';
-		}elseif(($sub['text_frequency'] >= 1)&&($sub['text_frequency'] <= 2)){
+		}elseif(($sub['text_frequency'] >= 1)&&($sub['text_frequency'] <= ($entityVer->getRankB()-1))){
 			$sub['text_frequency'] = 'C';
 		}else{
 			$sub['text_frequency'] = '';
@@ -666,7 +671,7 @@ class DownloadController extends BaseController {
 		}
 	}
 
-	private function replaceSynField(&$syn){
+	private function replaceSynField(&$syn,$entityVer){
 		$syn['id'] = 'D'.str_pad($syn['id'], 6, 0, STR_PAD_LEFT);
 
 		if($syn['synonym_id'] == '1'){
@@ -683,11 +688,11 @@ class DownloadController extends BaseController {
 			$syn['red_letter'] = '';
 		}
 
-		if($syn['text_frequency'] >= 6){
+		if($syn['text_frequency'] >= $entityVer->getRankA()){
 			$syn['text_frequency'] = 'A';
-		}elseif(($syn['text_frequency'] >= 3)&&($syn['text_frequency'] <= 5)){
+		}elseif(($syn['text_frequency'] >= $entityVer->getRankB())&&($syn['text_frequency'] <= ($entityVer->getRankA()-1))){
 			$syn['text_frequency'] = 'B';
-		}elseif(($syn['text_frequency'] >= 1)&&($syn['text_frequency'] <= 2)){
+		}elseif(($syn['text_frequency'] >= 1)&&($syn['text_frequency'] <= ($entityVer->getRankB()-1))){
 			$syn['text_frequency'] = 'C';
 		}else{
 			$syn['text_frequency'] = '';

@@ -73,6 +73,20 @@ class Version
     private $year;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="rank_a", type="integer", nullable=true)
+     */
+    private $rankA;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="rank_b", type="integer", nullable=true)
+     */
+    private $rankB;
+
+    /**
      * construct
      */
     public function __construct(){
@@ -273,5 +287,53 @@ class Version
     public function getYear()
     {
         return $this->year;
+    }
+
+    /**
+     * Set rankA.
+     *
+     * @param int|null $rankA
+     *
+     * @return Version
+     */
+    public function setRankA($rankA = null)
+    {
+        $this->rankA = $rankA;
+
+        return $this;
+    }
+
+    /**
+     * Get rankA.
+     *
+     * @return int|null
+     */
+    public function getRankA()
+    {
+        return $this->rankA;
+    }
+
+    /**
+     * Set rankB.
+     *
+     * @param int|null $rankB
+     *
+     * @return Version
+     */
+    public function setRankB($rankB = null)
+    {
+        $this->rankB = $rankB;
+
+        return $this;
+    }
+
+    /**
+     * Get rankB.
+     *
+     * @return int|null
+     */
+    public function getRankB()
+    {
+        return $this->rankB;
     }
 }

@@ -60,14 +60,14 @@ class ClientExtension extends \Twig_Extension
 	 * @param  [type] $textFreq     [description]
 	 * @return [type]               [description]
 	 */
-	public function getTextFreqIcon($textFreq){
+	public function getTextFreqIcon($textFreq,$ranka,$rankb){
 		if($textFreq == "") return "";
 
-		if($textFreq >= 6){
+		if($textFreq >= $ranka){
 			$text_freq_tag = '<img src="/./img/A.jpg" class="icon-full" alt="A">';
-		}elseif(($textFreq >= 3) && ($textFreq <= 5)){
+		}elseif(($textFreq >= $rankb) && ($textFreq <= ($ranka-1))){
 			$text_freq_tag = '<img src="/./img/B.jpg" class="icon-full" alt="B">';
-		}elseif(($textFreq >= 1) && ($textFreq <= 2)){
+		}elseif(($textFreq >= 1) && ($textFreq <= ($rankb-1))){
 			$text_freq_tag = '<img src="/./img/C.jpg" class="icon-full" alt="C">';
 		}else{
 			$text_freq_tag = '';
