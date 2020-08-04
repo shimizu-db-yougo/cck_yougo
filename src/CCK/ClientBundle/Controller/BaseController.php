@@ -410,9 +410,6 @@ class BaseController extends Controller {
 
 	protected function encoding(array $value, Request $request, $mac_sjis = false){
 		$ua = $request->server->get('HTTP_USER_AGENT');
-		if(preg_match("/MSIE/i", $ua) || preg_match("/Windows/i", $ua)){
-			mb_convert_variables('sjis-win', 'UTF-8', $value);
-		}
 		if($mac_sjis){
 			if(preg_match("/Mac/i", $ua) || preg_match("/mac/i", $ua)){
 				mb_convert_variables('sjis-win', 'UTF-8', $value);
