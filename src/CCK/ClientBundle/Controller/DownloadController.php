@@ -49,6 +49,7 @@ class DownloadController extends BaseController {
 			'index_original',
 			'index_abbreviation',
 			'nombre',
+			'nombre_bold',
 			'term_explain',
 			'exp_id',
 			'exp_term',
@@ -594,6 +595,12 @@ class DownloadController extends BaseController {
 			$main['delimiter'] = '（';
 		}elseif($main['delimiter'] == '6'){
 			$main['delimiter'] = '）';
+		}
+
+		if($main['nombre_bold'] == '1'){
+			$main['nombre_bold'] = '＊';
+		}else{
+			$main['nombre_bold'] = '';
 		}
 	}
 

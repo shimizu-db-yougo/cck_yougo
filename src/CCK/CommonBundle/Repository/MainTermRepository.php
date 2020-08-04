@@ -321,6 +321,7 @@ class MainTermRepository extends EntityRepository
 				MainTerm.western_language,
 				MainTerm.birth_year,
 				MainTerm.nombre,
+				MainTerm.nombre_bold,
 				MainTerm.illust_filename,
 				MainTerm.illust_caption,
 				MainTerm.illust_kana,

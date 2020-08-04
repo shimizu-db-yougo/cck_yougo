@@ -286,6 +286,7 @@ csv:
         western_language: 主用語_欧文
         birth_year: 主用語_年月日
         nombre: 主用語_ノンブル
+        nombre_bold: 主用語_ノンブル_太字
         illust_filename: 図版ファイル名
         illust_caption: 図版キャプション
         illust_kana: 図版キャプション読み仮名

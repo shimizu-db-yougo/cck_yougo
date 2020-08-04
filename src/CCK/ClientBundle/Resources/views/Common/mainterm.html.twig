@@ -106,7 +106,7 @@
 							<label class="col-xs-1" name="nombre">{{ yougo.nombre }}</label>
 							<label class="col-xs-1">{{ 'text.yougo.nombre.bold'|trans }}</label>
 							<div class="col-xs-2">
-								<input type="checkbox" name="nombre.bold">
+								<input type="checkbox" name="nombre_bold" {{ (yougo.nombreBold == '1') ? ' checked ' : '' }}>
 							</div>
 						</div>
 					</div>

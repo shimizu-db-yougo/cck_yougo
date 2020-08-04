@@ -241,6 +241,13 @@ class MainTerm
     private $kanaExistFlag;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="nombre_bold", type="boolean", nullable=true, options={"default" = 0})
+     */
+    private $nombreBold;
+
+    /**
      * construct
      */
     public function __construct(){
@@ -1017,5 +1024,29 @@ class MainTerm
     public function getKanaExistFlag()
     {
         return $this->kanaExistFlag;
+    }
+
+    /**
+     * Set nombreBold.
+     *
+     * @param bool|null $nombreBold
+     *
+     * @return MainTerm
+     */
+    public function setNombreBold($nombreBold = null)
+    {
+        $this->nombreBold = $nombreBold;
+
+        return $this;
+    }
+
+    /**
+     * Get nombreBold.
+     *
+     * @return bool|null
+     */
+    public function getNombreBold()
+    {
+        return $this->nombreBold;
     }
 }

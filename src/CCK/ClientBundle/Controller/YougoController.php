@@ -761,6 +761,8 @@ class YougoController extends BaseController {
 				'center_main' => '',
 				'center_sub' => '',
 				'center_syn' => '',
+				'ranka' => '',
+				'rankb' => '',
 		);
 	}
 
@@ -856,6 +858,7 @@ class YougoController extends BaseController {
 			$entity->setIndexOriginalKana($request->request->get('index_original_kana'));
 			$entity->setIndexAbbreviation($request->request->get('index_abbreviation'));
 			$entity->setTermExplain($request->request->get('term_explain'));
+			$entity->setNombreBold(($request->request->get('nombre_bold') == 'true') ? true : false);
 			$entity->setIllustFilename($request->request->get('illust_filename'));
 			$entity->setIllustCaption($request->request->get('illust_caption'));
 			$entity->setIllustKana($request->request->get('illust_kana'));
