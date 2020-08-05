@@ -390,8 +390,8 @@ class DownloadController extends BaseController {
 		// 主用語
 		$this->replaceMainField($main,$entityVer);
 
-		$main['nombre'] = (($type == '1') ? $main['nombre'] : '');
-		$main['illust_nombre'] = (($type == '1') ? $main['illust_nombre'] : '');
+		$main['nombre'] = (($type != '0') ? $main['nombre'] : '');
+		$main['illust_nombre'] = (($type != '0') ? $main['illust_nombre'] : '');
 
 		// 解説内索引用語
 		$exp = [];
@@ -409,7 +409,7 @@ class DownloadController extends BaseController {
 				$exp['exp_term'] .= $exptermRec['indexTerm'] . '\v';
 				$exp['exp_index_kana'] .= $exptermRec['indexKana'] . '\v';
 				$exp['exp_index_add_letter'] .= $exptermRec['indexAddLetter'] . '\v';
-				$exp['exp_nombre'] .= (($type == '1') ? $exptermRec['nombre'] : '') . '\v';
+				$exp['exp_nombre'] .= (($type != '0') ? $exptermRec['nombre'] : '') . '\v';
 			}
 			foreach ($exp as $key => $val) {
 				$exp[$key] = mb_substr($val,0,mb_strlen($val)-2);
@@ -448,7 +448,7 @@ class DownloadController extends BaseController {
 				$sub['sub_delimiter_kana'] .= $subtermRec['delimiter_kana'] . '\v';
 				$sub['sub_index_add_letter'] .= $subtermRec['index_add_letter'] . '\v';
 				$sub['sub_index_kana'] .= $subtermRec['index_kana'] . '\v';
-				$sub['sub_nombre'] .= (($type == '1') ? $subtermRec['nombre'] : '') . '\v';
+				$sub['sub_nombre'] .= (($type != '0') ? $subtermRec['nombre'] : '') . '\v';
 			}
 			foreach ($sub as $key => $val) {
 				$sub[$key] = mb_substr($val,0,mb_strlen($val)-2);
@@ -485,7 +485,7 @@ class DownloadController extends BaseController {
 				$syn['syn_delimiter'] .= $syntermRec['delimiter'] . '\v';
 				$syn['syn_index_add_letter'] .= $syntermRec['index_add_letter'] . '\v';
 				$syn['syn_index_kana'] .= $syntermRec['index_kana'] . '\v';
-				$syn['syn_nombre'] .= (($type == '1') ? $syntermRec['nombre'] : '') . '\v';
+				$syn['syn_nombre'] .= (($type != '0') ? $syntermRec['nombre'] : '') . '\v';
 			}
 			foreach ($syn as $key => $val) {
 				$syn[$key] = mb_substr($val,0,mb_strlen($val)-2);
@@ -515,7 +515,7 @@ class DownloadController extends BaseController {
 				$ref['ref_ko'] .= $reftermRec['ko'] . '\v';
 				$ref['ref_refer_term_id'] .= $reftermRec['refer_term_id'] . '\v';
 				$ref['ref_main_term'] .= $reftermRec['main_term'] . '\v';
-				$ref['ref_nombre'] .= (($type == '1') ? $reftermRec['nombre'] : '') . '\v';
+				$ref['ref_nombre'] .= (($type != '0') ? $reftermRec['nombre'] : '') . '\v';
 			}
 			foreach ($ref as $key => $val) {
 				$ref[$key] = mb_substr($val,0,mb_strlen($val)-2);
