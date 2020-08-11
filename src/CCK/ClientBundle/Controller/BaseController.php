@@ -763,7 +763,7 @@ class BaseController extends Controller {
 
 				$entityNewCenter->setMainTermId($newTermId);
 				if($entityCenterRec->getYougoFlag() == 1){
-					$entityNewCenter->setSubTermId(null);
+					$entityNewCenter->setSubTermId(0);
 
 					if($idx == 10){$idx = 0;}
 				}elseif($entityCenterRec->getYougoFlag() == 2){
@@ -818,7 +818,7 @@ class BaseController extends Controller {
 			$idx_sub = 0;
 			$idx_syn = 0;
 
-			$wkSubTermId = null;
+			$wkSubTermId = 0;
 			$wkYougoFlag = 1;
 
 			$wkStartYear = $wkYear;
@@ -860,7 +860,7 @@ class BaseController extends Controller {
 
 						$entityNewCenter->setMainTermId($newTermId);
 						if($entityCenterRec->getYougoFlag() == 1){
-							$entityNewCenter->setSubTermId(null);
+							$entityNewCenter->setSubTermId(0);
 							$wkSubTermId = null;
 
 						}elseif($entityCenterRec->getYougoFlag() == 2){

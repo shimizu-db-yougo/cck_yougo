@@ -1383,7 +1383,7 @@ class MasterController extends BaseController {
 			$idx_sub = 0;
 			$idx_syn = 0;
 
-			$wkSubTermId = 'null';
+			$wkSubTermId = '0';
 			$wkYougoFlag = 1;
 
 			$wkStartYear = $wkYear;
@@ -1426,7 +1426,7 @@ class MasterController extends BaseController {
 					}else{
 						// DBの実施年と対象年が等しい場合、元データを複製する
 						if($entityCenterRec->getYougoFlag() == 1){
-							$wkSubTermId = 'null';
+							$wkSubTermId = '0';
 
 							if(isset($arr_freq_main[$newTermId])){
 								$arr_freq_main[$newTermId] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();

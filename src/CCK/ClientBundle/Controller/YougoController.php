@@ -1150,7 +1150,7 @@ class YougoController extends BaseController {
 					$entity->setMainTermId($main_term_id);
 
 					if($sub == '1'){
-						$entity->setSubTermId(null);
+						$entity->setSubTermId(0);
 					}else{
 						$entity->setSubTermId($term_id);
 					}
