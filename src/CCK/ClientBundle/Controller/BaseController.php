@@ -652,12 +652,12 @@ class BaseController extends Controller {
 				$entityNewSub->setDeleteFlag(false);
 
 				$em->persist($entityNewSub);
+				$em->flush();
 
 				array_push($arr_rtn_id, $entityNewSub->getId());
 				unset($entityNewSub);
 			}
 
-			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
 			$em->getConnection()->rollback();
@@ -695,11 +695,12 @@ class BaseController extends Controller {
 				$entityNewSyn->setDeleteFlag(false);
 
 				$em->persist($entityNewSyn);
+				$em->flush();
 
 				array_push($arr_rtn_id, $entityNewSyn->getId());
 				unset($entityNewSyn);
 			}
-			$em->flush();
+
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
 			$em->getConnection()->rollback();
@@ -753,9 +754,12 @@ class BaseController extends Controller {
 			$idx_sub = 0;
 			$idx_syn = 0;
 
+			$this->get('logger')->error("***copy start***");
 			foreach($entityCenter as $entityCenterRec){
 				$entityNewCenter = new Center();
 				$idx++;
+
+				$this->get('logger')->error("***idx***".$idx);
 
 				$entityNewCenter->setMainTermId($newTermId);
 				if($entityCenterRec->getYougoFlag() == 1){
@@ -763,6 +767,8 @@ class BaseController extends Controller {
 
 					if($idx == 10){$idx = 0;}
 				}elseif($entityCenterRec->getYougoFlag() == 2){
+					$this->get('logger')->error("***idx_sub***".$idx_sub);
+					$this->get('logger')->error("***newSubId***".$newSubId[$idx_sub].":".$idx_sub);
 					$entityNewCenter->setSubTermId($newSubId[$idx_sub]);
 
 					if($idx == 10){
@@ -771,6 +777,7 @@ class BaseController extends Controller {
 					}
 
 				}else{
+					$this->get('logger')->error("***newSynId***".$newSynId[$idx_syn].":".$idx_syn);
 					$entityNewCenter->setSubTermId($newSynId[$idx_syn]);
 
 					if($idx == 10){
@@ -787,7 +794,6 @@ class BaseController extends Controller {
 
 				$em->persist($entityNewCenter);
 				$em->flush();
-
 			}
 
 			$em->getConnection()->commit();

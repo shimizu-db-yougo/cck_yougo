@@ -902,7 +902,7 @@ class MasterController extends BaseController {
 						'mainTermId' => $term_id,
 						'deleteFlag' => FALSE
 				),
-						array('id' => 'ASC','yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
+						array('yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
 
 				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":READ***");
 
@@ -1461,12 +1461,13 @@ class MasterController extends BaseController {
 							}
 
 						}
+						$wkYougoFlag = $entityCenterRec->getYougoFlag();
 
 						$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
 						$sql .= "(null,";
 						$sql .= $newTermId.",";
 						$sql .= $wkSubTermId.",";
-						$sql .= $entityCenterRec->getYougoFlag().",";
+						$sql .= $wkYougoFlag.",";
 						$sql .= $entityCenterRec->getYear().",";
 						$sql .= $entityCenterRec->getMainExam().",";
 						$sql .= $entityCenterRec->getSubExam().",";

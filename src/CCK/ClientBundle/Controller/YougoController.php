@@ -1853,12 +1853,13 @@ class YougoController extends BaseController {
 				'mainTermId' => $id,
 				'deleteFlag' => FALSE
 				),
-				array('id' => 'ASC','yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
+				array('yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
 
 		// 用語データの複製
 		$newTermId = $this->copyMainTerm($em, $entityMain);
 		$this->copyExpTerm($em, $entityExp, $newTermId);
 		$newSubId = $this->copySubTerm($em, $entitySub, $newTermId);
+		$this->get('logger')->error("***新規登録subid***".serialize($newSubId));
 		$newSynId = $this->copySynTerm($em, $entitySyn, $newTermId);
 		$this->copyRefTerm($em, $entityRef, $newTermId);
 		$this->copyCenterData($em, $entityCenter, $newTermId, $newSubId, $newSynId);
