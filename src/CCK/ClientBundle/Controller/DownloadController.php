@@ -169,6 +169,9 @@ class DownloadController extends BaseController {
 		}elseif($type == '1'){
 			$type_name = '索引';
 			$versionId = $request->query->get('version2');
+		}elseif($type == '3'){
+			$type_name = '前見返し';
+			$versionId = $request->query->get('version4');
 		}else{
 			$type_name = $request->query->get('preset');
 			$versionId = $request->query->get('version');

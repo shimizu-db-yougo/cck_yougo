@@ -305,9 +305,13 @@ class MainTermRepository extends EntityRepository
 				MainTerm.print_order,
 				MainTerm.main_term,
 				MainTerm.red_letter,
-				MainTerm.text_frequency,
-				MainTerm.center_frequency,
-				MainTerm.news_exam,
+				MainTerm.text_frequency,";
+		if($type != '3'){
+			$sql .= "MainTerm.center_frequency,";
+		}else{
+			$sql .= "tbl_center.center_frequency,";
+		}
+		$sql .= "MainTerm.news_exam,
 				MainTerm.kana,
 				MainTerm.kana_exist_flag,
 				MainTerm.index_kana,
@@ -341,8 +345,35 @@ class MainTermRepository extends EntityRepository
 					INNER JOIN
 				Header ON (MainTerm.header_id = Header.id
 					AND MainTerm.delete_flag = false
-					AND Header.delete_flag = false)
-				WHERE
+					AND Header.delete_flag = false)";
+
+		if($type == '3'){
+			$sql .= "INNER JOIN
+				(SELECT Center.main_term_id,
+						Center.year,
+						Center.main_exam,
+						Center.sub_exam,
+						Center.delete_flag,
+						(Center.main_exam + Center.sub_exam) center_frequency
+				FROM
+					Center
+						INNER JOIN
+					(SELECT MAX(Center.year) year,
+							Center.main_term_id
+					FROM
+						Center
+					WHERE Center.yougo_flag = 1
+						AND Center.delete_flag = false
+					GROUP BY Center.main_term_id) tbl_tmp ON (Center.main_term_id = tbl_tmp.main_term_id
+															AND Center.year = tbl_tmp.year)
+				WHERE Center.yougo_flag = 1
+					AND Center.delete_flag = false
+					AND (Center.main_exam+Center.sub_exam)>=1) tbl_center ON (MainTerm.term_id = tbl_center.main_term_id
+																			AND MainTerm.delete_flag = false
+																			AND tbl_center.delete_flag = false)";
+		}
+
+		$sql .= "WHERE
 				MainTerm.delete_flag = false
 		";
 
@@ -360,7 +391,7 @@ class MainTermRepository extends EntityRepository
 			$sql .= " AND Header.sho = '" . str_replace("'", "''", $sho) . "'";
 		}
 
-		if($type == '1'){
+		if(($type == '1')||($type == '3')){
 			// 索引
 			$sql .= " ORDER BY MainTerm.index_kana,MainTerm.term_id";
 		}else{

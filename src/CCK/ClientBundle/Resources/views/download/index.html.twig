@@ -134,6 +134,49 @@
 	</div>
 </div>
 </form>
+
+<form action="{{ path('client.typesetting.download') }}" class="form-horizontal" method="GET">
+<div class="row">
+	<div class="col-xs-12">
+		<div class="panel panel-primary">
+			<div class="panel-body">
+				<div class="row">
+					<div class="form-horizontal">
+						<div class="">
+							<div class="col-xs-12">
+								<label class="col-xs-1">{{ 'text.csv.export.maemikaeshi'|trans }}</label>
+								<div class="col-xs-2">
+									<select class="form-control js-cur4 input-sm" name="curriculum">
+										<option value="0">--------------</option>
+										{% for cur in cur_list %}
+											<option value="{{ cur.id }}">{{ cur.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-xs-2">
+									<select class="form-control js-han4 input-sm" name="version4" disabled>
+										<option value="0">--------------</option>
+										{% for ver in ver_list %}
+											<option value="{{ ver.id }}">{{ ver.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-xs-1">
+									<input type="hidden" name="type" value="3"/>
+									<button class="btn btn-primary button_text_align input-sm" type="submit" onClick="return checkDownload('js-cur4','js-han4')">{{ 'btn.download'|trans }}</button>
+								</div>
+							</div>
+							<div class="col-xs-5">
+									{{ message_sakuin }}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
 <hr>
 
 <div class="row">
@@ -276,6 +319,10 @@
 
 		$('.js-cur3').bind('change', function(){
 			changeCurriculumHeader($('.js-cur3'),'version3');
+		});
+
+		$('.js-cur4').bind('change', function(){
+			changeCurriculumHeader($('.js-cur4'),'version4');
 		});
 
 		$('.js-preset').bind('change', function(){

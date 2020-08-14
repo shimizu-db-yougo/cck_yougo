@@ -146,6 +146,7 @@ text:
         honmon: 本文組版
         index: 索引組版
         field.title: フィールド選択出力
+        maemikaeshi: 前見返し
     csv.import:
         title: データ取り込み
         nombre: ノンブル取り込み
