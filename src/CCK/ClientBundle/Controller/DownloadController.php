@@ -133,6 +133,8 @@ class DownloadController extends BaseController {
 			$message_sakuin = "用語の登録がありません。教科・版を確認してください。";
 		}elseif($status == 206){
 			$message_preset = "用語の登録がありません。教科・版を確認してください。";
+		}elseif($status == 207){
+			$message_preset = "用語の登録がありません。教科・版を確認してください。";
 		}
 
 		return array(
@@ -202,13 +204,13 @@ class DownloadController extends BaseController {
 
 		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($versionId,$term_id,$hen,$sho,$type);
 
-		$entityVer = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
-				'id' => $entity[0]['ver_id'],
-				'deleteFlag' => FALSE
-		));
-
 		// 原稿データCSV生成
 		if($entity){
+			$entityVer = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+					'id' => $entity[0]['ver_id'],
+					'deleteFlag' => FALSE
+			));
+
 			$body_list = $this->constructManuscriptCSV($term_id, $request, $entity, $outFileName, $entityVer);
 		}else{
 			$body_list = false;
@@ -219,6 +221,8 @@ class DownloadController extends BaseController {
 				$status = 204;
 			}elseif ($type == '1'){
 				$status = 205;
+			}elseif ($type == '3'){
+				$status = 207;
 			}else{
 				$status = 206;
 			}
