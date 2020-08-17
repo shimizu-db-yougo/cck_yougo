@@ -373,7 +373,7 @@ class MainTermRepository extends EntityRepository
 																			AND tbl_center.delete_flag = false)";
 		}
 
-		$sql .= "WHERE
+		$sql .= " WHERE
 				MainTerm.delete_flag = false
 		";
 
@@ -415,9 +415,15 @@ class MainTermRepository extends EntityRepository
 				SubTerm.main_term_id,
 				SubTerm.sub_term,
 				SubTerm.red_letter,
-				SubTerm.text_frequency,
-				SubTerm.center_frequency,
-				SubTerm.news_exam,
+				SubTerm.text_frequency,";
+
+		if($is_index != '3'){
+			$sql .= "SubTerm.center_frequency,";
+		}else{
+			$sql .= "tbl_center.center_frequency,";
+		}
+
+		$sql .= "SubTerm.news_exam,
 				SubTerm.kana,
 				SubTerm.kana_exist_flag,
 				SubTerm.index_kana,
@@ -426,8 +432,35 @@ class MainTermRepository extends EntityRepository
 				SubTerm.delimiter_kana,
 				SubTerm.nombre
 			FROM
-				SubTerm
-			WHERE
+				SubTerm";
+
+		if($is_index == '3'){
+			$sql .= " INNER JOIN
+				(SELECT Center.sub_term_id,
+						Center.year,
+						Center.main_exam,
+						Center.sub_exam,
+						Center.delete_flag,
+						(Center.main_exam + Center.sub_exam) center_frequency
+				FROM
+					Center
+						INNER JOIN
+					(SELECT MAX(Center.year) year,
+							Center.sub_term_id
+					FROM
+						Center
+					WHERE Center.yougo_flag = 2
+						AND Center.delete_flag = false
+					GROUP BY Center.sub_term_id) tbl_tmp ON (Center.sub_term_id = tbl_tmp.sub_term_id
+															AND Center.year = tbl_tmp.year)
+				WHERE Center.yougo_flag = 2
+					AND Center.delete_flag = false
+					AND (Center.main_exam+Center.sub_exam)>=1) tbl_center ON (SubTerm.id = tbl_center.sub_term_id
+																			AND SubTerm.delete_flag = false
+																			AND tbl_center.delete_flag = false)";
+		}
+
+		$sql .= " WHERE
 				SubTerm.delete_flag = false
 		";
 
@@ -461,16 +494,49 @@ class MainTermRepository extends EntityRepository
 				Synonym.term,
 				Synonym.synonym_id,
 				Synonym.red_letter,
-				Synonym.text_frequency,
-				Synonym.center_frequency,
-				Synonym.news_exam,
+				Synonym.text_frequency,";
+
+		if($is_index != '3'){
+			$sql .= "Synonym.center_frequency,";
+		}else{
+			$sql .= "tbl_center.center_frequency,";
+		}
+
+		$sql .= "Synonym.news_exam,
 				Synonym.delimiter,
 				Synonym.index_add_letter,
 				Synonym.index_kana,
 				Synonym.nombre
 			FROM
-				Synonym
-			WHERE
+				Synonym";
+
+		if($is_index == '3'){
+			$sql .= " INNER JOIN
+				(SELECT Center.sub_term_id,
+						Center.year,
+						Center.main_exam,
+						Center.sub_exam,
+						Center.delete_flag,
+						(Center.main_exam + Center.sub_exam) center_frequency
+				FROM
+					Center
+						INNER JOIN
+					(SELECT MAX(Center.year) year,
+							Center.sub_term_id
+					FROM
+						Center
+					WHERE Center.yougo_flag = 3
+						AND Center.delete_flag = false
+					GROUP BY Center.sub_term_id) tbl_tmp ON (Center.sub_term_id = tbl_tmp.sub_term_id
+															AND Center.year = tbl_tmp.year)
+				WHERE Center.yougo_flag = 3
+					AND Center.delete_flag = false
+					AND (Center.main_exam+Center.sub_exam)>=1) tbl_center ON (Synonym.id = tbl_center.sub_term_id
+																			AND Synonym.delete_flag = false
+																			AND tbl_center.delete_flag = false)";
+		}
+
+		$sql .= " WHERE
 				Synonym.delete_flag = false
 		";
 
