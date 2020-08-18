@@ -367,8 +367,7 @@ class MainTermRepository extends EntityRepository
 					GROUP BY Center.main_term_id) tbl_tmp ON (Center.main_term_id = tbl_tmp.main_term_id
 															AND Center.year = tbl_tmp.year)
 				WHERE Center.yougo_flag = 1
-					AND Center.delete_flag = false
-					AND (Center.main_exam+Center.sub_exam)>=1) tbl_center ON (MainTerm.term_id = tbl_center.main_term_id
+					AND Center.delete_flag = false) tbl_center ON (MainTerm.term_id = tbl_center.main_term_id
 																			AND MainTerm.delete_flag = false
 																			AND tbl_center.delete_flag = false)";
 		}
@@ -454,8 +453,7 @@ class MainTermRepository extends EntityRepository
 					GROUP BY Center.sub_term_id) tbl_tmp ON (Center.sub_term_id = tbl_tmp.sub_term_id
 															AND Center.year = tbl_tmp.year)
 				WHERE Center.yougo_flag = 2
-					AND Center.delete_flag = false
-					AND (Center.main_exam+Center.sub_exam)>=1) tbl_center ON (SubTerm.id = tbl_center.sub_term_id
+					AND Center.delete_flag = false) tbl_center ON (SubTerm.id = tbl_center.sub_term_id
 																			AND SubTerm.delete_flag = false
 																			AND tbl_center.delete_flag = false)";
 		}
@@ -530,8 +528,7 @@ class MainTermRepository extends EntityRepository
 					GROUP BY Center.sub_term_id) tbl_tmp ON (Center.sub_term_id = tbl_tmp.sub_term_id
 															AND Center.year = tbl_tmp.year)
 				WHERE Center.yougo_flag = 3
-					AND Center.delete_flag = false
-					AND (Center.main_exam+Center.sub_exam)>=1) tbl_center ON (Synonym.id = tbl_center.sub_term_id
+					AND Center.delete_flag = false) tbl_center ON (Synonym.id = tbl_center.sub_term_id
 																			AND Synonym.delete_flag = false
 																			AND tbl_center.delete_flag = false)";
 		}
