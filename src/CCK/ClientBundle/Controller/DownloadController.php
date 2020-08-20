@@ -97,6 +97,11 @@ class DownloadController extends BaseController {
 	];
 
 	/**
+	 * @var session key
+	 */
+	const SES_CSV_FIELD_ALERT_KEY = "ses_csv_field_alert_key";
+
+	/**
 	 * @Route("/csv/download/index/{status}", name="client.csv.export")
 	 * @Template()
 	 */
@@ -127,6 +132,7 @@ class DownloadController extends BaseController {
 		$message_honmon = '';
 		$message_sakuin = '';
 		$message_preset = '';
+		$message_maemikaeshi = '';
 		if($status == 204){
 			$message_honmon = "用語の登録がありません。教科・版を確認してください。";
 		}elseif($status == 205){
@@ -134,7 +140,26 @@ class DownloadController extends BaseController {
 		}elseif($status == 206){
 			$message_preset = "用語の登録がありません。教科・版を確認してください。";
 		}elseif($status == 207){
-			$message_preset = "用語の登録がありません。教科・版を確認してください。";
+			$message_maemikaeshi = "用語の登録がありません。教科・版を確認してください。";
+		}elseif(($status > 250)&&($status < 260)){
+
+			$arr_alert_list = $session->get(self::SES_CSV_FIELD_ALERT_KEY);
+			$txt_alert = "";
+			foreach ($arr_alert_list as $ele_alert_list){
+				$txt_alert .= $ele_alert_list[0].$ele_alert_list[1]."　主用語：".$ele_alert_list[2]."　同対類語：".$ele_alert_list[3]."の同体類マークがブランクです\n\r";
+			}
+
+			if($status == 251){
+				$message_honmon = $txt_alert;
+			}elseif($status == 252){
+				$message_sakuin = $txt_alert;
+			}elseif($status == 253){
+				$message_preset = $txt_alert;
+			}else{
+				$message_maemikaeshi = $txt_alert;
+			}
+
+			$this->sessionRemove($request);
 		}
 
 		return array(
@@ -147,7 +172,8 @@ class DownloadController extends BaseController {
 				'preset_list' => $preset,
 				'message_honmon' => $message_honmon,
 				'message_sakuin' => $message_sakuin,
-				'message_preset' => $message_preset
+				'message_preset' => $message_preset,
+				'message_maemikaeshi' => $message_maemikaeshi
 		);
 	}
 
@@ -156,6 +182,9 @@ class DownloadController extends BaseController {
 	 * @Method("POST|GET")
 	 */
 	public function typesettingDownloadAction(Request $request){
+		// session
+		$session = $request->getSession();
+
 		$tmpFilePath = tempnam(sys_get_temp_dir(), 'tmp');
 
 		$em = $this->getDoctrine()->getManager();
@@ -205,17 +234,20 @@ class DownloadController extends BaseController {
 		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList($versionId,$term_id,$hen,$sho,$type);
 
 		// 原稿データCSV生成
+		global $arr_err_list;
+		$arr_err_list = array();
 		if($entity){
 			$entityVer = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
 					'id' => $entity[0]['ver_id'],
 					'deleteFlag' => FALSE
 			));
 
-			$body_list = $this->constructManuscriptCSV($term_id, $request, $entity, $outFileName, $entityVer);
+			$body_list = $this->constructManuscriptCSV($term_id, $request, $entity, $outFileName, $entityVer, $arr_err_list);
 		}else{
 			$body_list = false;
 		}
 
+		$status = 0;
 		if($body_list === false){
 			if($type == '0'){
 				$status = 204;
@@ -237,6 +269,28 @@ class DownloadController extends BaseController {
 		}else{
 			// 本文・索引組版
 			$header = $this->encoding($this->generateHeader($entity[0]), $request);
+		}
+
+		// trans service
+		$translator = $this->get('translator');
+		// 入力データの不備の場合のアラート表示
+		if(count($arr_err_list) > 0){
+			if($type == '0'){
+				$status = 251;
+			}elseif ($type == '1'){
+				$status = 252;
+			}elseif ($type == '3'){
+				$status = 254;
+			}else{
+				if(in_array($translator->trans('csv.term.syn_synonym_id'), $header)){
+					$status = 253;
+				}
+			}
+			$session->set(self::SES_CSV_FIELD_ALERT_KEY, $arr_err_list);
+
+			if($status > 0){
+				return $this->redirect($this->generateUrl('client.csv.export', array('status' => $status)));
+			}
 		}
 
 		// response
@@ -281,7 +335,7 @@ class DownloadController extends BaseController {
 	}
 
 	// 原稿データCSV生成
-	private function constructManuscriptCSV($genkoId, $request, $entity, $outFileName, $entityVer) {
+	private function constructManuscriptCSV($genkoId, $request, $entity, $outFileName, $entityVer, &$arr_err_list) {
 		$em = $this->getDoctrine()->getManager();
 
 		$type = $request->query->get('type');
@@ -296,7 +350,7 @@ class DownloadController extends BaseController {
 			$entity_ref = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($mainTermRec['term_id']);
 
 			// body
-			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref, $type, $generic_value, $entityVer), $request);
+			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref, $type, $generic_value, $entityVer, $arr_err_list), $request);
 			array_push($body_list,$body);
 		}
 
@@ -385,7 +439,7 @@ class DownloadController extends BaseController {
 	 * @param  array $coupons
 	 * @return array $body
 	 */
-	private function generateBody($main, $expterm, $subterm, $synterm, $refterm, $type, $generic, $entityVer){
+	private function generateBody($main, $expterm, $subterm, $synterm, $refterm, $type, $generic, $entityVer ,&$arr_err_list){
 		$body = [];
 		$result = [];
 
@@ -479,7 +533,7 @@ class DownloadController extends BaseController {
 
 		if($synterm){
 			foreach ($synterm as $syntermRec) {
-				$this->replaceSynField($syntermRec,$entityVer);
+				$this->replaceSynField($syntermRec,$entityVer,$main,$arr_err_list);
 
 				$syn['syn_id'] .= $syntermRec['id'] . '\v';
 				$syn['syn_synonym_id'] .= $syntermRec['synonym_id'] . '\v';
@@ -685,15 +739,27 @@ class DownloadController extends BaseController {
 		}
 	}
 
-	private function replaceSynField(&$syn,$entityVer){
+	private function replaceSynField(&$syn,$entityVer,$main,&$arr_err_list){
 		$syn['id'] = 'D'.str_pad($syn['id'], 6, 0, STR_PAD_LEFT);
 
 		if($syn['synonym_id'] == '1'){
 			$syn['synonym_id'] = '同';
 		}elseif($syn['synonym_id'] == '2'){
 			$syn['synonym_id'] = '対';
-		}else{
+		}elseif($syn['synonym_id'] == '3'){
 			$syn['synonym_id'] = '類';
+		}else{
+			if(mb_strpos($main['hen'], "編") !== false){
+				$hen = mb_substr($main['hen'], 0, mb_strpos($main['hen'], "編")+1);
+			}else{
+				$hen = $main['hen']."　";
+			}
+			if(mb_strpos($main['sho'], "章") !== false){
+				$sho = mb_substr($main['sho'], 0, mb_strpos($main['sho'], "章")+1);
+			}else{
+				$sho = $main['sho'];
+			}
+			array_push($arr_err_list,array($hen,$sho,$main['main_term'],$syn['term']));
 		}
 
 		if($syn['red_letter'] == '1'){
@@ -935,5 +1001,13 @@ class DownloadController extends BaseController {
 
 		$response = new JsonResponse(array("return_cd" => true, "name" => ''));
 		return $response;
+	}
+
+	/**
+	 * session data remove
+	 */
+	private function sessionRemove($request){
+		$session = $request->getSession();
+		$session->remove(self::SES_CSV_FIELD_ALERT_KEY);
 	}
 }
