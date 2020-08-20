@@ -1123,59 +1123,7 @@ class YougoController extends BaseController {
 		// センター頻度開始年より古いデータを削除
 		$rtncd = $em->getRepository('CCKCommonBundle:Center')->deleteOldData($main_term_id,$term_id,$sub,$year);
 
-		for ($idx=0;$idx<10;$idx++){
-
-			try{
-				// 存在チェック
-				if($sub == '1'){
-					$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
-							'mainTermId' => $main_term_id,
-							'yougoFlag' =>  $sub,
-							'year' => $year+$idx,
-							'deleteFlag' => FALSE
-					));
-				}else{
-					$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
-							'mainTermId' => $main_term_id,
-							'subTermId' => $term_id,
-							'yougoFlag' =>  $sub,
-							'year' => $year+$idx,
-							'deleteFlag' => FALSE
-					));
-				}
-
-				if(!$entityCenter){
-					$entity = new Center();
-
-					$entity->setMainTermId($main_term_id);
-
-					if($sub == '1'){
-						$entity->setSubTermId(0);
-					}else{
-						$entity->setSubTermId($term_id);
-					}
-
-					$entity->setYougoFlag($sub);
-					$entity->setYear($year+$idx);
-					$entity->setMainExam(0);
-					$entity->setSubExam(0);
-
-					$em->persist($entity);
-					$em->flush();
-				}
-
-			} catch (\Exception $e){
-				$em->getConnection()->rollback();
-				$em->close();
-
-				// log
-				$this->get('logger')->error($e->getMessage());
-				$this->get('logger')->error($e->getTraceAsString());
-
-				$return_flag = false;
-				return $return_flag;
-			}
-		}
+		$this->addCenterYearData($em, $main_term_id, $term_id, $sub, $year);
 
 		// センター頻度開始年+10年後より新しいデータを削除
 		$rtncd = $em->getRepository('CCKCommonBundle:Center')->deleteOverData($main_term_id,$term_id,$sub,$year+9);
@@ -1371,7 +1319,16 @@ class YougoController extends BaseController {
 	}
 
 	private function summaryCenterFreqMain($main_term_id, $start_year){
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
 		$rtncd = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->deleteOldData($main_term_id,'','1',$start_year);
+
+		$this->addCenterYearData($em, $main_term_id, '', '1', $start_year);
+
+		$rtncd = $em->getRepository('CCKCommonBundle:Center')->deleteOverData($main_term_id,'','1',$start_year+9);
+
+		$em->getConnection()->commit();
 
 		$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($main_term_id,'1');
 		$sum_center_main = 0;
@@ -1382,11 +1339,18 @@ class YougoController extends BaseController {
 	}
 
 	private function summaryCenterFreqSub($main_term_id, $yougo_flag, $start_year,$entitySub){
+		$em = $this->get('doctrine.orm.entity_manager');
+		$em->getConnection()->beginTransaction();
+
 		$arr_sub = array();
 		foreach ($entitySub as $rec_sub){
 			$sum_center = 0;
 
 			$rtncd = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->deleteOldData($main_term_id,$rec_sub['id'],$yougo_flag,$start_year);
+
+			$this->addCenterYearData($em, $main_term_id, $rec_sub['id'], $yougo_flag, $start_year);
+
+			$rtncd = $em->getRepository('CCKCommonBundle:Center')->deleteOverData($main_term_id,$rec_sub['id'], $yougo_flag,$start_year+9);
 
 			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($rec_sub['id'],$yougo_flag);
 			foreach ($center_point as $rec_center_point){
@@ -1394,8 +1358,71 @@ class YougoController extends BaseController {
 			}
 			$arr_sub += array_merge($arr_sub,array($rec_sub['id'] => $sum_center));
 		}
+
+		$em->getConnection()->commit();
+
 		return $arr_sub;
 	}
+
+	private function addCenterYearData($em,$main_term_id,$sub_term_id,$sub,$year){
+
+		for ($idx=0;$idx<10;$idx++){
+
+			try{
+				// 存在チェック
+				if($sub == '1'){
+					$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+							'mainTermId' => $main_term_id,
+							'yougoFlag' =>  $sub,
+							'year' => $year+$idx,
+							'deleteFlag' => FALSE
+					));
+				}else{
+					$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+							'mainTermId' => $main_term_id,
+							'subTermId' => $sub_term_id,
+							'yougoFlag' =>  $sub,
+							'year' => $year+$idx,
+							'deleteFlag' => FALSE
+					));
+				}
+
+				if(!$entityCenter){
+					$entity = new Center();
+
+					$entity->setMainTermId($main_term_id);
+
+					if($sub == '1'){
+						$entity->setSubTermId(0);
+					}else{
+						$entity->setSubTermId($sub_term_id);
+					}
+
+					$entity->setYougoFlag($sub);
+					$entity->setYear($year+$idx);
+					$entity->setMainExam(0);
+					$entity->setSubExam(0);
+
+					$em->persist($entity);
+					$em->flush();
+				}
+
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$return_flag = false;
+				return $return_flag;
+			}
+		}
+	}
+
+
+
 
 	/**
 	 * @Route("/yougo/subterm/new/ajax", name="client.yougo.subterm.new.ajax")
