@@ -357,6 +357,11 @@
 					$.removeCookie("downloaded", { path: "/" });
 					$("#loading").remove();
 				}
+				if ($.cookie("isalert")) {
+					alert($.cookie("isalert"));
+					$.removeCookie("isalert", { path: "/" });
+					$("#loading").remove();
+				}
 			}, 1000);
 		}
 

@@ -289,7 +289,12 @@ class DownloadController extends BaseController {
 			$session->set(self::SES_CSV_FIELD_ALERT_KEY, $arr_err_list);
 
 			if($status > 0){
-				return $this->redirect($this->generateUrl('client.csv.export', array('status' => $status)));
+				if($term_id){
+					// アラート表示
+					setcookie('isalert',$arr_err_list[0][0].$arr_err_list[0][1]."　主用語：".$arr_err_list[0][2]."　同対類語：".$arr_err_list[0][3]."の同体類マークがブランクです",0,'/');
+				}else{
+					return $this->redirect($this->generateUrl('client.csv.export', array('status' => $status)));
+				}
 			}
 		}
 
