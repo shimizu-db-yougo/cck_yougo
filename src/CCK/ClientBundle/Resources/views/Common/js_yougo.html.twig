@@ -194,6 +194,21 @@
 			return explain_attr;
 		}
 
+		$('.js-yougo-back').bind('click', function(e){
+			var term_id = parseInt($('#form_mainterm [name=term_id]').text().slice(1));
+			var param = {term_id:''};
+			param.term_id = term_id;
+
+			$.post("{{ path('client.explain.delete.ajax') }}", param)
+			.done(function(r,s){
+				console.log('deleteExplain:done',s,r);
+			})
+			.fail(function(e,s){
+				console.log('deleteExplain:fail',s,e.status);
+				alert('DB更新エラー');
+			});
+		});
+
 		// 用語登録
 		$('.js-yougo-submit').bind('click', function(e){
 			// 入力チェック
