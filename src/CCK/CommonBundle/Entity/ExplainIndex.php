@@ -87,6 +87,27 @@ class ExplainIndex
     private $deleteFlag;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="text_frequency", type="integer", nullable=false)
+     */
+    private $textFrequency;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="center_frequency", type="integer", nullable=false)
+     */
+    private $centerFrequency;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="news_exam", type="boolean", nullable=false, options={"default" = 0})
+     */
+    private $newsExam;
+
+    /**
      * construct
      */
     public function __construct(){

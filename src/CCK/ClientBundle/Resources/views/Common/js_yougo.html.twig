@@ -148,10 +148,13 @@
 								+'<input class="form-control input-sm" type="hidden" id="explain_main_term_id" name="explain_main_term_id" value="' + main_term_id + '">'
 								+'<input class="form-control input-sm" type="hidden" id="explain_index_term" name="explain_index_term" value="' + explain_list[i].indexTerm + '">'
 								+'<input class="form-control input-sm" type="hidden" id="explain_nombre" name="explain_nombre" value="'+ explain_list[i].nombre + '">'
-								+'<label class="col-xs-2">'+ explain_list[i].indexTerm + '</label>'
-								+'<div class="col-xs-4"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
-								+'<div class="col-xs-4"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
-								+'<label class="col-xs-2">'+ explain_list[i].nombre + '</label>'
+								+'<label class="col-xs-1">'+ explain_list[i].indexTerm + '</label>'
+								+'<div class="col-xs-3"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
+								+'<div class="col-xs-3"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
+								+'<label class="col-xs-1">'+ explain_list[i].nombre + '</label>'
+								+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq4" name="text_freq" value="' + explain_list[i].textFrequency + '"></div>'
+								+'<div class="col-xs-2"><button type="button" class="btn btn-primary btn-sm js-center-target4" term-id="' + explain_list[i].id + '" main-term-id="' + 'M' + ( '000000' + main_term_id).slice(-6) + '" yougo-flag="4" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+								+'<div class="col-xs-1"><input type="checkbox" name="news_exam" ' + ((explain_list[i].newsExam == '1') ? ' checked ' : '') + '></div>'
 								+'</div>');
 					}
 				}
@@ -159,6 +162,12 @@
 			}
 
 			$('#explainModal').modal();
+
+		});
+
+		// 解説用語　センター頻度　イベント設定
+		$(document).on("click", ".js-center-target4", function (e) {
+			getCenterPoint(e);
 		});
 
 		$('.js-explain-submit').bind('click', function(e){
@@ -354,9 +363,6 @@
 
 			if($('#form_mainterm [name=main_term]').val() == ""){
 				err_filed += '主用語,';
-			}
-			if($('#form_mainterm [name=term_explain]').val() == ""){
-				err_filed += '解説,';
 			}
 			if($('#form_mainterm [name=index_kana]').val() == ""){
 				err_filed += '主用語_索引用語読み,';
@@ -643,6 +649,7 @@
 			var target = $(e.currentTarget);
 			var term_id = target.attr('term-id');
 			var main_term_id = target.attr('main-term-id');
+			alert(main_term_id);
 			var yougo_flag = target.attr('yougo-flag');
 			var ver_id = $('#form_mainterm [name=version]').val();
 
