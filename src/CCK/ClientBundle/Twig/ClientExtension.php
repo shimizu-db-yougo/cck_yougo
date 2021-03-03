@@ -51,7 +51,9 @@ class ClientExtension extends \Twig_Extension
 			new \Twig_SimpleFunction('getNewsExamIcon', array($this, 'getNewsExamIcon')),
 			new \Twig_SimpleFunction('replaceTag', array($this, 'replaceTag')),
 			new \Twig_SimpleFunction('getDelimiter', array($this, 'getDelimiter')),
-			new \Twig_SimpleFunction('getDelimiterSyn', array($this, 'getDelimiterSyn'))
+			new \Twig_SimpleFunction('getDelimiterSyn', array($this, 'getDelimiterSyn')),
+			new \Twig_SimpleFunction('getTerm', array($this, 'getTerm')),
+			new \Twig_SimpleFunction('getKana', array($this, 'getKana')),
 		);
 	}
 
@@ -200,6 +202,30 @@ class ClientExtension extends \Twig_Extension
 		}else{
 			return "";
 		}
+	}
+
+	/**
+	 * [getTerm description]
+	 * @param  [type] $term     [description]
+	 * @return [type]               [description]
+	 */
+	public function getTerm($term){
+		return preg_replace('/【.*?】/', '', $term);
+	}
+
+	/**
+	 * [getKana description]
+	 * @param  [type] $term     [description]
+	 * @return [type]               [description]
+	 */
+	public function getKana($term){
+		$rtn = '';
+		if ( preg_match('/【.*?】/', $term, $matches)){
+			$rtn = $matches[0];
+			$rtn = str_replace('【', '', $rtn);
+			$rtn = str_replace('】', '', $rtn);
+		}
+		return $rtn;
 	}
 
 	public function twigFileExists($filename){

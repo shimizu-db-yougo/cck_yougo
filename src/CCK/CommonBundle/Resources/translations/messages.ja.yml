@@ -55,6 +55,7 @@ btn:
     sort.text: ソート
     preset: プリセット
     duplication: を複製
+    log: ログ出力
 
 # ソーティング
 sort:

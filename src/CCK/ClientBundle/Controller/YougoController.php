@@ -23,7 +23,6 @@ use CCK\CommonBundle\Entity\SubTerm;
 use CCK\CommonBundle\Entity\Synonym;
 use CCK\CommonBundle\Entity\Refer;
 use CCK\CommonBundle\Entity\ExplainIndex;
-use CCK\CommonBundle\Entity\ExplainIndexTmp;
 use CCK\CommonBundle\Entity\Center;
 
 /**
@@ -808,11 +807,6 @@ class YougoController extends BaseController {
 			return $response;
 		}
 
-		if($this->saveExplainIndex($request,$ret) == false){
-			$response = new JsonResponse($ret);
-			return $response;
-		}
-
 		$response = new JsonResponse($ret);
 		return $response;
 	}
@@ -918,13 +912,10 @@ class YougoController extends BaseController {
 			try{
 				$entity->setSubTerm($subterm['sub_term'][$idx]);
 				$entity->setRedLetter(($subterm['red_letter'][$idx] == 'true') ? true : false);
-				$entity->setKana($subterm['kana'][$idx]);
-				$entity->setKanaExistFlag(($subterm['kana_exist'][$idx] == 'true') ? true : false);
 				$entity->setTextFrequency($subterm['text_freq'][$idx]);
 				$entity->setCenterFrequency($subterm['center_freq'][$idx]);
 				$entity->setNewsExam(($subterm['news_exam'][$idx] == 'true') ? true : false);
 				$entity->setDelimiter($subterm['delimiter'][$idx]);
-				$entity->setDelimiterKana($subterm['delimiter_kana'][$idx]);
 				$entity->setIndexAddLetter($subterm['index_add_letter'][$idx]);
 				$entity->setIndexKana($subterm['index_kana'][$idx]);
 
@@ -1097,99 +1088,6 @@ class YougoController extends BaseController {
 			}
 		}
 		$em->getConnection()->commit();
-
-		return $return_flag;
-	}
-
-	private function saveExplainIndex($request,&$ret){
-		$return_flag = true;
-		// 解説内索引用語を一時テーブルよりコピー
-		$em = $this->get('doctrine.orm.entity_manager');
-		$entityTmp = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findBy(array(
-				'mainTermId' => $request->request->get('term_id')
-		));
-
-		foreach($entityTmp as $entity_rec){
-			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
-					'mainTermId' => $entity_rec->getMainTermId(),
-					'indexTerm' => $entity_rec->getIndexTerm()
-			));
-			$update_mode = 'update';
-			if(!$entity){
-				$entity = new ExplainIndex();
-				$update_mode = 'new';
-			}
-
-			$em->getConnection()->beginTransaction();
-
-			try{
-				$entity->setMainTermId($entity_rec->getMainTermId());
-				$entity->setIndexTerm($entity_rec->getIndexTerm());
-				$entity->setIndexAddLetter($entity_rec->getIndexAddLetter());
-				$entity->setIndexKana($entity_rec->getIndexKana());
-				$entity->setNombre($entity_rec->getNombre());
-				$entity->setDeleteDate($entity_rec->getDeleteDate());
-				$entity->setDeleteFlag($entity_rec->getDeleteFlag());
-
-				if($update_mode == 'new'){
-					$em->persist($entity);
-				}
-				$em->flush();
-				$em->getConnection()->commit();
-			} catch (\Exception $e){
-				$em->getConnection()->rollback();
-				$em->close();
-
-				// log
-				$this->get('logger')->error($e->getMessage());
-				$this->get('logger')->error($e->getTraceAsString());
-
-				$ret = ['result'=>'ng','error'=>'ExplainDB error id:'.$entity_rec->getIndexTerm()];
-				$return_flag = false;
-				return $return_flag;
-			}
-		}
-
-		// WEBに入力されなかった用語は削除
-		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
-				'mainTermId' => $request->request->get('term_id'),
-				'deleteFlag' => FALSE
-		));
-
-		foreach($entity as $entity_rec){
-			$index_term = $entity_rec->getIndexTerm();
-			$this->get('logger')->error("***DB:yougo***".$index_term);
-
-			$entity_tmp = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
-					'indexTerm' => $index_term,
-					'deleteFlag' => FALSE
-			));
-
-			if(!$entity_tmp){
-				$em->getConnection()->beginTransaction();
-
-				try{
-					$entity_rec->setDeleteFlag(true);
-					$entity_rec->setModifyDate(new \DateTime());
-					$entity_rec->setDeleteDate(new \DateTime());
-
-					$em->flush();
-					$em->getConnection()->commit();
-				} catch (\Exception $e){
-					$em->getConnection()->rollback();
-					$em->close();
-
-					// log
-					$this->get('logger')->error($e->getMessage());
-					$this->get('logger')->error($e->getTraceAsString());
-
-					$ret = ['result'=>'ng','error'=>'ExplainDB error id:'.$index_term];
-					$response = new JsonResponse($ret);
-					return $response;
-				}
-			}
-
-		}
 
 		return $return_flag;
 	}
@@ -1645,10 +1543,7 @@ class YougoController extends BaseController {
 	public function getExplainAjaxAction(Request $request){
 		if($request->request->has('term_id')){
 			$term_id = $request->request->get('term_id');
-			$explain = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndexTmp')->getExplainTerms($term_id);
-			if(!$explain){
-				$explain = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($term_id);
-			}
+			$explain = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($term_id);
 
 			$response = new JsonResponse($explain);
 		}else{
@@ -1683,14 +1578,14 @@ class YougoController extends BaseController {
 		foreach($request->request->get('index_term') as $ele_expterm){
 			//$this->get('logger')->error("***exp_term_elem***".serialize($ele_expterm));
 
-			$entity = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
+			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
 					'mainTermId' => $request->request->get('term_id')[$idx],
 					'indexTerm' => $ele_expterm,
 					'deleteFlag' => FALSE
 			));
 			$update_mode = 'update';
 			if(!$entity){
-				$entity = new ExplainIndexTmp();
+				$entity = new ExplainIndex();
 				$update_mode = 'new';
 			}
 
@@ -1724,7 +1619,7 @@ class YougoController extends BaseController {
 		}
 
 		// WEBに入力されなかった用語は削除
-		$entity = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findBy(array(
+		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
 				'mainTermId' => $request->request->get('term_id')[0],
 				'deleteFlag' => FALSE
 		));
@@ -1734,7 +1629,7 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***DB:yougo***".$index_term);
 
 			if(!in_array($index_term, $request->request->get('index_term'))){
-				$entity = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
+				$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
 						'indexTerm' => $index_term,
 						'deleteFlag' => FALSE
 				));
@@ -1764,36 +1659,20 @@ class YougoController extends BaseController {
 
 		}
 
-		$response = new JsonResponse($ret);
-		return $response;
-	}
+		// 主用語DBの用語解説の更新
+		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+				'termId' => $request->request->get('term_id')[0],
+				'deleteFlag' => FALSE
+		));
 
-	/**
-	 * @Route("/explain/delete/ajax", name="client.explain.delete.ajax")
-	 * @Method("POST")
-	 */
-	public function deleteExplainAjaxAction(Request $request){
-		$this->get('logger')->error("***deleteExplainAjaxAction start***");
-		$this->get('logger')->error(serialize($request->request->get('term_id')));
+		$em->getConnection()->beginTransaction();
 
-		$ret = ['result'=>'ok','error'=>''];
+		try{
+			$entity->setTermExplain($request->request->get('mainterm_explain'));
 
-		if(!($request->request->has('term_id'))){
-			$ret = ['result'=>'ng','error'=>'parameter error'];
-			$response = new JsonResponse($ret);
-			return $response;
-		}
-
-		$term_id = $request->request->get('term_id');
-
-		$em = $this->get('doctrine.orm.entity_manager');
-		// 解説内索引用語サブ画面で一時テーブルに保存された後、用語編集画面から戻った場合は削除
-		$conn = $em->getConnection();
-		$conn->beginTransaction();
-		try {
-			$conn->delete('ExplainIndexTmp', array('main_term_id' => $term_id));
+			$em->flush();
 			$em->getConnection()->commit();
-		}catch (\Exception $e){
+		} catch (\Exception $e){
 			$em->getConnection()->rollback();
 			$em->close();
 
@@ -1801,7 +1680,7 @@ class YougoController extends BaseController {
 			$this->get('logger')->error($e->getMessage());
 			$this->get('logger')->error($e->getTraceAsString());
 
-			$ret = ['result'=>'ng','error'=>'ExplainIndexTmpDB error id:'.$term_id];
+			$ret = ['result'=>'ng','error'=>'MainTermDB error id:'.$entity->getMainTerm()];
 			$response = new JsonResponse($ret);
 			return $response;
 		}

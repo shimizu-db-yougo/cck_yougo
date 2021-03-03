@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use CCK\CommonBundle\Entity\MainTerm;
 use CCK\CommonBundle\Entity\SubTerm;
 use CCK\CommonBundle\Entity\Synonym;
@@ -1021,6 +1022,95 @@ class BaseController extends Controller {
 	protected function searchSessionRemove($request){
 		$session = $request->getSession();
 		$session->remove(self::SES_SEARCH_HAN_KEY);
+	}
+
+	protected function OutputLog($type, $file, $log) {
+		$year = date ( "Y" );
+		$month = date ( "m" );
+		$day = date ( "d" );
+		$hour = date ( "H" );
+
+		// タイムゾーンの設定（タイムゾーンを設定しないとログ書き出し時にエラーとなる）
+		date_default_timezone_set ( 'Asia/Tokyo' );
+
+		// ログ出力先の決定
+		$logName = $file;
+		$logDir = "./app/logs/" . "$year/$month/$day/";
+		$error_log = $logDir . $logName;
+
+		// ディレクトリ作成
+		if (! is_dir ( $logDir )) {
+			// ディレクトリが存在しない場合作成
+			mkdir ( $logDir, 0777, True );
+			// umaskを考慮して再度777に変更
+			chmod ( $logDir, 0777 );
+		}
+
+		// ファイル作成
+		if (! file_exists ( $error_log )) {
+			// ファイルが存在しない場合作成
+			touch ( $error_log );
+			// 権限変更
+			chmod ( $error_log, 0666 );
+		}
+
+		// ログファイル出力
+		$fp = fopen($error_log, "a");
+		fwrite($fp, "[" . date("Y-m-d H:i:s") . "] [$type] $log" ."\n");
+		fclose($fp);
+	}
+
+	protected function DownloadLog($logName){
+		$year = date ( "Y" );
+		$month = date ( "m" );
+		$day = date ( "d" );
+		$hour = date ( "H" );
+
+		// ログ出力先の決定
+		$logDir = "./app/logs/" . "$year/$month/$day/";
+		$error_log = $logDir . $logName;
+
+		// ダウンロードファイル名設定
+		$finename = "ノンブル取込みエラー_".$year.$month.$day.".log";
+
+		// 取込データエラーログ
+		$response = new BinaryFileResponse($error_log);
+
+		$response->setStatusCode(200);
+		$response->headers->set('Content-Encoding', 'UTF-8');
+		$response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+		$response->headers->set('Content-Transfer-Encoding', 'binary');
+		$response->headers->set('Content-Type', 'application/force-download');
+		$response->headers->set('Content-Type', 'application/octet-stream');
+		$response->headers->set('Content-Disposition', 'attachment; filename='. $finename);
+
+		return $response;
+	}
+
+	protected function RemoveLog($file) {
+		$year = date ( "Y" );
+		$month = date ( "m" );
+		$day = date ( "d" );
+		$hour = date ( "H" );
+
+		// ログ出力先の決定
+		$logName = $file;
+		$logDir = "./app/logs/" . "$year/$month/$day/";
+		$error_log = $logDir . $logName;
+
+		// ディレクトリ作成
+		if (! is_dir ( $logDir )) {
+			// ディレクトリが存在しない場合作成
+			mkdir ( $logDir, 0777, True );
+			// umaskを考慮して再度777に変更
+			chmod ( $logDir, 0777 );
+		}
+
+		// ファイル削除
+		if (file_exists ( $error_log )) {
+			unlink ( $error_log );
+		}
+
 	}
 
 }

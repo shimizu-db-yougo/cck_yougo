@@ -194,21 +194,6 @@
 			return explain_attr;
 		}
 
-		$('.js-yougo-back').bind('click', function(e){
-			var term_id = parseInt($('#form_mainterm [name=term_id]').text().slice(1));
-			var param = {term_id:''};
-			param.term_id = term_id;
-
-			$.post("{{ path('client.explain.delete.ajax') }}", param)
-			.done(function(r,s){
-				console.log('deleteExplain:done',s,r);
-			})
-			.fail(function(e,s){
-				console.log('deleteExplain:fail',s,e.status);
-				alert('DB更新エラー');
-			});
-		});
-
 		// 用語登録
 		$('.js-yougo-submit').bind('click', function(e){
 			// 入力チェック
@@ -253,7 +238,7 @@
 			mainterm.handover = $('#form_handover [id=handover]').val();
 
 			// サブ用語
-			var subterm = {sub_term_id:[],sub_term:[],red_letter:[],kana:[],kana_exist:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],delimiter_kana:[],index_add_letter:[],index_kana:[],nombre:[]};
+			var subterm = {sub_term_id:[],sub_term:[],red_letter:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],index_add_letter:[],index_kana:[],nombre:[]};
 			var form_subterm = $('.form_subterm');
 			var err_field_sub = '';
 			form_subterm.each(function(i,elem) {
@@ -262,13 +247,10 @@
 				subterm.sub_term_id.push($(elem).find('#sub_term_id').val());
 				subterm.sub_term.push($(elem).find('#sub_term').val());
 				subterm.red_letter.push($(elem).find('#red_letter').prop("checked"));
-				subterm.kana.push($(elem).find('#kana').val());
-				subterm.kana_exist.push($(elem).find('#kana_exist').prop("checked"));
 				subterm.text_freq.push($(elem).find('#text_freq').val());
 				subterm.center_freq.push($(elem).find('#center_freq').text());
 				subterm.news_exam.push($(elem).find('#news_exam').prop("checked"));
 				subterm.delimiter.push($(elem).find('#delimiter').val());
-				subterm.delimiter_kana.push($(elem).find('#delimiter_kana').val());
 				subterm.index_add_letter.push($(elem).find('#index_add_letter').val());
 				subterm.index_kana.push($(elem).find('#index_kana').val());
 				subterm.nombre.push($(elem).find('#nombre').text());
@@ -355,9 +337,6 @@
 			if($('#form_mainterm [name=main_term]').val() == ""){
 				err_filed += '主用語,';
 			}
-			if($('#form_mainterm [name=term_explain]').val() == ""){
-				err_filed += '解説,';
-			}
 			if($('#form_mainterm [name=index_kana]').val() == ""){
 				err_filed += '主用語_索引用語読み,';
 			}
@@ -409,10 +388,6 @@
 			+'<div class="col-xs-3"><input class="form-control input-sm" type="text" id="sub_term" name="sub_term" value="' + (((record)&&(record.sub_term)) ? record.sub_term : '') + '"></div>'
 			+'<label class="col-xs-1">{{ "text.yougo.red_letter"|trans }}</label>'
 			+'<div class="col-xs-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
-			+'<label class="col-xs-1">{{ "text.yougo.yomigana"|trans }}</label>'
-			+'<div class="col-xs-3"><input class="form-control input-sm" type="text" id="kana" name="kana" value="' + (((record)&&(record.kana)) ? record.kana : '') + '"></div>'
-			+'<label class="col-xs-1">{{ "text.yougo.kana_exist"|trans }}</label>'
-			+'<div class="col-xs-1"><input type="checkbox" id="kana_exist" name="kana_exist" ' + (((record)&&(record.kana_exist_flag == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.freq.text"|trans }}</label>'
@@ -438,20 +413,6 @@
 
 			html += '</select></div>'
 
-			+'<label class="col-xs-1">{{ "text.yougo.delimiter_kana"|trans }}</label>'
-			+'<div class="col-xs-1"><select class="form-control input-sm" id="delimiter_kana" name="delimiter_kana">'
-					+'<option value="0">なし</option>';
-
-			html += '<option value="1" ' + (((record)&&(record.delimiter_kana == '1')) ? ' selected ' : '') + '>と</option>'
-			+'<option value="2" ' + (((record)&&(record.delimiter_kana == '2')) ? ' selected ' : '') + '>，</option>'
-			+'<option value="3" ' + (((record)&&(record.delimiter_kana == '3')) ? ' selected ' : '') + '>・</option>'
-			+'<option value="4" ' + (((record)&&(record.delimiter_kana == '4')) ? ' selected ' : '') + '>／</option>'
-			+'<option value="5" ' + (((record)&&(record.delimiter_kana == '5')) ? ' selected ' : '') + '>（</option>'
-			+'<option value="6" ' + (((record)&&(record.delimiter_kana == '6')) ? ' selected ' : '') + '>）</option>'
-			+'<option value="7" ' + (((record)&&(record.delimiter_kana == '7')) ? ' selected ' : '') + '>）（</option>'
-			+'<option value="8" ' + (((record)&&(record.delimiter_kana == '8')) ? ' selected ' : '') + '>）と</option>';
-
-			html += '</select></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.index_letter"|trans }}</label>'

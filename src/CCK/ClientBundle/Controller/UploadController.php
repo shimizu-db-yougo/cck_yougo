@@ -44,16 +44,10 @@ class UploadController extends BaseController {
 
 		if($status == 200){
 			$status_message = "csvファイルの取込みが完了しました。";
+		}elseif($status == 201){
+			$status_message = "csvファイルの取込みが完了しましたが、エラーがありますのでログ出力ボタンからダウンロードしてください。";
 		}elseif($status == 'default'){
 			$status_message = "";
-		}elseif($status == 454){
-			$status_message = "テキストファイルのエンコード形式を確認してください。取込可能な形式はUTF-8です。";
-		}elseif($status == 455){
-			$status_message = "ファイル形式を確認してください。CSVファイルのみ取込可能です。";
-		}elseif(strpos($status,'456') !== false){
-			$status_message = "用語IDがマッチしていません。:" . explode(':',$status)[1];
-		}elseif($status == 457){
-			$status_message = "CSVファイルの項目数が異なっています。項目数：5";
 		}else{
 			$status_message = "csvファイルの取込みに失敗しました。ファイルを確認して下さい。";
 		}
@@ -66,6 +60,7 @@ class UploadController extends BaseController {
 				'ver_list' => $ver_list,
 				'return_message' => $status_message,
 				'upload_list' => $upload_list,
+				'status' => $status,
 		);
 	}
 
@@ -108,6 +103,8 @@ class UploadController extends BaseController {
 			return $this->redirect($this->generateUrl('client.csv.import', array('status' => 451)));
 		}
 
+		$this->RemoveLog("nombre_check.log");
+		$status = 200;
 		try {
 			// 初期化
 			$this->clearDirectory($archivePath . $params['curriculum'] . '_' . $params['version']);
@@ -117,7 +114,10 @@ class UploadController extends BaseController {
 			}
 
 			if(!$this->checkFileType($archivePath . $params['curriculum'] . '_' . $params['version'] . '/' . $filename)){
-				return $this->redirect($this->generateUrl('client.csv.import', array('status' => 455)));
+				// ログ出力
+				$this->OutputLog("ERROR", "nombre_check.log", "ファイル形式を確認してください。CSVファイルのみ取込可能です。");
+				$status = 201;
+				return $this->redirect($this->generateUrl('client.csv.import', array('status' => $status)));
 			}
 
 		} catch(\Exception $e){
@@ -154,20 +154,31 @@ class UploadController extends BaseController {
 
 					$data = explode("	",$line);
 
-					// 項目名を保存
+					//ヘッダーはスキップ
 					if($lineCnt == 1) {
-						//エンコードチェック
-						if (mb_detect_encoding($line, "UTF-8") === false){
-							fclose($filePointer);
-							return $this->redirect($this->generateUrl('client.csv.import', array('status' => 454)));
-						}
-
 						continue;
+					}
+
+					if($lineCnt > 1) {
+						//エンコードチェック
+						if (mb_detect_encoding($data[2], "UTF-8") === false){
+							fclose($filePointer);
+							$this->OutputLog("ERROR0", "nombre_check.log", "テキストファイルのエンコード形式を確認してください。取込可能な形式はUTF-8です。");
+							$status = 201;
+							return $this->redirect($this->generateUrl('client.csv.import', array('status' => $status)));
+						}
 					}
 
 					// 項目数チェック
 					if(count($data) != 5){
-						return $this->redirect($this->generateUrl('client.csv.import', array('status' => 457)));
+						$this->OutputLog("ERROR1", "nombre_check.log", "[".$data[2]."]の項目数が異なっています。項目数：5");
+						$status = 201;
+					}
+
+					// ノンブル空欄チェック
+					if(($data[0] == "")||($data[1] == "")){
+						$this->OutputLog("ERROR2", "nombre_check.log", "[".$data[2]."]のノンブルが登録されていません");
+						$status = 201;
 					}
 
 					// db connect and Transaction start
@@ -179,6 +190,7 @@ class UploadController extends BaseController {
 						$termID = $data[3];
 						$is_term = true;
 						$term = false;
+						$term_db = "";
 
 						if(strpos($termID, '.') !== false){
 							// 画像ファイル名
@@ -188,6 +200,7 @@ class UploadController extends BaseController {
 							));
 
 							$is_term = false;
+
 						}elseif(substr($termID, 0, 1) == 'M'){
 							$termID = ltrim(substr($termID, 1), '0');
 
@@ -195,6 +208,11 @@ class UploadController extends BaseController {
 									'termId' => $termID,
 									'deleteFlag' => FALSE
 							));
+
+							if($term){
+								$term_db = $term->getMainTerm();
+							}
+
 						}elseif(substr($termID, 0, 1) == 'S'){
 							$termID = ltrim(substr($termID, 1), '0');
 
@@ -202,6 +220,11 @@ class UploadController extends BaseController {
 									'id' => $termID,
 									'deleteFlag' => FALSE
 							));
+
+							if($term){
+								$term_db = $term->getSubTerm();
+							}
+
 						}elseif(substr($termID, 0, 1) == 'D'){
 							$termID = ltrim(substr($termID, 1), '0');
 
@@ -209,6 +232,11 @@ class UploadController extends BaseController {
 									'id' => $termID,
 									'deleteFlag' => FALSE
 							));
+
+							if($term){
+								$term_db = $term->getTerm();
+							}
+
 						}elseif(substr($termID, 0, 1) == 'K'){
 							$termID = ltrim(substr($termID, 1), '0');
 
@@ -216,6 +244,10 @@ class UploadController extends BaseController {
 									'id' => $termID,
 									'deleteFlag' => FALSE
 							));
+
+							if($term){
+								$term_db = $term->getIndexTerm();
+							}
 						}
 
 						if($term){
@@ -225,10 +257,16 @@ class UploadController extends BaseController {
 								$term->setIllustNombre($data[0]);
 							}
 						}else{
-							$em->getConnection()->rollback();
-							$em->close();
-
-							return $this->redirect($this->generateUrl('client.csv.import', array('status' => '456:'.$data[3])));
+							// CSVの用語IDがDBに登録された用語IDと一致しない
+							$this->OutputLog("ERROR3", "nombre_check.log", "用語IDがマッチしていません。:" . $termID);
+							$status = 201;
+						}
+						// CSVの用語とDBに登録されたID,用語と一致しない
+						if($is_term){
+							if($data[2] != $term_db){
+								$this->OutputLog("ERROR4", "nombre_check.log", "[".$data[2]."]が登録されているID・用語と一致しません。");
+								$status = 201;
+							}
 						}
 
 						$em->flush();
@@ -249,7 +287,9 @@ class UploadController extends BaseController {
 				// ファイルをクローズする
 				fclose($filePointer);
 			}else{
-				return $this->redirect($this->generateUrl('client.csv.import', array('status' => 455)));
+				$this->OutputLog("ERROR5", "nombre_check.log", "ファイル形式を確認してください。CSVファイルのみ取込可能です。");
+				$status = 201;
+				break;
 			}
 		}
 
@@ -258,8 +298,16 @@ class UploadController extends BaseController {
 
 		$em->close();
 
-		return $this->redirect($this->generateUrl('client.csv.import', array('status' => 200)));
+		return $this->redirect($this->generateUrl('client.csv.import', array('status' => $status)));
 
+	}
+
+	/**
+	 * @Route("/log/download", name="client.log.download")
+	 * @Method("POST|GET")
+	 */
+	public function logDownloadAction(Request $request){
+		return $this->DownloadLog("nombre_check.log");
 	}
 
 	private function checkFileType($filename){
