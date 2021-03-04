@@ -42,19 +42,15 @@
 						{% for yougo in arr_yougo %}
 
 						<div>
-							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (yougo.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ getTerm(yougo.main_term) }}　{{ getTextFreqIcon(yougo.text_frequency,yougo.ranka,yougo.rankb)|raw }}{{ getCenterFreqIcon(center_main[record])|raw }}{{ getNewsExamIcon(yougo.news_exam)|raw }}</span>
+							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (yougo.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ getTerm(yougo.main_term)|raw }}　{{ getTextFreqIcon(yougo.text_frequency,yougo.ranka,yougo.rankb)|raw }}{{ getCenterFreqIcon(center_main[record])|raw }}{{ getNewsExamIcon(yougo.news_exam)|raw }}</span>
 
-							{% set sub_kana = '' %}
 							{% set i = 0 %}
 							{% for rec_sub_term in arr_subterm[record] %}
 								{% if i == 0 %}<span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(yougo.delimiter)|trans }}</span>{% endif %}
-								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (rec_sub_term.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ getTerm(rec_sub_term.sub_term) }}{{ getTextFreqIcon(rec_sub_term.text_frequency,yougo.ranka,yougo.rankb)|raw }}{{ getCenterFreqIcon(center_sub[record][i])|raw }}{{ getNewsExamIcon(rec_sub_term.news_exam)|raw }}</span><span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(rec_sub_term.delimiter)|trans }}</span>
-								{% if getKana(rec_sub_term.sub_term) != '' %}{% set sub_kana = sub_kana~getKana(rec_sub_term.sub_term)~'）' %}{% endif %}
+								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (rec_sub_term.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ getTerm(rec_sub_term.sub_term)|raw }}{{ getTextFreqIcon(rec_sub_term.text_frequency,yougo.ranka,yougo.rankb)|raw }}{{ getCenterFreqIcon(center_sub[record][i])|raw }}{{ getNewsExamIcon(rec_sub_term.news_exam)|raw }}</span><span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(rec_sub_term.delimiter)|trans }}</span>
 								{% set i = i + 1 %}
 							{% endfor %}
 
-							{% if getKana(yougo.main_term) != '' %}<span style="font-size: 10px; font-family: serif;">（{{ getKana(yougo.main_term) }}）</span>{% endif %}
-							<span style="font-size: 10px; font-family: serif;">{% if sub_kana != '' %}{{ '（'~sub_kana }}{% endif %}</span>
 							<span style="font-size: 14px; font-family: serif;">{{ replaceTag(yougo.term_explain)|raw }}</span>
 							{% set i = 0 %}
 							{% for rec_refer in arr_refer[record] %}

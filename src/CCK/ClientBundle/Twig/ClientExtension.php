@@ -150,6 +150,7 @@ class ClientExtension extends \Twig_Extension
 		$term_explain = preg_replace('/《c_UBK》(.*?)《\/c_UBK》/u', '$1', $term_explain);
 		$term_explain = preg_replace('/《c_TM:[0-9]+》(.*?)《\/c_TM》/u', '$1', $term_explain);
 		$term_explain = preg_replace('/《c_SAK》(.*?)《\/c_SAK》/u', '$1', $term_explain);
+		$term_explain = preg_replace('/【.*?】/', '', $term_explain);
 
 		return $term_explain;
 	}
@@ -210,7 +211,9 @@ class ClientExtension extends \Twig_Extension
 	 * @return [type]               [description]
 	 */
 	public function getTerm($term){
-		return preg_replace('/【.*?】/', '', $term);
+		$rtn = str_replace('【', '<span style="font-size: 10px; font-family: serif; font-weight: normal;">', $term);
+		$rtn = str_replace('】', '</span>', $rtn);
+		return $rtn;
 	}
 
 	/**
