@@ -297,6 +297,9 @@ csv:
         term_explain: 主用語_解説
         exp_id: 解説内さくいん用語ID
         exp_term: 主用語_解説内さくいん用語
+        exp_text_frequency: 解説内用語_教科書頻度
+        exp_center_frequency: 解説内用語_センター頻度
+        exp_news_exam: 解説内用語_検定出題
         exp_index_kana: 解説内用語_さくいん読み仮名
         exp_index_add_letter: 解説内用語_さくいん文字
         exp_nombre: 解説内用語_ノンブル

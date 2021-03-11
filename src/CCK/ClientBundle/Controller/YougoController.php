@@ -1596,6 +1596,11 @@ class YougoController extends BaseController {
 				$entity->setIndexTerm($ele_expterm);
 				$entity->setIndexAddLetter($request->request->get('index_add_letter')[$idx]);
 				$entity->setIndexKana($request->request->get('index_kana')[$idx]);
+
+				$entity->setTextFrequency($request->request->get('text_freq')[$idx]);
+				$entity->setCenterFrequency($request->request->get('center_freq')[$idx]);
+				$entity->setNewsExam(($request->request->get('news_exam')[$idx] == 'true') ? true : false);
+
 				$entity->setNombre($request->request->get('nombre')[$idx]);
 
 				if($update_mode == 'new'){

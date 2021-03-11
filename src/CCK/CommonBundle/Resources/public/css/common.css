@@ -431,8 +431,8 @@ ul.character-list li {
 
 /* coupon expire update modal overwite */
 @media (min-width: 768px) {
-  .expire-modal {
-    width: 900px;
+  .explain-modal {
+    width: 1200px;
     margin: 30px auto;
   }
 }

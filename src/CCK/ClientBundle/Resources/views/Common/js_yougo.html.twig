@@ -123,7 +123,7 @@
 					}
 
 					if(is_saved == false){
-						var explain = {indexTerm:match_chr[i],indexAddLetter:'',indexKana:'',nombre:0};
+						var explain = {indexTerm:match_chr[i],indexAddLetter:'',indexKana:'',nombre:0,textFrequency:0,centerFrequency:0,newsExam:0};
 						explain_list.push(explain);
 					}
 				}
@@ -131,6 +131,7 @@
 
 
 			if(explain_list){
+				var center_sum = 0;
 				console.log(explain_list);
 
 				if(match_chr){
@@ -146,13 +147,26 @@
 						$('#form_explains').append(
 								'<div class="col-xs-12 form_index">'
 								+'<input class="form-control input-sm" type="hidden" id="explain_main_term_id" name="explain_main_term_id" value="' + main_term_id + '">'
+								+'<input class="form-control input-sm" type="hidden" id="explain_id" name="explain_id" value="' + explain_list[i].id + '">'
 								+'<input class="form-control input-sm" type="hidden" id="explain_index_term" name="explain_index_term" value="' + explain_list[i].indexTerm + '">'
 								+'<input class="form-control input-sm" type="hidden" id="explain_nombre" name="explain_nombre" value="'+ explain_list[i].nombre + '">'
 								+'<label class="col-xs-2">'+ explain_list[i].indexTerm + '</label>'
-								+'<div class="col-xs-4"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
-								+'<div class="col-xs-4"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
-								+'<label class="col-xs-2">'+ explain_list[i].nombre + '</label>'
+								+'<div class="col-xs-2"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
+								+'<div class="col-xs-2"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
+
+								+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq4" term-id="' + explain_list[i].id + '" id="explain_text_freq" name="explain_text_freq" value="' + explain_list[i].textFrequency + '"></div>'
+								+'<div class="col-xs-1"><div id="' + 'text_rank' + explain_list[i].id + '" value=""><div id="text_rank"></div></div></div>'
+
+								+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target4" term-id="' + explain_list[i].id + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="4" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+								+'<div class="col-xs-1"><div id="' + 'center_freq' + explain_list[i].id + '" value=""><div id="center_freq" value="">' + ((center_sum) ? center_sum : explain_list[i].centerFrequency) + '</div><input type="hidden" id="center_freq_text" name="center_freq_text" value="test"></div></div>'
+
+								+'<div class="col-xs-1"><input type="checkbox" id="explain_news_exam" name="explain_news_exam" ' + ((explain_list[i].newsExam == '1') ? ' checked ' : '') + '></div>'
+
+								+'<label class="col-xs-1">'+ explain_list[i].nombre + '</label>'
 								+'</div>');
+
+						// 解説内用語　教科書頻度　初期設定
+						getTextPoint(explain_list[i].textFrequency,explain_list[i].id,"{{ ranka }}","{{ rankb }}");
 					}
 				}
 
@@ -163,11 +177,16 @@
 
 		$('.js-explain-submit').bind('click', function(e){
 			console.log($('#form_mainterm [id=term_explain]').val());
-			var explain = {term_id:[],index_term:[],index_add_letter:[],index_kana:[],nombre:[],mainterm_explain:''};
+			var explain = {term_id:[],index_term:[],index_add_letter:[],index_kana:[],nombre:[],mainterm_explain:'',text_freq:[],center_freq:[],news_exam:[]};
 			explain.term_id = setExplainList('explain_main_term_id',explain.term_id);
 			explain.index_term = setExplainList('explain_index_term',explain.index_term);
 			explain.index_kana = setExplainList('explain_index_kana',explain.index_kana);
 			explain.index_add_letter = setExplainList('explain_index_add_letter',explain.index_add_letter);
+
+			explain.text_freq = setExplainList('explain_text_freq',explain.text_freq);
+			explain.center_freq = setExplainListDiv('center_freq',explain.center_freq);
+			explain.news_exam = setExplainListChk('explain_news_exam',explain.news_exam);
+
 			explain.nombre = setExplainList('explain_nombre',explain.nombre);
 			explain.mainterm_explain = $('#form_mainterm [id=term_explain]').val();
 			console.log(explain);
@@ -190,6 +209,26 @@
 			var explain_list = $('input[id="' + field + '"]');
 			for(var i in explain_list){
 				if(explain_list[i].value !== void 0){explain_attr.push(explain_list[i].value);}
+			}
+			return explain_attr;
+		}
+
+		function setExplainListDiv(field,explain_attr){
+			var explain_list = $('.form_index');
+			var explain_id='';
+			explain_list.each(function(i,elem) {
+				console.log($(elem).find('#center_freq').text());
+				console.log($(elem).find('#explain_id').val());
+				explain_id = $(elem).find('#explain_id').val();
+				explain_attr.push($(elem).find('#center_freq'+explain_id).text());
+			});
+			return explain_attr;
+		}
+
+		function setExplainListChk(field,explain_attr){
+			var explain_list = $('input[id="' + field + '"]');
+			for(var i in explain_list){
+				if(explain_list[i].value !== void 0){explain_attr.push(explain_list[i].checked);}
 			}
 			return explain_attr;
 		}
@@ -808,6 +847,20 @@
 
 				$(this).parents('.form_refterm').remove();
 			});
+
+			// 解説内用語　教科書頻度　イベント設定
+			$(document).on("keydown keyup keypress change", ".js-text-freq4", function (e) {
+				// get target
+				var target = $(e.currentTarget);
+				var term_id = target.attr('term-id');
+
+				getTextPoint(e.currentTarget.value,term_id,"{{ ranka }}","{{ rankb }}");
+			});
+			// 解説内用語　センター頻度　イベント設定
+			$(document).on("click", ".js-center-target4", function (e) {
+				getCenterPoint(e);
+			});
+
 		}
 
 	$(function(){

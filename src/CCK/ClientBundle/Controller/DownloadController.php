@@ -51,6 +51,9 @@ class DownloadController extends BaseController {
 			'term_explain',
 			'exp_id',
 			'exp_term',
+			'exp_text_frequency',
+			'exp_center_frequency',
+			'exp_news_exam',
 			'exp_index_kana',
 			'exp_index_add_letter',
 			'exp_nombre',
@@ -381,6 +384,9 @@ class DownloadController extends BaseController {
 		// 解説内索引用語
 		$result['exp_id'] = $translator->trans('csv.term.exp_id');
 		$result['exp_term'] = $translator->trans('csv.term.exp_term');
+		$result['exp_text_frequency'] = $translator->trans('csv.term.exp_text_frequency');
+		$result['exp_center_frequency'] = $translator->trans('csv.term.exp_center_frequency');
+		$result['exp_news_exam'] = $translator->trans('csv.term.exp_news_exam');
 		$result['exp_index_kana'] = $translator->trans('csv.term.exp_index_kana');
 		$result['exp_index_add_letter'] = $translator->trans('csv.term.exp_index_add_letter');
 		$result['exp_nombre'] = $translator->trans('csv.term.exp_nombre');
@@ -457,6 +463,9 @@ class DownloadController extends BaseController {
 		$exp = [];
 		$exp['exp_id'] = "";
 		$exp['exp_term'] = "";
+		$exp['exp_text_frequency'] = "";
+		$exp['exp_center_frequency'] = "";
+		$exp['exp_news_exam'] = "";
 		$exp['exp_index_kana'] = "";
 		$exp['exp_index_add_letter'] = "";
 		$exp['exp_nombre'] = "";
@@ -464,9 +473,13 @@ class DownloadController extends BaseController {
 		if($expterm){
 			foreach ($expterm as $exptermRec) {
 				$exptermRec['id'] = 'K'.str_pad($exptermRec['id'], 6, 0, STR_PAD_LEFT);
+				$this->replaceExpField($exptermRec,$entityVer);
 
 				$exp['exp_id'] .= $exptermRec['id'] . '\v';
 				$exp['exp_term'] .= $exptermRec['indexTerm'] . '\v';
+				$exp['exp_text_frequency'] .= $exptermRec['textFrequency'] . '\v';
+				$exp['exp_center_frequency'] .= $exptermRec['centerFrequency'] . '\v';
+				$exp['exp_news_exam'] .= $exptermRec['newsExam'] . '\v';
 				$exp['exp_index_kana'] .= $exptermRec['indexKana'] . '\v';
 				$exp['exp_index_add_letter'] .= $exptermRec['indexAddLetter'] . '\v';
 				$exp['exp_nombre'] .= (($type != '0') ? $exptermRec['nombre'] : '') . '\v';
@@ -661,6 +674,28 @@ class DownloadController extends BaseController {
 			$main['nombre_bold'] = '＊';
 		}else{
 			$main['nombre_bold'] = '';
+		}
+	}
+
+	private function replaceExpField(&$exp,$entityVer){
+		if($exp['textFrequency'] >= $entityVer->getRankA()){
+			$exp['textFrequency'] = 'A';
+		}elseif(($exp['textFrequency'] >= $entityVer->getRankB())&&($exp['textFrequency'] <= ($entityVer->getRankA()-1))){
+			$exp['textFrequency'] = 'B';
+		}elseif(($exp['textFrequency'] >= 1)&&($exp['textFrequency'] <= ($entityVer->getRankB()-1))){
+			$exp['textFrequency'] = 'C';
+		}else{
+			$exp['textFrequency'] = '';
+		}
+
+		if($exp['centerFrequency'] == 0){
+			$exp['centerFrequency'] = '';
+		}
+
+		if($exp['newsExam'] == '1'){
+			$exp['newsExam'] = 'N';
+		}else{
+			$exp['newsExam'] = '';
 		}
 	}
 

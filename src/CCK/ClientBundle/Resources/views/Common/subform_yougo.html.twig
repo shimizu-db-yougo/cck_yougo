@@ -1,4 +1,4 @@
-<div class="modal fade" id="centerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="centerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="z-index:1042;">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -19,8 +19,8 @@
 	</div>
 </div>
 
-<div class="modal fade" id="explainModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-	<div class="modal-dialog" role="document">
+<div class="modal fade" id="explainModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="z-index:1041;">
+	<div class="modal-dialog explain-modal" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				{{ 'text.yougo.explain.index'|trans }}
@@ -29,9 +29,12 @@
 				<div class="row">
 					<div class="col-xs-12">
 						<label class="col-xs-2">{{ 'text.yougo.explain.term'|trans }}</label>
-						<label class="col-xs-4">{{ 'text.yougo.explain.index.kana'|trans }}</label>
-						<label class="col-xs-4">{{ 'text.yougo.explain.index.add'|trans }}</label>
-						<label class="col-xs-2">{{ 'text.yougo.explain.nombre'|trans }}</label>
+						<label class="col-xs-2">{{ 'text.yougo.explain.index.kana'|trans }}</label>
+						<label class="col-xs-2">{{ 'text.yougo.explain.index.add'|trans }}</label>
+						<label class="col-xs-2">{{ 'text.yougo.freq.text'|trans }}</label>
+						<label class="col-xs-2">{{ 'text.yougo.freq.center'|trans }}</label>
+						<label class="col-xs-1">{{ 'text.yougo.news.exam'|trans }}</label>
+						<label class="col-xs-1">{{ 'text.yougo.explain.nombre'|trans }}</label>
 					</div>
 				</div>
 				<div class="row">
