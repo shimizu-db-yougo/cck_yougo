@@ -483,6 +483,9 @@ class DownloadController extends BaseController {
 				$exp['exp_index_kana'] .= $exptermRec['indexKana'] . '\v';
 				$exp['exp_index_add_letter'] .= $exptermRec['indexAddLetter'] . '\v';
 				$exp['exp_nombre'] .= (($type != '0') ? $exptermRec['nombre'] : '') . '\v';
+
+				// 解説内用語存在チェック
+				$this->isExistsExplainTerm($main['term_explain'],$exptermRec['indexTerm']);
 			}
 			foreach ($exp as $key => $val) {
 				$exp[$key] = mb_substr($val,0,mb_strlen($val)-2);
@@ -914,6 +917,10 @@ class DownloadController extends BaseController {
 		if($entityKo){
 			$record['ko'] = $entityKo->getName();
 		}
+
+	}
+
+	private function isExistsExplainTerm($main_explain,$explain_term){
 
 	}
 
