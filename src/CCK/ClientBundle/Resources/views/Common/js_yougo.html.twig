@@ -157,8 +157,8 @@
 								+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq4" term-id="' + explain_list[i].id + '" id="explain_text_freq" name="explain_text_freq" value="' + explain_list[i].textFrequency + '"></div>'
 								+'<div class="col-xs-1"><div id="' + 'text_rank' + explain_list[i].id + '" value=""><div id="text_rank"></div></div></div>'
 
-								+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target4" term-id="' + explain_list[i].id + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="4" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-								+'<div class="col-xs-1"><div id="' + 'center_freq' + explain_list[i].id + '" value=""><div id="center_freq" value="">' + ((center_sum) ? center_sum : explain_list[i].centerFrequency) + '</div><input type="hidden" id="center_freq_text" name="center_freq_text" value="test"></div></div>'
+								+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target4" index-term="' + explain_list[i].indexTerm + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="4" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+								+'<div class="col-xs-1"><div id="' + 'center_freq' + explain_list[i].indexTerm + '" value=""><div id="center_freq" value="">' + ((center_sum) ? center_sum : explain_list[i].centerFrequency) + '</div><input type="hidden" id="center_freq_text" name="center_freq_text" value="test"></div></div>'
 
 								+'<div class="col-xs-1"><input type="checkbox" id="explain_news_exam" name="explain_news_exam" ' + ((explain_list[i].newsExam == '1') ? ' checked ' : '') + '></div>'
 
@@ -220,7 +220,7 @@
 				console.log($(elem).find('#center_freq').text());
 				console.log($(elem).find('#explain_id').val());
 				explain_id = $(elem).find('#explain_id').val();
-				explain_attr.push($(elem).find('#center_freq'+explain_id).text());
+				explain_attr.push($(elem).find('#center_freq').text());
 			});
 			return explain_attr;
 		}
@@ -232,6 +232,47 @@
 			}
 			return explain_attr;
 		}
+
+		function checkBeforeBack(msg){
+			// .js-yougo-backクリック時のイベントを発生させる為に実装
+			//alert(msg);
+		}
+
+		function deleteExplainTmp(){
+			var term_id = parseInt($('#form_mainterm [name=term_id]').text().slice(1));
+			var param = {term_id:''};
+			param.term_id = term_id;
+			$.post("{{ path('client.explain.delete.ajax') }}", param)
+			.done(function(r,s){
+				console.log('deleteExplain:done',s,r);
+			})
+			.fail(function(e,s){
+				console.log('deleteExplain:fail',s,e.status);
+				// 正常に削除されてもエラーになるのでalertコメント化。要調査。
+				// request.CRITICAL: Uncaught PHP Exception LogicException: "The controller must return a response (null given). Did you forget to add a return statement somewhere in your controller?" at /var/www/html/cck/vendor/symfony/symfony/src/Symfony/Component/HttpKernel/HttpKernel.php line 169 {"exception":"[object] (LogicException(code: 0): The controller must return a response (null given). Did you forget to add a return statement somewhere in your controller?
+				//alert('DB更新エラー');
+			});
+		}
+
+		$('.js-yougo-back').bind('click', function(e){
+			deleteExplainTmp();
+		});
+
+		$('.js-explain-cancel').bind('click', function(e){
+			var term_id = parseInt($('#form_mainterm [name=term_id]').text().slice(1));
+			var param = {term_id:'',explain_id:[],index_term:[]};
+			param.term_id = term_id;
+			param.explain_id = setExplainList('explain_id',param.explain_id);
+			param.index_term = setExplainList('explain_index_term',param.index_term);
+
+			$.post("{{ path('client.center.delete.ajax') }}", param)
+			.done(function(r,s){
+				console.log('deleteCenter:done',s,r);
+			})
+			.fail(function(e,s){
+				console.log('deleteCenter:fail',s,e.status);
+			});
+		});
 
 		// 用語登録
 		$('.js-yougo-submit').bind('click', function(e){
@@ -350,6 +391,7 @@
 			$.post("{{ path('client.edit.save.ajax') }}", mainterm)
 			.done(function(r,s){
 				console.log('savePost:done',s,r);
+				deleteExplainTmp();
 				window.location.href = "{{ path('client.yougo.index') }}";
 			})
 			.fail(function(e,s){
@@ -687,6 +729,55 @@
 
 		}
 
+		function getCenterTmpPoint(e){
+			// get target
+			var target = $(e.currentTarget);
+			var index_term = target.attr('index-term');
+			var main_term_id = target.attr('main-term-id');
+			var yougo_flag = target.attr('yougo-flag');
+			var ver_id = $('#form_mainterm [name=version]').val();
+
+			$('#term_id').val(index_term);
+			$('#yougo_flag').val(yougo_flag);
+			$('#formcenter').empty();
+
+			// センター頻度の取得
+			var data = {
+				'index_term': index_term,
+				'main_term_id': main_term_id,
+				'yougo_flag': yougo_flag,
+				'ver_id': ver_id
+			};
+			$.ajax({
+				url: "{{ path('client.yougo.center.tmp.ajax') }}",
+				data: data,
+				method: 'POST',
+				success: function(response){
+					var html = '<div class="row"><div class="col-xs-12"><label class="col-xs-4"></label>'
+					+'<label class="col-xs-4">本試</label><label class="col-xs-4">追試</label>'
+					+'</div>'
+					$('#formcenter').append(html);
+
+					$.each(response, function(key, list){
+						console.log(key);
+						console.log(list.year);
+
+						html = '<div class="row"><div class="col-xs-12"><label class="col-xs-4">' + list.year + '</label>'
+						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + list.mainExam + '">'
+						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + list.subExam + '">'
+						+'</div>';
+
+						$('#formcenter').append(html);
+					});
+				},
+				error: function(response){
+				}
+			});
+
+			$('#centerModal').modal();
+
+		}
+
 		function setHeaderSelectedIdx(id,hen,sho,dai,chu,ko){
 			var data = {
 					'id': id
@@ -858,7 +949,7 @@
 			});
 			// 解説内用語　センター頻度　イベント設定
 			$(document).on("click", ".js-center-target4", function (e) {
-				getCenterPoint(e);
+				getCenterTmpPoint(e);
 			});
 
 		}

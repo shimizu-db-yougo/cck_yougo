@@ -71,4 +71,21 @@ class CenterRepository extends EntityRepository
 
 		return $result;
 	}
+
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function deleteDataByMainId($main_term_id,$term_id,$yougo_flag){
+
+		$sql = "UPDATE Center SET Center.delete_flag = 1, Center.delete_date='". date("Y-m-d H:i:s") .
+		"' WHERE Center.main_term_id = '" . $main_term_id ."' AND Center.yougo_flag = ".$yougo_flag;
+
+		if($yougo_flag != '1'){
+			$sql .= " AND Center.sub_term_id = ".$term_id;
+		}
+
+		$result = $this->getEntityManager()->getConnection()->executeUpdate($sql);
+
+		return $result;
+	}
 }

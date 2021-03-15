@@ -23,7 +23,9 @@ use CCK\CommonBundle\Entity\SubTerm;
 use CCK\CommonBundle\Entity\Synonym;
 use CCK\CommonBundle\Entity\Refer;
 use CCK\CommonBundle\Entity\ExplainIndex;
+use CCK\CommonBundle\Entity\ExplainIndexTmp;
 use CCK\CommonBundle\Entity\Center;
+use CCK\CommonBundle\Entity\CenterTmp;
 
 /**
  * yougo controller.
@@ -807,6 +809,16 @@ class YougoController extends BaseController {
 			return $response;
 		}
 
+		if($this->saveExplainIndex($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		if($this->saveExplainCenter($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
 		$response = new JsonResponse($ret);
 		return $response;
 	}
@@ -1092,6 +1104,188 @@ class YougoController extends BaseController {
 		return $return_flag;
 	}
 
+	private function saveExplainIndex($request,&$ret){
+		$return_flag = true;
+		// 解説内索引用語を一時テーブルよりコピー
+		$em = $this->get('doctrine.orm.entity_manager');
+		$entityTmp = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findBy(array(
+				'mainTermId' => $request->request->get('term_id')
+		));
+
+		foreach($entityTmp as $entity_rec){
+			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+					'mainTermId' => $entity_rec->getMainTermId(),
+					'indexTerm' => $entity_rec->getIndexTerm()
+			));
+			$update_mode = 'update';
+			if(!$entity){
+				$entity = new ExplainIndex();
+				$update_mode = 'new';
+			}
+
+			$em->getConnection()->beginTransaction();
+
+			try{
+				$entity->setMainTermId($entity_rec->getMainTermId());
+				$entity->setIndexTerm($entity_rec->getIndexTerm());
+				$entity->setIndexAddLetter($entity_rec->getIndexAddLetter());
+				$entity->setIndexKana($entity_rec->getIndexKana());
+				$entity->setNombre($entity_rec->getNombre());
+				$entity->setDeleteDate($entity_rec->getDeleteDate());
+				$entity->setDeleteFlag($entity_rec->getDeleteFlag());
+				$entity->setTextFrequency($entity_rec->getTextFrequency());
+				$entity->setCenterFrequency($entity_rec->getCenterFrequency());
+				$entity->setNewsExam($entity_rec->getNewsExam());
+
+				if($update_mode == 'new'){
+					$em->persist($entity);
+				}
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$ret = ['result'=>'ng','error'=>'ExplainDB error id:'.$entity_rec->getIndexTerm()];
+				$return_flag = false;
+				return $return_flag;
+			}
+		}
+
+		// WEBに入力されなかった用語は削除
+		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
+				'mainTermId' => $request->request->get('term_id'),
+				'deleteFlag' => FALSE
+		));
+
+		foreach($entity as $entity_rec){
+			$index_term = $entity_rec->getIndexTerm();
+			$this->get('logger')->error("***DB:yougo***".$index_term);
+
+			$entity_tmp = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
+					'indexTerm' => $index_term,
+					'deleteFlag' => FALSE
+			));
+
+			if(!$entity_tmp){
+				$em->getConnection()->beginTransaction();
+
+				try{
+					$entity_rec->setDeleteFlag(true);
+					$entity_rec->setModifyDate(new \DateTime());
+					$entity_rec->setDeleteDate(new \DateTime());
+
+					$em->flush();
+					$em->getConnection()->commit();
+				} catch (\Exception $e){
+					$em->getConnection()->rollback();
+					$em->close();
+
+					// log
+					$this->get('logger')->error($e->getMessage());
+					$this->get('logger')->error($e->getTraceAsString());
+
+					$ret = ['result'=>'ng','error'=>'ExplainDB error id:'.$index_term];
+					$response = new JsonResponse($ret);
+					return $response;
+				}
+			}
+
+		}
+
+		return $return_flag;
+	}
+
+	private function saveExplainCenter($request,&$ret){
+		$return_flag = true;
+		// センター頻度を一時テーブルよりコピー
+		$em = $this->get('doctrine.orm.entity_manager');
+		$entityTmp = $em->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
+				'mainTermId' => $request->request->get('term_id')
+		));
+
+		foreach($entityTmp as $entity_rec){
+			$entityExp = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+					'mainTermId' => $request->request->get('term_id'),
+					'indexTerm' => $entity_rec->getIndexTerm(),
+					'deleteFlag' => FALSE
+			));
+
+			$entity = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+					'mainTermId' => $entity_rec->getMainTermId(),
+					'subTermId' => $entityExp->getId(),
+					'yougoFlag' => '4',
+					'year' => $entity_rec->getYear()
+			));
+
+			$update_mode = 'update';
+			if(!$entity){
+				$entity = new Center();
+				$update_mode = 'new';
+			}
+
+			$em->getConnection()->beginTransaction();
+
+			try{
+				$entity->setMainTermId($entity_rec->getMainTermId());
+				$entity->setSubTermId($entityExp->getId());
+				$entity->setYougoFlag('4');
+				$entity->setYear($entity_rec->getYear());
+				$entity->setMainExam($entity_rec->getMainExam());
+				$entity->setSubExam($entity_rec->getSubExam());
+				$entity->setDeleteDate($entity_rec->getDeleteDate());
+				$entity->setDeleteFlag($entity_rec->getDeleteFlag());
+
+				if($update_mode == 'new'){
+					$em->persist($entity);
+				}
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$ret = ['result'=>'ng','error'=>'CenterDB error id:'.$entity_rec->getIndexTerm()];
+				$return_flag = false;
+				return $return_flag;
+			}
+		}
+
+		// WEBに入力されなかった解説内用語のセンター頻度は削除
+		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
+				'mainTermId' => $request->request->get('term_id'),
+				'deleteFlag' => FALSE
+		));
+
+		foreach($entity as $entity_rec){
+			$index_term = $entity_rec->getIndexTerm();
+			$this->get('logger')->error("***DB:yougo***".$index_term);
+
+			$entity_tmp = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
+					'indexTerm' => $index_term,
+					'deleteFlag' => FALSE
+			));
+
+			if(!$entity_tmp){
+				$em->getConnection()->beginTransaction();
+
+				$rtncd = $em->getRepository('CCKCommonBundle:Center')->deleteDataByMainId($request->request->get('term_id'),$entity_rec->getId(),'4');
+				$em->getConnection()->commit();
+
+			}
+		}
+
+		return $return_flag;
+	}
+
 	private function saveCenterFrequency($term_id,$main_term_id,$sub,$ver_id){
 		$return_flag = true;
 
@@ -1153,6 +1347,13 @@ class YougoController extends BaseController {
 					if($yougo_flag == '1'){
 						$entity = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
 								'mainTermId' => $term_id,
+								'yougoFlag' => $yougo_flag,
+								'year' => $center_key,
+								'deleteFlag' => FALSE
+						));
+					}elseif($yougo_flag == '4'){
+						$entity = $em->getRepository('CCKCommonBundle:CenterTmp')->findOneBy(array(
+								'indexTerm' => $term_id,
 								'yougoFlag' => $yougo_flag,
 								'year' => $center_key,
 								'deleteFlag' => FALSE
@@ -1538,12 +1739,128 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/yougo/center/tmp/ajax", name="client.yougo.center.tmp.ajax")
+	 */
+	public function getCenterTmpAjaxAction(Request $request){
+		if($request->request->has('index_term')){
+			$index_term = $request->request->get('index_term');
+			$main_term_id = $request->request->get('main_term_id');
+			$main_term_id = (int)ltrim(substr($main_term_id, 1),'0');
+
+			$yougo_flag = $request->request->get('yougo_flag');
+			$ver_id = $request->request->get('ver_id');
+
+			$em = $this->get('doctrine.orm.entity_manager');
+			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+					'indexTerm' => $index_term,
+					'deleteFlag' => FALSE
+			));
+
+			//センター頻度開始年の取得
+			$entityVersion = $em->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+					'id' => $ver_id,
+					'deleteFlag' => FALSE
+			));
+
+			if(!$entityVersion){
+				$return_flag = false;
+				return $return_flag;
+			}
+
+			$year = $entityVersion->getYear();
+
+			$em->getConnection()->beginTransaction();
+
+			try{
+				$entityCenter = null;
+				if($entity){
+					$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
+							'mainTermId' => $main_term_id,
+							'subTermId' => $entity->getId(),
+							'yougoFlag' => $yougo_flag,
+							'deleteFlag' => FALSE
+					));
+				}
+
+				$entityCenterTmp = $em->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
+						'mainTermId' => $main_term_id,
+						'indexTerm' => $index_term,
+						'yougoFlag' => $yougo_flag,
+						'deleteFlag' => FALSE
+				));
+
+				$tmp_exist = true;
+				if(!$entityCenterTmp){
+					$tmp_exist = false;
+				}
+
+				if($entityCenter){
+					// 解説内索引用語が登録済のセンター頻度取得
+					foreach($entityCenter as $entityCenterRec){
+						if(!$tmp_exist){
+							$entityCenterTmp = new CenterTmp();
+							$entityCenterTmp->setMainTermId($entityCenterRec->getMainTermId());
+							$entityCenterTmp->setIndexTerm($index_term);
+							$entityCenterTmp->setYougoFlag($entityCenterRec->getYougoFlag());
+							$entityCenterTmp->setYear($entityCenterRec->getYear());
+							$entityCenterTmp->setMainExam($entityCenterRec->getMainExam());
+							$entityCenterTmp->setSubExam($entityCenterRec->getSubExam());
+
+							$em->persist($entityCenterTmp);
+						}
+					}
+
+				}else{
+					// 解説内索引用語が未登録の場合、初期値設定
+					for ($idx=0;$idx<10;$idx++){
+						if(!$tmp_exist){
+							$entityCenterTmp = new CenterTmp();
+							$entityCenterTmp->setMainTermId($main_term_id);
+							$entityCenterTmp->setIndexTerm($index_term);
+							$entityCenterTmp->setYougoFlag($yougo_flag);
+							$entityCenterTmp->setYear($year+$idx);
+							$entityCenterTmp->setMainExam(0);
+							$entityCenterTmp->setSubExam(0);
+
+							$em->persist($entityCenterTmp);
+
+						}
+					}
+				}
+
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+			}
+
+			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CenterTmp')->getCenterPoints($index_term,$yougo_flag);
+
+			$response = new JsonResponse($center_point);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * @Route("/yougo/explain/ajax", name="client.yougo.explain.ajax")
 	 */
 	public function getExplainAjaxAction(Request $request){
 		if($request->request->has('term_id')){
 			$term_id = $request->request->get('term_id');
-			$explain = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($term_id);
+			$explain = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndexTmp')->getExplainTerms($term_id);
+			if(!$explain){
+				$explain = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndex')->getExplainTerms($term_id);
+			}
 
 			$response = new JsonResponse($explain);
 		}else{
@@ -1578,14 +1895,14 @@ class YougoController extends BaseController {
 		foreach($request->request->get('index_term') as $ele_expterm){
 			//$this->get('logger')->error("***exp_term_elem***".serialize($ele_expterm));
 
-			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+			$entity = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
 					'mainTermId' => $request->request->get('term_id')[$idx],
 					'indexTerm' => $ele_expterm,
 					'deleteFlag' => FALSE
 			));
 			$update_mode = 'update';
 			if(!$entity){
-				$entity = new ExplainIndex();
+				$entity = new ExplainIndexTmp();
 				$update_mode = 'new';
 			}
 
@@ -1624,7 +1941,7 @@ class YougoController extends BaseController {
 		}
 
 		// WEBに入力されなかった用語は削除
-		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
+		$entity = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findBy(array(
 				'mainTermId' => $request->request->get('term_id')[0],
 				'deleteFlag' => FALSE
 		));
@@ -1634,7 +1951,7 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***DB:yougo***".$index_term);
 
 			if(!in_array($index_term, $request->request->get('index_term'))){
-				$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+				$entity = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
 						'indexTerm' => $index_term,
 						'deleteFlag' => FALSE
 				));
@@ -1656,7 +1973,37 @@ class YougoController extends BaseController {
 					$this->get('logger')->error($e->getMessage());
 					$this->get('logger')->error($e->getTraceAsString());
 
-					$ret = ['result'=>'ng','error'=>'ExplainDB error id:'.$index_term];
+					$ret = ['result'=>'ng','error'=>'ExplainTmpDB error id:'.$index_term];
+					$response = new JsonResponse($ret);
+					return $response;
+				}
+
+				$entity = $em->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
+						'mainTermId' => $request->request->get('term_id')[0],
+						'indexTerm' => $index_term,
+						'deleteFlag' => FALSE
+				));
+
+				$em->getConnection()->beginTransaction();
+
+				try{
+					foreach($entity as $entity_rec){
+						$entity_rec->setDeleteFlag(true);
+						$entity_rec->setModifyDate(new \DateTime());
+						$entity_rec->setDeleteDate(new \DateTime());
+					}
+
+					$em->flush();
+					$em->getConnection()->commit();
+				} catch (\Exception $e){
+					$em->getConnection()->rollback();
+					$em->close();
+
+					// log
+					$this->get('logger')->error($e->getMessage());
+					$this->get('logger')->error($e->getTraceAsString());
+
+					$ret = ['result'=>'ng','error'=>'CenterTmpDB error id:'.$index_term];
 					$response = new JsonResponse($ret);
 					return $response;
 				}
@@ -1665,7 +2012,7 @@ class YougoController extends BaseController {
 		}
 
 		// 主用語DBの用語解説の更新
-		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+		/*$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
 				'termId' => $request->request->get('term_id')[0],
 				'deleteFlag' => FALSE
 		));
@@ -1688,10 +2035,170 @@ class YougoController extends BaseController {
 			$ret = ['result'=>'ng','error'=>'MainTermDB error id:'.$entity->getMainTerm()];
 			$response = new JsonResponse($ret);
 			return $response;
-		}
+		}*/
 
 		$response = new JsonResponse($ret);
 		return $response;
+	}
+
+	/**
+	 * @Route("/explain/delete/ajax", name="client.explain.delete.ajax")
+	 * @Method("POST")
+	 */
+	public function deleteExplainAjaxAction(Request $request){
+		$this->get('logger')->error("***deleteExplainAjaxAction start***");
+		$this->get('logger')->error(serialize($request->request->get('term_id')));
+
+		$ret = ['result'=>'ok','error'=>''];
+
+		if(!($request->request->has('term_id'))){
+			$ret = ['result'=>'ng','error'=>'parameter error'];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		$term_id = $request->request->get('term_id');
+
+		// 一時テーブルに主用語IDに紐づく解説内用語が無い場合は即終了
+		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndexTmp')->findBy(array(
+				'mainTermId' =>$term_id,
+				'deleteFlag' => FALSE
+		));
+
+		$entityCenter = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
+				'mainTermId' =>$term_id,
+				'deleteFlag' => FALSE
+		));
+
+		if((!$entity)&&(!$entityCenter)){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		// 解説内索引用語サブ画面で一時テーブルに保存された後、用語編集画面から戻った場合は削除
+		$conn = $em->getConnection();
+		$conn->beginTransaction();
+		try {
+			if($entity){
+				$conn->delete('ExplainIndexTmp', array('main_term_id' => $term_id));
+			}
+			if($entityCenter){
+				$conn->delete('CenterTmp', array('main_term_id' => $term_id));
+			}
+			$em->getConnection()->commit();
+		}catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$ret = ['result'=>'ng','error'=>'ExplainIndexTmpDB error id:'.$term_id];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+	}
+
+	/**
+	 * @Route("/center/delete/ajax", name="client.center.delete.ajax")
+	 * @Method("POST")
+	 */
+	public function deleteCenterAjaxAction(Request $request){
+		$this->get('logger')->error("***deleteCenterAjaxAction start***");
+		$this->get('logger')->error(serialize($request->request->get('term_id')));
+		$this->get('logger')->error(serialize($request->request->get('explain_id')));
+		$this->get('logger')->error(serialize($request->request->get('index_term')));
+
+		$ret = ['result'=>'ok','error'=>''];
+
+		if(!($request->request->has('term_id'))){
+			$ret = ['result'=>'ng','error'=>'parameter error'];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		$term_id = $request->request->get('term_id');
+
+		// 一時テーブルに主用語IDに紐づくセンター頻度が無い場合は即終了
+		$entityCenter = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
+				'mainTermId' =>$term_id,
+				'deleteFlag' => FALSE
+		));
+
+		if(!$entityCenter){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		$idx = 0;
+		$em = $this->get('doctrine.orm.entity_manager');
+		$conn = $em->getConnection();
+
+		foreach($request->request->get('index_term') as $ele_expterm){
+			//$this->get('logger')->error("***exp_term_elem***".serialize($ele_expterm));
+
+			$entityExpTmp = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
+					'mainTermId' => $term_id,
+					'indexTerm' => $ele_expterm,
+					'deleteFlag' => FALSE
+			));
+
+			if(!$entityExpTmp){
+				continue;
+			}
+
+			$entityExp = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+					'mainTermId' => $term_id,
+					'indexTerm' => $entityExpTmp->getIndexTerm(),
+					'deleteFlag' => FALSE
+			));
+
+			$em->getConnection()->beginTransaction();
+
+			try{
+				if($entityExp){
+					$entityExpTmp->setCenterFrequency($entityExp->getCenterFrequency());
+				}else{
+					$entityExpTmp->setCenterFrequency(0);
+				}
+
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$ret = ['result'=>'ng','error'=>'ExplainIndexTmp error id:'.$ele_expterm];
+				$response = new JsonResponse($ret);
+				return $response;
+			}
+			$idx++;
+		}
+
+		// センター頻度サブ画面で一時テーブルに保存された後、解説内用語サブ画面から戻った場合は削除
+		try {
+			if($entityCenter){
+				$conn->delete('CenterTmp', array('main_term_id' => $term_id));
+			}
+			$em->getConnection()->commit();
+		}catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$ret = ['result'=>'ng','error'=>'CenterTmpDB error id:'.$term_id];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
 	}
 
 	/**

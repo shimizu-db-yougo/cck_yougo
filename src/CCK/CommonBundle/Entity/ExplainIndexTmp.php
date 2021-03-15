@@ -87,6 +87,27 @@ class ExplainIndexTmp
 	private $deleteFlag;
 
 	/**
+	 * @var integer
+	 *
+	 * @ORM\Column(name="text_frequency", type="integer", nullable=false)
+	 */
+	private $textFrequency;
+
+	/**
+	 * @var integer
+	 *
+	 * @ORM\Column(name="center_frequency", type="integer", nullable=false)
+	 */
+	private $centerFrequency;
+
+	/**
+	 * @var boolean
+	 *
+	 * @ORM\Column(name="news_exam", type="boolean", nullable=false, options={"default" = 0})
+	 */
+	private $newsExam;
+
+	/**
 	 * construct
 	 */
 	public function __construct(){
@@ -338,4 +359,76 @@ class ExplainIndexTmp
 	{
 		return $this->deleteFlag;
 	}
+
+    /**
+     * Set textFrequency.
+     *
+     * @param int $textFrequency
+     *
+     * @return ExplainIndexTmp
+     */
+    public function setTextFrequency($textFrequency)
+    {
+        $this->textFrequency = $textFrequency;
+
+        return $this;
+    }
+
+    /**
+     * Get textFrequency.
+     *
+     * @return int
+     */
+    public function getTextFrequency()
+    {
+        return $this->textFrequency;
+    }
+
+    /**
+     * Set centerFrequency.
+     *
+     * @param int $centerFrequency
+     *
+     * @return ExplainIndexTmp
+     */
+    public function setCenterFrequency($centerFrequency)
+    {
+        $this->centerFrequency = $centerFrequency;
+
+        return $this;
+    }
+
+    /**
+     * Get centerFrequency.
+     *
+     * @return int
+     */
+    public function getCenterFrequency()
+    {
+        return $this->centerFrequency;
+    }
+
+    /**
+     * Set newsExam.
+     *
+     * @param bool $newsExam
+     *
+     * @return ExplainIndexTmp
+     */
+    public function setNewsExam($newsExam)
+    {
+        $this->newsExam = $newsExam;
+
+        return $this;
+    }
+
+    /**
+     * Get newsExam.
+     *
+     * @return bool
+     */
+    public function getNewsExam()
+    {
+        return $this->newsExam;
+    }
 }
