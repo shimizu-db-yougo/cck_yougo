@@ -32,4 +32,16 @@ class ExplainIndexRepository extends EntityRepository
 
 		return $qb->getQuery()->getResult();
 	}
+
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function getNewTermID(){
+		$sql = "
+			SELECT * FROM ExplainIndex WHERE ExplainIndex.id = (SELECT MAX(ExplainIndex.id) FROM ExplainIndex)
+		";
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result;
+	}
 }

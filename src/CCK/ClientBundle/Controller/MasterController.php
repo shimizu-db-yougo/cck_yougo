@@ -873,6 +873,7 @@ class MasterController extends BaseController {
 			$handleCenterFreqMain = $this->openExportFile("CenterFreqMain");
 			$handleCenterFreqSub = $this->openExportFile("CenterFreqSub");
 			$handleCenterFreqSyn = $this->openExportFile("CenterFreqSyn");
+			$handleCenterFreqExp = $this->openExportFile("CenterFreqExp");
 
 			$this->get('logger')->info("***用語複製処理:START***");
 
@@ -886,6 +887,9 @@ class MasterController extends BaseController {
 
 			$maxSynTermIDRec = $em->getRepository('CCKCommonBundle:Synonym')->getNewTermID();
 			$newSynTermId = (int)$maxSynTermIDRec[0]['id'] + 1;
+
+			$maxExpTermIDRec = $em->getRepository('CCKCommonBundle:ExplainIndex')->getNewTermID();
+			$newExpTermId = (int)$maxExpTermIDRec[0]['id'] + 1;
 
 			$record_cnt = 0;
 			foreach($maintermRecordSet as $mainterm){
@@ -906,21 +910,22 @@ class MasterController extends BaseController {
 
 				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":READ***");
 
-				$this->exportExpTerm($handleExplain[0], $entityExp, $newTermId);
-				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,EXPLAIN***");
+				$newExpId = $this->exportExpTerm($handleExplain[0], $entityExp, $newTermId, $newExpTermId);
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,EXPLAIN".serialize($newExpId)."***");
 				$newSubId = $this->exportSubTerm($handleSub[0], $entitySub, $newTermId, $newSubTermId);
-				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,SUBTERM***");
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,SUBTERM".serialize($newSubId)."***");
 				$newSynId = $this->exportSynTerm($handleSyn[0], $entitySyn, $newTermId, $newSynTermId);
-				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,SYNONYM***");
+				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,SYNONYM".serialize($newSynId)."***");
 				$this->exportRefTerm($handleRefer[0], $entityRef, $newTermId, $newTermIdStart);
 				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,REFER***");
-				$arr_center_freq = $this->exportCenterDataByYear($handleCenter[0], $entityCenter, $newTermId, $newSubId, $newSynId, $request->request->get('startyear'));
+				$arr_center_freq = $this->exportCenterDataByYear($handleCenter[0], $entityCenter, $newTermId, $newSubId, $newSynId, $newExpId, $request->request->get('startyear'));
 				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,CENTER***".serialize($arr_center_freq)."****");
 
 				// センター頻度の更新SQL生成
 				$this->exportCenterFreqMain($handleCenterFreqMain[0], $arr_center_freq[0]);
 				$this->exportCenterFreqSub($handleCenterFreqSub[0], $arr_center_freq[1]);
 				$this->exportCenterFreqSyn($handleCenterFreqSyn[0], $arr_center_freq[2]);
+				$this->exportCenterFreqExp($handleCenterFreqExp[0], $arr_center_freq[3]);
 				$this->get('logger')->info("***用語複製処理:用語ID=".$term_id.":COPY,CENTER_FREQ***");
 
 				$newTermId++;
@@ -929,6 +934,9 @@ class MasterController extends BaseController {
 				}
 				if(count($newSynId) > 0){
 					$newSynTermId = max($newSynId)+1;
+				}
+				if(count($newExpId) > 0){
+					$newExpTermId = max($newExpId)+1;
 				}
 			}
 
@@ -949,10 +957,10 @@ class MasterController extends BaseController {
 			fclose($handleCenterFreqMain[0]);
 			fclose($handleCenterFreqSub[0]);
 			fclose($handleCenterFreqSyn[0]);
-
+			fclose($handleCenterFreqExp[0]);
 
 			$rtn_cd = $this->importSQLFile($handleMain[1],$handleExplain[1],$handleSub[1],$handleSyn[1],$handleRefer[1],$handleCenter[1],$handleHeader[1],
-					$handleCenterFreqMain[1],$handleCenterFreqSub[1],$handleCenterFreqSyn[1]);
+					$handleCenterFreqMain[1],$handleCenterFreqSub[1],$handleCenterFreqSyn[1],$handleCenterFreqExp[1]);//***
 
 			if($rtn_cd == false){
 				throw new \Exception("importSQL error");
@@ -996,7 +1004,7 @@ class MasterController extends BaseController {
 		return array($handle,$csv_path,$csvName);
 	}
 
-	private function importSQLFile($handleMain,$handleExplain,$handleSub,$handleSyn,$handleRefer,$handleCenter,$handleHeader,$handleCenterFreqMain,$handleCenterFreqSub,$handleCenterFreqSyn){
+	private function importSQLFile($handleMain,$handleExplain,$handleSub,$handleSyn,$handleRefer,$handleCenter,$handleHeader,$handleCenterFreqMain,$handleCenterFreqSub,$handleCenterFreqSyn,$handleCenterFreqExp){
 		// SQLファイルのインポート
 		$command_import = 'mysql -h'. $this->container->getParameter('database_host') . ' -u'. $this->container->getParameter('database_user') . ' -p' . $this->container->getParameter('database_password') . ' ' . $this->container->getParameter('database_name') . ' < ';
 		$this->get('logger')->info($command_import . $handleMain);
@@ -1058,14 +1066,21 @@ class MasterController extends BaseController {
 		}
 
 		$return_txt = exec($command_import . $handleCenterFreqSub,$output,$retrun_ver);
-		$this->get('logger')->info("***用語インポート:CenterFreqMain***" . $return_txt . ':' . $retrun_ver);
+		$this->get('logger')->info("***用語インポート:CenterFreqSub***" . $return_txt . ':' . $retrun_ver);
 
 		if($retrun_ver != 0){
 			return false;
 		}
 
 		$return_txt = exec($command_import . $handleCenterFreqSyn,$output,$retrun_ver);
-		$this->get('logger')->info("***用語インポート:CenterFreqMain***" . $return_txt . ':' . $retrun_ver);
+		$this->get('logger')->info("***用語インポート:CenterFreqSyn***" . $return_txt . ':' . $retrun_ver);
+
+		if($retrun_ver != 0){
+			return false;
+		}
+
+		$return_txt = exec($command_import . $handleCenterFreqExp,$output,$retrun_ver);
+		$this->get('logger')->info("***用語インポート:CenterFreqExp***" . $return_txt . ':' . $retrun_ver);
 
 		if($retrun_ver != 0){
 			return false;
@@ -1237,13 +1252,14 @@ class MasterController extends BaseController {
 		return $newTermId;
 	}
 
-	public function exportExpTerm($handle, $entityExp, $newTermId){
+	public function exportExpTerm($handle, $entityExp, $newTermId, $newId){
 
 		try{
 
+			$arr_rtn_id = array();
 			foreach($entityExp as $entityExpRec){
-				$sql = "INSERT INTO `ExplainIndex` (`id`, `main_term_id`, `index_term`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
-				$sql .= "(null,";
+				$sql = "INSERT INTO `ExplainIndex` (`id`, `main_term_id`, `index_term`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`, `text_frequency`, `center_frequency`, `news_exam`) VALUES";
+				$sql .= "(".$newId.",";
 				$sql .= $newTermId.",";
 				$sql .= "'".$entityExpRec['indexTerm']."',";
 				$sql .= "'".$entityExpRec['indexAddLetter']."',";
@@ -1252,10 +1268,15 @@ class MasterController extends BaseController {
 				$sql .= "NOW(),";
 				$sql .= "null,";
 				$sql .= "null,";
-				$sql .= "0);";
+				$sql .= "0,";
+				$sql .= $entityExpRec['textFrequency'].",";
+				$sql .= $entityExpRec['centerFrequency'].",";
+				$sql .= (($entityExpRec['newsExam']) ? "1" : "0").");";
 
 				fputs($handle, $sql."\n");
 
+				array_push($arr_rtn_id, $newId);
+				$newId++;
 			}
 
 		} catch (\Exception $e){
@@ -1266,6 +1287,7 @@ class MasterController extends BaseController {
 
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
+		return $arr_rtn_id;
 	}
 
 	public function exportSubTerm($handle, $entitySub, $newTermId, $newId){
@@ -1376,12 +1398,13 @@ class MasterController extends BaseController {
 		}
 	}
 
-	public function exportCenterDataByYear($handle, $entityCenter, $newTermId, $newSubId, $newSynId, $wkYear){
+	public function exportCenterDataByYear($handle, $entityCenter, $newTermId, $newSubId, $newSynId, $newExpId, $wkYear){
 
 		try{
 			$idx = 0;
 			$idx_sub = 0;
 			$idx_syn = 0;
+			$idx_exp = 0;
 
 			$wkSubTermId = '0';
 			$wkYougoFlag = 1;
@@ -1392,6 +1415,7 @@ class MasterController extends BaseController {
 			$arr_freq_main = array();
 			$arr_freq_sub = array();
 			$arr_freq_syn = array();
+			$arr_freq_exp = array();
 
 			foreach($entityCenter as $entityCenterRec){
 				$idx++;
@@ -1433,7 +1457,6 @@ class MasterController extends BaseController {
 							}else{
 								$arr_freq_main[$newTermId] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
 							}
-
 						}elseif($entityCenterRec->getYougoFlag() == 2){
 							$wkSubTermId = $newSubId[$idx_sub];
 
@@ -1446,8 +1469,7 @@ class MasterController extends BaseController {
 							if($idx == 10){
 								$idx_sub++;
 							}
-
-						}else{
+						}elseif($entityCenterRec->getYougoFlag() == 3){
 							$wkSubTermId = $newSynId[$idx_syn];
 
 							if(isset($arr_freq_syn[$wkSubTermId])){
@@ -1459,7 +1481,18 @@ class MasterController extends BaseController {
 							if($idx == 10){
 								$idx_syn++;
 							}
+						}else{
+							$wkSubTermId = $newExpId[$idx_exp];
 
+							if(isset($arr_freq_exp[$wkSubTermId])){
+								$arr_freq_exp[$wkSubTermId] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+							}else{
+								$arr_freq_exp[$wkSubTermId] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+							}
+
+							if($idx == 10){
+								$idx_exp++;
+							}
 						}
 						$wkYougoFlag = $entityCenterRec->getYougoFlag();
 
@@ -1508,7 +1541,7 @@ class MasterController extends BaseController {
 
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
-		return array($arr_freq_main,$arr_freq_sub,$arr_freq_syn);
+		return array($arr_freq_main,$arr_freq_sub,$arr_freq_syn,$arr_freq_exp);
 	}
 
 	public function exportHeader($handle, $entityHeader, $newCurId){
@@ -1579,6 +1612,22 @@ class MasterController extends BaseController {
 		try{
 			foreach($arr_freq as $key=>$val) {
 				$sql = "UPDATE `Synonym` SET `center_frequency` = " . $val . " WHERE `id` = ".$key.";";
+				fputs($handle, $sql."\n");
+			}
+		} catch (\Exception $e){
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			return $this->redirect($this->generateUrl('client.yougo.list'));
+		}
+	}
+
+	public function exportCenterFreqExp($handle, $arr_freq){
+
+		try{
+			foreach($arr_freq as $key=>$val) {
+				$sql = "UPDATE `ExplainIndex` SET `center_frequency` = " . $val . " WHERE `id` = ".$key.";";
 				fputs($handle, $sql."\n");
 			}
 		} catch (\Exception $e){
