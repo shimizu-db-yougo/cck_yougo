@@ -625,7 +625,7 @@ class DownloadController extends BaseController {
 
 		$main['term_id'] = 'M'.str_pad($main['term_id'], 6, 0, STR_PAD_LEFT);
 
-		if($main['red_letter'] == '1'){
+		if($main['center_frequency'] > 4){
 			$main['red_letter'] = '●';
 		}else{
 			$main['red_letter'] = '';
@@ -705,7 +705,7 @@ class DownloadController extends BaseController {
 	private function replaceSubField(&$sub,$entityVer){
 		$sub['id'] = 'S'.str_pad($sub['id'], 6, 0, STR_PAD_LEFT);
 
-		if($sub['red_letter'] == '1'){
+		if($sub['center_frequency'] > 4){
 			$sub['red_letter'] = '●';
 		}else{
 			$sub['red_letter'] = '';
@@ -799,7 +799,7 @@ class DownloadController extends BaseController {
 			array_push($arr_err_list,array($hen,$sho,$main['main_term'],$syn['term']));
 		}
 
-		if($syn['red_letter'] == '1'){
+		if($syn['center_frequency'] > 4){
 			$syn['red_letter'] = '●';
 		}else{
 			$syn['red_letter'] = '';
