@@ -1165,6 +1165,7 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***DB:yougo***".$index_term);
 
 			$entity_tmp = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
+					'mainTermId' => $request->request->get('term_id'),
 					'indexTerm' => $index_term,
 					'deleteFlag' => FALSE
 			));
@@ -1268,6 +1269,7 @@ class YougoController extends BaseController {
 			$this->get('logger')->error("***DB:yougo***".$index_term);
 
 			$entity_tmp = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
+					'mainTermId' => $request->request->get('term_id'),
 					'indexTerm' => $index_term,
 					'deleteFlag' => FALSE
 			));
@@ -1750,6 +1752,7 @@ class YougoController extends BaseController {
 
 			$em = $this->get('doctrine.orm.entity_manager');
 			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+					'mainTermId' => $main_term_id,
 					'indexTerm' => $index_term,
 					'deleteFlag' => FALSE
 			));
@@ -1950,6 +1953,7 @@ class YougoController extends BaseController {
 
 			if(!in_array($index_term, $request->request->get('index_term'))){
 				$entity = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findOneBy(array(
+						'mainTermId' => $request->request->get('term_id')[0],
 						'indexTerm' => $index_term,
 						'deleteFlag' => FALSE
 				));
