@@ -923,7 +923,6 @@ class YougoController extends BaseController {
 
 			try{
 				$entity->setSubTerm($subterm['sub_term'][$idx]);
-				$entity->setRedLetter(($subterm['red_letter'][$idx] == 'true') ? true : false);
 				$entity->setTextFrequency($subterm['text_freq'][$idx]);
 				$entity->setCenterFrequency($subterm['center_freq'][$idx]);
 				$entity->setNewsExam(($subterm['news_exam'][$idx] == 'true') ? true : false);
@@ -979,7 +978,6 @@ class YougoController extends BaseController {
 			try{
 				$entity->setSynonymId($synterm['synonym_id'][$idx]);
 				$entity->setTerm($synterm['term'][$idx]);
-				$entity->setRedLetter(($synterm['red_letter'][$idx] == 'true') ? true : false);
 				$entity->setTextFrequency($synterm['text_freq'][$idx]);
 				$entity->setCenterFrequency($synterm['center_freq'][$idx]);
 				$entity->setNewsExam(($synterm['news_exam'][$idx] == 'true') ? true : false);

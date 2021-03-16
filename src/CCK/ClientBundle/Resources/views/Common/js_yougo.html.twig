@@ -318,7 +318,7 @@
 			mainterm.handover = $('#form_handover [id=handover]').val();
 
 			// サブ用語
-			var subterm = {sub_term_id:[],sub_term:[],red_letter:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],index_add_letter:[],index_kana:[],nombre:[]};
+			var subterm = {sub_term_id:[],sub_term:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],index_add_letter:[],index_kana:[],nombre:[]};
 			var form_subterm = $('.form_subterm');
 			var err_field_sub = '';
 			form_subterm.each(function(i,elem) {
@@ -326,7 +326,6 @@
 
 				subterm.sub_term_id.push($(elem).find('#sub_term_id').val());
 				subterm.sub_term.push($(elem).find('#sub_term').val());
-				subterm.red_letter.push($(elem).find('#red_letter').prop("checked"));
 				subterm.text_freq.push($(elem).find('#text_freq').val());
 				subterm.center_freq.push($(elem).find('#center_freq').text());
 				subterm.news_exam.push($(elem).find('#news_exam').prop("checked"));
@@ -340,7 +339,7 @@
 			mainterm.subterm = subterm;
 
 			// 同対類用語
-			var synterm = {syn_term_id:[],synonym_id:[],term:[],red_letter:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],index_add_letter:[],index_kana:[],nombre:[]};
+			var synterm = {syn_term_id:[],synonym_id:[],term:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],index_add_letter:[],index_kana:[],nombre:[]};
 			var form_synterm = $('.form_synterm');
 			var err_field_syn = '';
 			form_synterm.each(function(i,elem) {
@@ -349,7 +348,6 @@
 				synterm.syn_term_id.push($(elem).find('#syn_term_id').val());
 				synterm.synonym_id.push($(elem).find('#synonym_id').val());
 				synterm.term.push($(elem).find('#syn_term').val());
-				synterm.red_letter.push($(elem).find('#red_letter').prop("checked"));
 				synterm.text_freq.push($(elem).find('#text_freq').val());
 				synterm.center_freq.push($(elem).find('#center_freq').text());
 				synterm.news_exam.push($(elem).find('#news_exam').prop("checked"));
@@ -467,8 +465,6 @@
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.sub_term"|trans }}</label>'
 			+'<div class="col-xs-3"><input class="form-control input-sm" type="text" id="sub_term" name="sub_term" value="' + (((record)&&(record.sub_term)) ? record.sub_term : '') + '"></div>'
-			+'<label class="col-xs-1">{{ "text.yougo.red_letter"|trans }}</label>'
-			+'<div class="col-xs-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.freq.text"|trans }}</label>'
@@ -522,8 +518,6 @@
 			+'</select></div>'
 			+'<label class="col-xs-1">{{ "text.yougo.syn_term"|trans }}</label>'
 			+'<div class="col-xs-3"><input class="form-control input-sm" type="text" id="syn_term" name="syn_term" value="' + (((record)&&(record.term)) ? record.term : '') + '"></div>'
-			+'<label class="col-xs-1">{{ "text.yougo.red_letter"|trans }}</label>'
-			+'<div class="col-xs-1"><input type="checkbox" id="red_letter" name="red_letter" ' + (((record)&&(record.red_letter == '1')) ? ' checked ' : '') + '></div>'
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.freq.text"|trans }}</label>'
