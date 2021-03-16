@@ -38,12 +38,12 @@
 				<tr class="text-center">
 					<td width="60px" class="text-left">
 						<div>
-							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (yougo.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ getTerm(yougo.main_term)|raw }}　{{ getTextFreqIcon(yougo.text_frequency,ranka,rankb)|raw }}{{ getCenterFreqIcon(center_main)|raw }}{{ getNewsExamIcon(yougo.news_exam)|raw }}</span>
+							<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (center_main > 4) ? 'color:#ff004C;' : ''}}">{{ getTerm(yougo.main_term)|raw }}　{{ getTextFreqIcon(yougo.text_frequency,ranka,rankb)|raw }}{{ getCenterFreqIcon(center_main)|raw }}{{ getNewsExamIcon(yougo.news_exam)|raw }}</span>
 
 							{% set i = 0 %}
 							{% for rec_sub_term in subterm %}
 								{% if i == 0 %}<span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(yougo.delimiter)|trans }}</span>{% endif %}
-								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (rec_sub_term.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ getTerm(rec_sub_term.sub_term)|raw }}{{ getTextFreqIcon(rec_sub_term.text_frequency,ranka,rankb)|raw }}{{ getCenterFreqIcon(center_sub[i])|raw }}{{ getNewsExamIcon(rec_sub_term.news_exam)|raw }}</span><span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(rec_sub_term.delimiter)|trans }}</span>
+								<span style="font-size: 16px; font-weight: bold; font-family: sans-serif; {{ (center_sub[i] > 4) ? 'color:#ff004C;' : ''}}">{{ getTerm(rec_sub_term.sub_term)|raw }}{{ getTextFreqIcon(rec_sub_term.text_frequency,ranka,rankb)|raw }}{{ getCenterFreqIcon(center_sub[i])|raw }}{{ getNewsExamIcon(rec_sub_term.news_exam)|raw }}</span><span style="font-size: 16px; font-family: sans-serif;">{{ getDelimiter(rec_sub_term.delimiter)|trans }}</span>
 								{% set i = i + 1 %}
 							{% endfor %}
 
@@ -58,7 +58,7 @@
 						<div class="text-right">
 							{% set i = 0 %}
 							{% for rec_synonym in synonym %}
-								{{ getSynonymIcon(rec_synonym.synonym_id)|raw }}<span style="font-size: 14px; font-weight: bold; {{ (rec_synonym.red_letter == '1') ? 'color:#ff004C;' : ''}}">{{ rec_synonym.term }}{{ getTextFreqIcon(rec_synonym.text_frequency,ranka,rankb)|raw }}{{ getCenterFreqIcon(center_syn[i])|raw }}{{ getNewsExamIcon(rec_synonym.news_exam)|raw }}</span>{{ getDelimiterSyn(rec_synonym.delimiter)|trans }}
+								{{ getSynonymIcon(rec_synonym.synonym_id)|raw }}<span style="font-size: 14px; font-weight: bold; {{ (center_syn[i] > 4) ? 'color:#ff004C;' : ''}}">{{ rec_synonym.term }}{{ getTextFreqIcon(rec_synonym.text_frequency,ranka,rankb)|raw }}{{ getCenterFreqIcon(center_syn[i])|raw }}{{ getNewsExamIcon(rec_synonym.news_exam)|raw }}</span>{{ getDelimiterSyn(rec_synonym.delimiter)|trans }}
 								{% set i = i + 1 %}
 							{% endfor %}
 						</div>
