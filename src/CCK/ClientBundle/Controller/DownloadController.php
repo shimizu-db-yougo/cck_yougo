@@ -705,6 +705,10 @@ class DownloadController extends BaseController {
 		}else{
 			$main['nombre_bold'] = '';
 		}
+
+		if($main['illust_caption'] != ''){
+			$main['illust_caption'] .= "〔図〕";
+		}
 	}
 
 	private function replaceExpField(&$exp,$entityVer){
