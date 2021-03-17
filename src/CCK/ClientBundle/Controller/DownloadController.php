@@ -138,6 +138,12 @@ class DownloadController extends BaseController {
 			$message_preset = "用語の登録がありません。教科・版を確認してください。";
 		}elseif($status == 207){
 			$message_maemikaeshi = "用語の登録がありません。教科・版を確認してください。";
+		}elseif($status == 210){
+			$message_honmon = "IDが付加されていない用語があります。ログテキストをご確認ください。";
+		}elseif($status == 211){
+			$message_sakuin = "IDが付加されていない用語があります。ログテキストをご確認ください。";
+		}elseif($status == 212){
+			$message_maemikaeshi = "IDが付加されていない用語があります。ログテキストをご確認ください。";
 		}elseif(($status > 250)&&($status < 260)){
 
 			$arr_alert_list = $session->get(self::SES_CSV_FIELD_ALERT_KEY);
@@ -170,7 +176,8 @@ class DownloadController extends BaseController {
 				'message_honmon' => $message_honmon,
 				'message_sakuin' => $message_sakuin,
 				'message_preset' => $message_preset,
-				'message_maemikaeshi' => $message_maemikaeshi
+				'message_maemikaeshi' => $message_maemikaeshi,
+				'status' => $status,
 		);
 	}
 
@@ -233,19 +240,24 @@ class DownloadController extends BaseController {
 		// 原稿データCSV生成
 		global $arr_err_list;
 		$arr_err_list = array();
+		global $status_err;
+		$status_err = 0;
+
+		$this->RemoveLog("id_check.log");
+
 		if($entity){
 			$entityVer = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
 					'id' => $entity[0]['ver_id'],
 					'deleteFlag' => FALSE
 			));
 
-			$body_list = $this->constructManuscriptCSV($term_id, $request, $entity, $outFileName, $entityVer, $arr_err_list);
+			$body_list = $this->constructManuscriptCSV($term_id, $request, $entity, $outFileName, $entityVer, $arr_err_list, $status_err);
 		}else{
 			$body_list = false;
 		}
 
 		$status = 0;
-		if($body_list === false){
+		if(($body_list === false)||($status_err > 0)){
 			if($type == '0'){
 				$status = 204;
 			}elseif ($type == '1'){
@@ -254,6 +266,17 @@ class DownloadController extends BaseController {
 				$status = 207;
 			}else{
 				$status = 206;
+			}
+
+			// ID存在チェックエラー
+			if($status_err > 0){
+				if($type == '0'){
+					$status = 210;
+				}elseif ($type == '1'){
+					$status = 211;
+				}elseif ($type == '3'){
+					$status = 212;
+				}
 			}
 
 			return $this->redirect($this->generateUrl('client.csv.export', array('status' => $status)));
@@ -337,7 +360,7 @@ class DownloadController extends BaseController {
 	}
 
 	// 原稿データCSV生成
-	private function constructManuscriptCSV($genkoId, $request, $entity, $outFileName, $entityVer, &$arr_err_list) {
+	private function constructManuscriptCSV($genkoId, $request, $entity, $outFileName, $entityVer, &$arr_err_list, &$status_err) {
 		$em = $this->getDoctrine()->getManager();
 
 		$type = $request->query->get('type');
@@ -352,7 +375,7 @@ class DownloadController extends BaseController {
 			$entity_ref = $em->getRepository('CCKCommonBundle:MainTerm')->getYougoDetailOfRefer($mainTermRec['term_id']);
 
 			// body
-			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref, $type, $generic_value, $entityVer, $arr_err_list), $request);
+			$body = $this->encoding($this->generateBody($mainTermRec,$entity_exp, $entity_sub, $entity_syn, $entity_ref, $type, $generic_value, $entityVer, $arr_err_list, $status_err), $request);
 			array_push($body_list,$body);
 		}
 
@@ -444,7 +467,7 @@ class DownloadController extends BaseController {
 	 * @param  array $coupons
 	 * @return array $body
 	 */
-	private function generateBody($main, $expterm, $subterm, $synterm, $refterm, $type, $generic, $entityVer ,&$arr_err_list){
+	private function generateBody($main, $expterm, $subterm, $synterm, $refterm, $type, $generic, $entityVer ,&$arr_err_list ,&$status_err){
 		$body = [];
 		$result = [];
 
@@ -470,6 +493,7 @@ class DownloadController extends BaseController {
 		$exp['exp_index_add_letter'] = "";
 		$exp['exp_nombre'] = "";
 
+		$arr_exp_indexTerm = [];
 		if($expterm){
 			foreach ($expterm as $exptermRec) {
 				$exptermRec['id'] = 'K'.str_pad($exptermRec['id'], 6, 0, STR_PAD_LEFT);
@@ -484,9 +508,12 @@ class DownloadController extends BaseController {
 				$exp['exp_index_add_letter'] .= $exptermRec['indexAddLetter'] . '\v';
 				$exp['exp_nombre'] .= (($type != '0') ? $exptermRec['nombre'] : '') . '\v';
 
-				// 解説内用語存在チェック
-				$this->isExistsExplainTerm($main['term_explain'],$exptermRec['indexTerm']);
+				array_push($arr_exp_indexTerm, $exptermRec['indexTerm']);
 			}
+
+			// 解説内用語存在チェック
+			$this->isExistsExplainTerm($main['term_id'],$main['main_term'],$main['term_explain'],$arr_exp_indexTerm,$status_err);
+
 			foreach ($exp as $key => $val) {
 				$exp[$key] = mb_substr($val,0,mb_strlen($val)-2);
 			}
@@ -920,8 +947,15 @@ class DownloadController extends BaseController {
 
 	}
 
-	private function isExistsExplainTerm($main_explain,$explain_term){
-
+	private function isExistsExplainTerm($main_term_id,$main_term,$main_explain,$explain_term,&$status_err){
+		if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $main_explain, $match_data, PREG_SET_ORDER)){
+			foreach($match_data as $main_explain_ele){
+				if(!in_array($main_explain_ele[1], $explain_term)){
+					$this->OutputLog("ERROR", "id_check.log", "主用語ID:".$main_term_id.",主用語:".$main_term.",解説内さくいん用語:".$main_explain_ele[1]);
+					$status_err = 210;
+				}
+			}
+		}
 	}
 
 	/**
@@ -1042,6 +1076,14 @@ class DownloadController extends BaseController {
 
 		$response = new JsonResponse(array("return_cd" => true, "name" => ''));
 		return $response;
+	}
+
+	/**
+	 * @Route("/log/id/download", name="client.log.id.download")
+	 * @Method("POST|GET")
+	 */
+	public function logIdDownloadAction(Request $request){
+		return $this->DownloadLog("id_check.log","IDチェックエラー");
 	}
 
 	/**

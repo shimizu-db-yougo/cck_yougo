@@ -1155,7 +1155,7 @@ class YougoController extends BaseController {
 		}
 
 		// WEBに入力されなかった用語は削除
-		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
+		/*$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
 				'mainTermId' => $request->request->get('term_id'),
 				'deleteFlag' => FALSE
 		));
@@ -1194,7 +1194,7 @@ class YougoController extends BaseController {
 				}
 			}
 
-		}
+		}*/
 
 		return $return_flag;
 	}
@@ -1259,7 +1259,7 @@ class YougoController extends BaseController {
 		}
 
 		// WEBに入力されなかった解説内用語のセンター頻度は削除
-		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
+		/*$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
 				'mainTermId' => $request->request->get('term_id'),
 				'deleteFlag' => FALSE
 		));
@@ -1281,7 +1281,7 @@ class YougoController extends BaseController {
 				$em->getConnection()->commit();
 
 			}
-		}
+		}*/
 
 		return $return_flag;
 	}
@@ -2395,12 +2395,12 @@ class YougoController extends BaseController {
 
 		// 用語データの複製
 		$newTermId = $this->copyMainTerm($em, $entityMain);
-		$this->copyExpTerm($em, $entityExp, $newTermId);
+		$newExpId = $this->copyExpTerm($em, $entityExp, $newTermId);
 		$newSubId = $this->copySubTerm($em, $entitySub, $newTermId);
 		$this->get('logger')->error("***新規登録subid***".serialize($newSubId));
 		$newSynId = $this->copySynTerm($em, $entitySyn, $newTermId);
 		$this->copyRefTerm($em, $entityRef, $newTermId);
-		$this->copyCenterData($em, $entityCenter, $newTermId, $newSubId, $newSynId);
+		$this->copyCenterData($em, $entityCenter, $newTermId, $newSubId, $newSynId, $newExpId);
 
 		$cur_list = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findBy(array(
 				'deleteFlag' => FALSE

@@ -307,7 +307,7 @@ class UploadController extends BaseController {
 	 * @Method("POST|GET")
 	 */
 	public function logDownloadAction(Request $request){
-		return $this->DownloadLog("nombre_check.log");
+		return $this->DownloadLog("nombre_check.log","ノンブル取込みエラー");
 	}
 
 	private function checkFileType($filename){

@@ -601,6 +601,7 @@ class BaseController extends Controller {
 		$em->getConnection()->beginTransaction();
 
 		try{
+			$arr_rtn_id = array();
 			foreach($entityExp as $entityExpRec){
 				$entityNewExp = new ExplainIndex();
 
@@ -611,11 +612,17 @@ class BaseController extends Controller {
 				$entityNewExp->setNombre($entityExpRec['nombre']);
 				$entityNewExp->setDeleteFlag(false);
 
+				$entityNewExp->setTextFrequency($entityExpRec['textFrequency']);
+				$entityNewExp->setCenterFrequency($entityExpRec['centerFrequency']);
+				$entityNewExp->setNewsExam($entityExpRec['newsExam']);
+
 				$em->persist($entityNewExp);
+				$em->flush();
+
+				array_push($arr_rtn_id, $entityNewExp->getId());
 				unset($entityNewExp);
 			}
 
-			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){
 			$em->getConnection()->rollback();
@@ -627,6 +634,7 @@ class BaseController extends Controller {
 
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
+		return $arr_rtn_id;
 	}
 
 	public function copySubTerm($em, $entitySub, $newTermId){
@@ -746,7 +754,7 @@ class BaseController extends Controller {
 		}
 	}
 
-	public function copyCenterData($em, $entityCenter, $newTermId, $newSubId, $newSynId){
+	public function copyCenterData($em, $entityCenter, $newTermId, $newSubId, $newSynId, $newExpId){
 
 		$em->getConnection()->beginTransaction();
 
@@ -754,6 +762,7 @@ class BaseController extends Controller {
 			$idx = 0;
 			$idx_sub = 0;
 			$idx_syn = 0;
+			$idx_exp = 0;
 
 			$this->get('logger')->error("***copy start***");
 			foreach($entityCenter as $entityCenterRec){
@@ -777,13 +786,22 @@ class BaseController extends Controller {
 						$idx_sub++;
 					}
 
-				}else{
+				}elseif($entityCenterRec->getYougoFlag() == 3){
 					$this->get('logger')->error("***newSynId***".$newSynId[$idx_syn].":".$idx_syn);
 					$entityNewCenter->setSubTermId($newSynId[$idx_syn]);
 
 					if($idx == 10){
 						$idx = 0;
 						$idx_syn++;
+					}
+
+				}else{
+					$this->get('logger')->error("***newExpId***".$newExpId[$idx_exp].":".$idx_exp);
+					$entityNewCenter->setSubTermId($newExpId[$idx_exp]);
+
+					if($idx == 10){
+						$idx = 0;
+						$idx_exp++;
 					}
 
 				}
@@ -1060,7 +1078,7 @@ class BaseController extends Controller {
 		fclose($fp);
 	}
 
-	protected function DownloadLog($logName){
+	protected function DownloadLog($logName,$prefix){
 		$year = date ( "Y" );
 		$month = date ( "m" );
 		$day = date ( "d" );
@@ -1071,7 +1089,7 @@ class BaseController extends Controller {
 		$error_log = $logDir . $logName;
 
 		// ダウンロードファイル名設定
-		$finename = "ノンブル取込みエラー_".$year.$month.$day.".log";
+		$finename = $prefix."_".$year.$month.$day.".log";
 
 		// 取込データエラーログ
 		$response = new BinaryFileResponse($error_log);
