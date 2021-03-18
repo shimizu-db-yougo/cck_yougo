@@ -194,6 +194,7 @@
 			$.post("{{ path('client.explain.save.ajax') }}", explain)
 			.done(function(r,s){
 				console.log('savePost:done',s,r);
+				$('#form_mainterm [name=update_mode_exp]').val('update');
 				alert('解説内さくいん用語の登録が完了しました。');
 			})
 			.fail(function(e,s){
@@ -374,6 +375,10 @@
 
 			console.log(refterm);
 			mainterm.refterm = refterm;
+
+			// 解説内さくいん用語
+			mainterm.update_mode_exp = $('#form_mainterm [name=update_mode_exp]').val();
+			console.log(mainterm.update_mode_exp);
 
 			// エラーチェック文言出力
 			if((err_field != '')||(err_field_syn != '')||(err_field_ref != '')){
