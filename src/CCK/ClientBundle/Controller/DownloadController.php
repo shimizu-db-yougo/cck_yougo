@@ -511,13 +511,13 @@ class DownloadController extends BaseController {
 				array_push($arr_exp_indexTerm, $exptermRec['indexTerm']);
 			}
 
-			// 解説内用語存在チェック
-			$this->isExistsExplainTerm($main['term_id'],$main['main_term'],$main['term_explain'],$arr_exp_indexTerm,$status_err);
-
 			foreach ($exp as $key => $val) {
 				$exp[$key] = mb_substr($val,0,mb_strlen($val)-2);
 			}
 		}
+		// 解説内用語存在チェック
+		$this->isExistsExplainTerm($main['term_id'],$main['main_term'],$main['term_explain'],$arr_exp_indexTerm,$status_err);
+
 
 		// サブ用語
 		$sub = [];

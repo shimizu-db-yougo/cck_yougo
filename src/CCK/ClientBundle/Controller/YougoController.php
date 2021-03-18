@@ -819,6 +819,12 @@ class YougoController extends BaseController {
 			return $response;
 		}
 
+		// 解説内用語ID存在チェック
+		if($this->checkExplainId($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
 		$response = new JsonResponse($ret);
 		return $response;
 	}
@@ -1282,6 +1288,37 @@ class YougoController extends BaseController {
 
 			}
 		}*/
+
+		return $return_flag;
+	}
+
+	private function checkExplainId($request,&$ret){
+		$return_flag = true;
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
+				'mainTermId' => $request->request->get('term_id'),
+				'deleteFlag' => FALSE
+		));
+
+		$arr_exp_indexTerm = [];
+		foreach($entity as $entity_rec){
+			array_push($arr_exp_indexTerm, $entity_rec->getIndexTerm());
+		}
+
+		$arr_not_exist_index_term = [];
+		if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $request->request->get('term_explain'), $match_data, PREG_SET_ORDER)){
+			foreach($match_data as $main_explain_ele){
+				if(!in_array($main_explain_ele[1], $arr_exp_indexTerm)){
+					array_push($arr_not_exist_index_term,$main_explain_ele[1]);
+					$return_flag = false;
+				}
+			}
+		}
+
+		if(!$return_flag){
+			$ret = ['result'=>'explain_warn','error'=>$arr_not_exist_index_term];
+		}
 
 		return $return_flag;
 	}

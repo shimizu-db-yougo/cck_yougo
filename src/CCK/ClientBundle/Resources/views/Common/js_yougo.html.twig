@@ -390,7 +390,12 @@
 			.done(function(r,s){
 				console.log('savePost:done',s,r);
 				deleteExplainTmp();
-				window.location.href = "{{ path('client.yougo.index') }}";
+
+				if(r.result == "explain_warn"){
+					alert('IDが付加されていない解説内用語があります。:'+r.error.join(','));
+				}else{
+					window.location.href = "{{ path('client.yougo.index') }}";
+				}
 			})
 			.fail(function(e,s){
 				console.log('savePost:fail',s,e.status);
