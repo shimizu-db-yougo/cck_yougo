@@ -263,7 +263,7 @@ class UploadController extends BaseController {
 						}
 						// CSVの用語とDBに登録されたID,用語と一致しない
 						if($is_term){
-							if($data[2] != $term_db){
+							if($data[2] != preg_replace('/【.*?】/', '', $term_db)){
 								$this->OutputLog("ERROR4", "nombre_check.log", "[".$data[2]."]が登録されているID・用語と一致しません。");
 								$status = 201;
 							}
