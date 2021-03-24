@@ -1446,6 +1446,7 @@ class MasterController extends BaseController {
 
 				}
 
+				$wkYougoFlag = $entityCenterRec->getYougoFlag();
 				if($idx < 11){
 					if($wkYear > $entityCenterRec->getYear()){
 						// DBの実施年より対象年が大きい場合、スキップ
@@ -1508,7 +1509,6 @@ class MasterController extends BaseController {
 							}
 							//$this->get('logger')->error("★8");
 						}
-						$wkYougoFlag = $entityCenterRec->getYougoFlag();
 
 						$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
 						$sql .= "(null,";
@@ -1548,6 +1548,26 @@ class MasterController extends BaseController {
 
 				fputs($handle, $sql."\n");
 				//$this->get('logger')->error("★３".$sql);
+			}
+
+			// 画面に入力した開始年がDBに登録された年を超えていると頻度データの配列ができないので、初期値を設定
+			if(empty($arr_freq_main)){
+				$arr_freq_main[$newTermId] = 0;
+			}
+			if(empty($arr_freq_sub)){
+				foreach($newSubId as $newSubId_ele){
+					$arr_freq_sub[$newSubId_ele] = 0;
+				}
+			}
+			if(empty($arr_freq_syn)){
+				foreach($newSynId as $newSynId_ele){
+					$arr_freq_syn[$newSynId_ele] = 0;
+				}
+			}
+			if(empty($arr_freq_exp)){
+				foreach($newExpId as $newExpId_ele){
+					$arr_freq_exp[$newExpId_ele] = 0;
+				}
 			}
 
 		} catch (\Exception $e){
