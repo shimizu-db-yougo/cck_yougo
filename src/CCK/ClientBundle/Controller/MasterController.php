@@ -1225,7 +1225,7 @@ class MasterController extends BaseController {
 			$sql .= "'".$entityMain->getIndexOriginal()."',";
 			$sql .= "'".$entityMain->getIndexOriginalKana()."',";
 			$sql .= "'".$entityMain->getIndexAbbreviation()."',";
-			$sql .= $entityMain->getNombre().",";
+			$sql .= "0,";
 			$sql .= "'".$entityMain->getTermExplain()."',";
 			$sql .= "'".$entityMain->getHandover()."',";
 			$sql .= "'".$entityMain->getIllustFilename()."',";
@@ -1264,7 +1264,7 @@ class MasterController extends BaseController {
 				$sql .= "'".$entityExpRec['indexTerm']."',";
 				$sql .= "'".$entityExpRec['indexAddLetter']."',";
 				$sql .= "'".$entityExpRec['indexKana']."',";
-				$sql .= $entityExpRec['nombre'].",";
+				$sql .= "0,";
 				$sql .= "NOW(),";
 				$sql .= "null,";
 				$sql .= "null,";
@@ -1309,7 +1309,7 @@ class MasterController extends BaseController {
 				$sql .= "'".$entitySubRec['delimiter_kana']."',";
 				$sql .= "'".$entitySubRec['index_add_letter']."',";
 				$sql .= "'".$entitySubRec['index_kana']."',";
-				$sql .= $entitySubRec['nombre'].",";
+				$sql .= "0,";
 				$sql .= "NOW(),";
 				$sql .= "null,";
 				$sql .= "null,";
@@ -1350,7 +1350,7 @@ class MasterController extends BaseController {
 				$sql .= "'',";
 				$sql .= "'".$entitySynRec['index_add_letter']."',";
 				$sql .= "'".$entitySynRec['index_kana']."',";
-				$sql .= $entitySynRec['nombre'].",";
+				$sql .= "0,";
 				$sql .= "NOW(),";
 				$sql .= "null,";
 				$sql .= "null,";
@@ -1381,7 +1381,7 @@ class MasterController extends BaseController {
 				$sql .= "(null,";
 				$sql .= $newTermId.",";
 				$sql .= ($entityRefRec['refer_term_id'] + $newTermIdStart).",";
-				$sql .= $entityRefRec['nombre'].",";
+				$sql .= "0,";
 				$sql .= "NOW(),";
 				$sql .= "null,";
 				$sql .= "null,";
@@ -1419,6 +1419,7 @@ class MasterController extends BaseController {
 
 			foreach($entityCenter as $entityCenterRec){
 				$idx++;
+				//$this->get('logger')->error("★●".$idx.":".$entityCenterRec->getId());
 
 				if($idx > 10){
 					// DBから10件読み込んだ後、対象年がある場合は、初期データを登録する
@@ -1437,6 +1438,7 @@ class MasterController extends BaseController {
 						$sql .= "0);";
 
 						fputs($handle, $sql."\n");
+						//$this->get('logger')->error("★１".$sql);
 					}
 
 					$wkYear = $wkStartYear;
@@ -1447,6 +1449,7 @@ class MasterController extends BaseController {
 				if($idx < 11){
 					if($wkYear > $entityCenterRec->getYear()){
 						// DBの実施年より対象年が大きい場合、スキップ
+						//$this->get('logger')->error("★4");
 					}else{
 						// DBの実施年と対象年が等しい場合、元データを複製する
 						if($entityCenterRec->getYougoFlag() == 1){
@@ -1457,8 +1460,14 @@ class MasterController extends BaseController {
 							}else{
 								$arr_freq_main[$newTermId] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
 							}
+							//$this->get('logger')->error("★5");
 						}elseif($entityCenterRec->getYougoFlag() == 2){
+							//$this->get('logger')->error("★9");
+							//$this->get('logger')->error("★9:".serialize($newSubId));
+
 							$wkSubTermId = $newSubId[$idx_sub];
+
+							//$this->get('logger')->error("★10");
 
 							if(isset($arr_freq_sub[$wkSubTermId])){
 								$arr_freq_sub[$wkSubTermId] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
@@ -1466,9 +1475,12 @@ class MasterController extends BaseController {
 								$arr_freq_sub[$wkSubTermId] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
 							}
 
+							//$this->get('logger')->error("★11");
+
 							if($idx == 10){
 								$idx_sub++;
 							}
+							//$this->get('logger')->error("★6");
 						}elseif($entityCenterRec->getYougoFlag() == 3){
 							$wkSubTermId = $newSynId[$idx_syn];
 
@@ -1481,6 +1493,7 @@ class MasterController extends BaseController {
 							if($idx == 10){
 								$idx_syn++;
 							}
+							//$this->get('logger')->error("★7");
 						}else{
 							$wkSubTermId = $newExpId[$idx_exp];
 
@@ -1493,6 +1506,7 @@ class MasterController extends BaseController {
 							if($idx == 10){
 								$idx_exp++;
 							}
+							//$this->get('logger')->error("★8");
 						}
 						$wkYougoFlag = $entityCenterRec->getYougoFlag();
 
@@ -1510,6 +1524,7 @@ class MasterController extends BaseController {
 						$sql .= "0);";
 
 						fputs($handle, $sql."\n");
+						//$this->get('logger')->error("★２".$sql);
 						$wkYear++;
 
 					}
@@ -1532,6 +1547,7 @@ class MasterController extends BaseController {
 				$sql .= "0);";
 
 				fputs($handle, $sql."\n");
+				//$this->get('logger')->error("★３".$sql);
 			}
 
 		} catch (\Exception $e){
@@ -1539,6 +1555,8 @@ class MasterController extends BaseController {
 			$this->get('logger')->error($e->getMessage());
 			$this->get('logger')->error($e->getTraceAsString());
 
+
+			//$this->get('logger')->error("★exception".$sql);
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
 		return array($arr_freq_main,$arr_freq_sub,$arr_freq_syn,$arr_freq_exp);
