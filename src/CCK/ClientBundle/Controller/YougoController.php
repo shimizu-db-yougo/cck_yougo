@@ -1650,8 +1650,13 @@ class YougoController extends BaseController {
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
 
+		$term_id = 0;
+		if($request->request->has('term_id')){
+			$term_id = $request->request->get('term_id');
+		}
+
 		try{
-			$entitySub->setMainTermId(0);
+			$entitySub->setMainTermId($term_id);
 			$entitySub->setSubTerm("");
 			$entitySub->setRedLetter(0);
 			$entitySub->setKanaExistFlag(0);
@@ -1695,8 +1700,13 @@ class YougoController extends BaseController {
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
 
+		$term_id = 0;
+		if($request->request->has('term_id')){
+			$term_id = $request->request->get('term_id');
+		}
+
 		try{
-			$entitySub->setMainTermId(0);
+			$entitySub->setMainTermId($term_id);
 			$entitySub->setTerm("");
 			$entitySub->setRedLetter(0);
 			$entitySub->setSynonymId(0);
@@ -2349,6 +2359,24 @@ class YougoController extends BaseController {
 			$entity->setDeleteFlag(true);
 			$entity->setModifyDate(new \DateTime());
 			$entity->setDeleteDate(new \DateTime());
+
+			// 紐づくセンター頻度も削除
+			if($table == "SubTerm"){
+				$yougo_flag = 2;
+			}else{
+				$yougo_flag = 3;
+			}
+			$entityCenter = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->findBy(array(
+					'subTermId' => $id,
+					'yougoFlag' => $yougo_flag,
+					'deleteFlag' => FALSE
+			));
+
+			foreach($entityCenter as $entity_rec){
+				$entity_rec->setDeleteFlag(true);
+				$entity_rec->setModifyDate(new \DateTime());
+				$entity_rec->setDeleteDate(new \DateTime());
+			}
 
 			// transaction
 			$em = $this->get('doctrine.orm.entity_manager');

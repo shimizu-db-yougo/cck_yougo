@@ -621,8 +621,12 @@
 		}
 
 		$('#addForm').click(function(){
+			var data = {
+					'term_id': "{{ yougo.termID }}",
+			};
 			$.ajax({
 				url: "{{ path('client.yougo.subterm.new.ajax') }}",
+				data: data,
 				method: 'POST',
 				success: function(response){
 						console.log(response);
@@ -636,8 +640,12 @@
 		});
 
 		$('#addFormSyn').click(function(){
+			var data = {
+					'term_id': "{{ yougo.termID }}",
+			};
 			$.ajax({
 				url: "{{ path('client.yougo.synonym.new.ajax') }}",
+				data: data,
 				method: 'POST',
 				success: function(response){
 						console.log(response);
