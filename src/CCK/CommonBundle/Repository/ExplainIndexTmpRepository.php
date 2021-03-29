@@ -24,7 +24,7 @@ class ExplainIndexTmpRepository extends EntityRepository
 		->addSelect('c.newsExam')
 		->where('c.deleteFlag = :deleteFlag')
 		->andWhere('c.mainTermId = :term_id')
-		->addOrderBy('c.indexKana')
+		->addOrderBy('c.id')
 		->setParameters(array(
 				'deleteFlag' => false,
 				'term_id' => $term_id
