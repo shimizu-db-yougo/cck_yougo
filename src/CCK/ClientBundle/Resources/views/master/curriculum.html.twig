@@ -72,6 +72,7 @@
 							<a href="{{ path('client.master.cur.delete', {'id': ver_elem.id}) }}"><button class="btn btn-danger btn-sm button_yougo_list" name="id" onClick="return checkDelete(this.form)">{{ 'btn.delete'|trans }}</button></a>
 						</div>
 					</td>
+					<td class="text-left">{{ ver_elem.id }}</td>
 				</tr>
 				{% endif %}
 			{% endfor %}
