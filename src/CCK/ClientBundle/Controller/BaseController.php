@@ -96,8 +96,8 @@ class BaseController extends Controller {
 					// 必要ではないパラメーターが含まれないようにparamsをunsetする。もし 必要ではないパラメーターがあれば、下のif文で処理する。
 					unset($params[$target]);
 				} else {
-					$response = $this->responseForm(999, 'error.notexist.parameter', true, array('%parameter%' => $target));
-					return $response;
+					//$response = $this->responseForm(999, 'error.notexist.parameter', true, array('%parameter%' => $target));
+					//return $response;
 				}
 			}
 		}
@@ -409,12 +409,10 @@ class BaseController extends Controller {
 		return $pagination;
 	}
 
-	protected function encoding(array $value, Request $request, $mac_sjis = false){
+	protected function encoding(array $value, Request $request, $to_utf16 = false){
 		$ua = $request->server->get('HTTP_USER_AGENT');
-		if($mac_sjis){
-			if(preg_match("/Mac/i", $ua) || preg_match("/mac/i", $ua)){
-				mb_convert_variables('sjis-win', 'UTF-8', $value);
-			}
+		if($to_utf16){
+			mb_convert_variables('UTF-16LE', 'UTF-8', $value);
 		}
 		return $value;
 	}

@@ -15,14 +15,15 @@ class UploadRepository extends EntityRepository
 	/**
 	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
 	 */
-	public function getUploadList(){
+	public function getUploadList($cond = null){
 		$sql = "
 			SELECT
 				Curriculum.name cur_name,
 				Version.name ver_name,
 				User.name user_name,
 				Upload.file_name,
-				Upload.create_date
+				Upload.create_date,
+				Upload.contents
 			FROM
 				Upload
 					INNER JOIN
@@ -35,6 +36,10 @@ class UploadRepository extends EntityRepository
 				Curriculum.delete_flag = FALSE
 				AND Version.delete_flag = FALSE
 				AND Upload.delete_flag = FALSE";
+
+		if($cond == "term"){
+			$sql .= " AND Upload.contents is not NULL";
+		}
 
 		$sql .= " ORDER BY Upload.create_date DESC LIMIT 30";
 

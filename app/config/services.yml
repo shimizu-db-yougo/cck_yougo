@@ -8,6 +8,9 @@ parameters:
     duplicate:
         dir_path: "%kernel.root_dir%/../web/uploads/duplicate/"
         link: "uploads/duplicate/"
+    updateterm:
+        dir_path: "%kernel.root_dir%/../web/uploads/updateterm/"
+        link: "uploads/updateterm/"
         
     # temp path
     temp: "%kernel.root_dir%/../web/uploads/temp/"
@@ -16,6 +19,13 @@ parameters:
     api.upload.nombre:
         - curriculum
         - version
+        - image
+
+    api.upload.term:
+        - curriculum
+        - version2
+        - up_submit_all
+        - up_submit_freq
         - image
 
 services:

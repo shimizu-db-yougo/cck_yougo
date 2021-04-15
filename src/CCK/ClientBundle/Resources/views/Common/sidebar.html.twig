@@ -14,7 +14,8 @@
 	</select></li>
 	<li><hr></li>
 	<li><a href="{{ path('client.csv.export', {'status': 'default'}) }}">{{ 'text.csv.export.title'|trans|raw }}</a></li>
-	<li><a href="{{ path('client.csv.import', {'status': 'default'}) }}">{{ 'text.csv.import.title'|trans|raw }}</a></li>
+	<li><a href="{{ path('client.csv.import', {'status': 'default'}) }}">{{ 'text.csv.import.nombre'|trans|raw }}</a></li>
+	<li><a href="{{ path('client.csv.import.term', {'status': 'default'}) }}">{{ 'text.csv.import.term.title'|trans|raw }}</a></li>
 	<li><hr></li>
 	<li><a href="{{ path('client.master.index') }}">{{ 'text.master.title'|trans }}</a></li>
 </ul>

@@ -73,6 +73,13 @@ class Upload
     private $deleteFlag;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="contents", type="text", nullable=true)
+     */
+    private $contents;
+
+    /**
      * construct
      */
     public function __construct(){
@@ -274,5 +281,29 @@ class Upload
     public function getDeleteFlag()
     {
         return $this->deleteFlag;
+    }
+
+    /**
+     * Set contents.
+     *
+     * @param string|null $contents
+     *
+     * @return Upload
+     */
+    public function setContents($contents = null)
+    {
+        $this->contents = $contents;
+
+        return $this;
+    }
+
+    /**
+     * Get contents.
+     *
+     * @return string|null
+     */
+    public function getContents()
+    {
+        return $this->contents;
     }
 }
