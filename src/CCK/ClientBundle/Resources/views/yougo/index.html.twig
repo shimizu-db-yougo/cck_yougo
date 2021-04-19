@@ -222,7 +222,7 @@
 					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "Refer_term.refer_term"}) }}">{{ 'text.yougo.refer_term'|trans }}{% if sort_field == "Refer_term.refer_term" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="80px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.handover"}) }}">{{ 'text.yougo.handover'|trans }}{% if sort_field == "MainTerm.handover" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="80px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "User.name"}) }}">{{ 'text.yougo.update_user'|trans }}{% if sort_field == "User.name" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
-					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.modify_date"}) }}">{{ 'text.yougo.modify_date'|trans }}{% if sort_field == "MainTerm.modify_date" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
+					<th width="100px" class="text-left"><a href="{{ path('client.yougo.index', {'field': "MainTerm.edit_date"}) }}">{{ 'text.yougo.modify_date'|trans }}{% if sort_field == "MainTerm.edit_date" %}{{ sort_order == 'up' ? "▲" : '' }}{{ sort_order == 'down' ? "▼" : '' }}{% endif %}</a></th>
 					<th width="60px" class="text-left"></th>
 					<th width="60px" class="text-left"></th>
 					<th width="60px" class="text-left"></th>
@@ -247,7 +247,7 @@
 					<td width="100px" class="text-left">{{ replaceTag(yougo.refer_term)|raw }}</td>
 					<td width="80px" class="text-left">{{ yougo.handover|length > 5 ? yougo.handover[:5]~'…' : yougo.handover }}</td>
 					<td width="80px" class="text-left">{{ yougo.name }}</td>
-					<td width="100px" class="text-left">{% if yougo.modify_date is empty %}{{ yougo.create_date|date('Y/m/d H:i') }}{% else %}{{ yougo.modify_date|date('Y/m/d H:i') }}{% endif %}</td>
+					<td width="100px" class="text-left">{% if yougo.edit_date is empty %}{{ yougo.create_date|date('Y/m/d H:i') }}{% else %}{{ yougo.edit_date|date('Y/m/d H:i') }}{% endif %}</td>
 
 					<td width="60px">
 						<div class="form-inline">

@@ -888,6 +888,8 @@ class YougoController extends BaseController {
 				$entity->setDeleteFlag(false);
 			}
 
+			$entity->setEditDate(new \DateTime());
+
 			$em->flush();
 			$em->getConnection()->commit();
 		} catch (\Exception $e){

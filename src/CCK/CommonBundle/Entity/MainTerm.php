@@ -248,6 +248,13 @@ class MainTerm
     private $nombreBold;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="edit_date", type="datetime", nullable=true)
+     */
+    private $editDate;
+
+    /**
      * construct
      */
     public function __construct(){
@@ -1048,5 +1055,29 @@ class MainTerm
     public function getNombreBold()
     {
         return $this->nombreBold;
+    }
+
+    /**
+     * Set editDate.
+     *
+     * @param \DateTime|null $editDate
+     *
+     * @return MainTerm
+     */
+    public function setEditDate($editDate = null)
+    {
+        $this->editDate = $editDate;
+
+        return $this;
+    }
+
+    /**
+     * Get editDate.
+     *
+     * @return \DateTime|null
+     */
+    public function getEditDate()
+    {
+        return $this->editDate;
     }
 }

@@ -37,7 +37,8 @@ class MainTermRepository extends EntityRepository
 				MainTerm.handover,
 				User.name,
 				MainTerm.create_date,
-				MainTerm.modify_date
+				MainTerm.modify_date,
+				MainTerm.edit_date
 			FROM
 				MainTerm
 					LEFT JOIN
