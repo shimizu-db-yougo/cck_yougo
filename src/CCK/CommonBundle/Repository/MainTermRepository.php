@@ -38,7 +38,9 @@ class MainTermRepository extends EntityRepository
 				User.name,
 				MainTerm.create_date,
 				MainTerm.modify_date,
-				MainTerm.edit_date
+				MainTerm.edit_date,
+				Curriculum.id cur_id,
+				Version.id ver_id
 			FROM
 				MainTerm
 					LEFT JOIN

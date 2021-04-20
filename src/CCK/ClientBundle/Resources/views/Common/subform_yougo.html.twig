@@ -11,8 +11,8 @@
 			<div class="modal-footer">
 					<div class="text-center">
 						<button type="button" class="btn btn-default" data-dismiss="modal">{{ 'btn.cancel'|trans }}</button>
-						<button type="button" class="btn btn-primary js-center-submit">{{ 'btn.submit'|trans }}</button>
-						<button type="button" class="btn btn-danger js-center-delete">{{ 'btn.delete'|trans }}</button>
+						<button type="button" class="btn btn-primary js-center-submit" {{ is_latest_ver == false ? ' disabled' : '' }}>{{ 'btn.submit'|trans }}</button>
+						<button type="button" class="btn btn-danger js-center-delete" {{ is_latest_ver == false ? ' disabled' : '' }}>{{ 'btn.delete'|trans }}</button>
 					</div>
 			</div>
 		</div>
@@ -45,7 +45,7 @@
 			<div class="modal-footer">
 					<div class="text-center">
 						<button type="button" class="btn btn-default js-explain-cancel" data-dismiss="modal">{{ 'btn.cancel'|trans }}</button>
-						<button type="button" class="btn btn-primary js-explain-submit">{{ 'btn.submit'|trans }}</button>
+						<button type="button" class="btn btn-primary js-explain-submit" {{ is_latest_ver == false ? ' disabled' : '' }}>{{ 'btn.submit'|trans }}</button>
 					</div>
 			</div>
 		</div>

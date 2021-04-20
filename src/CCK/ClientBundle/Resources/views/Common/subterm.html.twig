@@ -6,7 +6,7 @@
 				<!-- サブ用語 -->
 				<div id="form_subterms">
 				</div>
-				<button type="button" class="btn btn-primary btn-sm" id="addForm">{{ 'btn.add.subterm'|trans }}</button>
+				<button type="button" class="btn btn-primary btn-sm js-max-ver" id="addForm" {{ is_latest_ver == false ? ' disabled' : '' }}>{{ 'btn.add.subterm'|trans }}</button>
 			</div>
 		</div>
 	</div>
@@ -19,7 +19,7 @@
 				<!-- 同対類用語 -->
 				<div id="form_synterms">
 				</div>
-				<button type="button" class="btn btn-primary btn-sm" id="addFormSyn">{{ 'btn.add.synterm'|trans }}</button>
+				<button type="button" class="btn btn-primary btn-sm js-max-ver" id="addFormSyn" {{ is_latest_ver == false ? ' disabled' : '' }}>{{ 'btn.add.synterm'|trans }}</button>
 			</div>
 		</div>
 	</div>
@@ -32,7 +32,7 @@
 				<!-- 指矢印用語 -->
 				<div id="form_refterms">
 				</div>
-				<button type="button" class="btn btn-primary btn-sm" id="addFormRef">{{ 'btn.add.refterm'|trans }}</button>
+				<button type="button" class="btn btn-primary btn-sm js-max-ver" id="addFormRef" {{ is_latest_ver == false ? ' disabled' : '' }}>{{ 'btn.add.refterm'|trans }}</button>
 			</div>
 		</div>
 	</div>

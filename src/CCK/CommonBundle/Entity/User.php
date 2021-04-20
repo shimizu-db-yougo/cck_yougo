@@ -82,6 +82,13 @@ class User implements UserInterface, AdvancedUserInterface, \Serializable
     private $deleteFlag;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="authority", type="integer")
+     */
+    private $authority;
+
+    /**
      * construct
      */
     public function __construct(){
@@ -392,5 +399,29 @@ class User implements UserInterface, AdvancedUserInterface, \Serializable
     public function getDeleteFlag()
     {
         return $this->deleteFlag;
+    }
+
+    /**
+     * Set authority.
+     *
+     * @param int $authority
+     *
+     * @return User
+     */
+    public function setAuthority($authority)
+    {
+        $this->authority = $authority;
+
+        return $this;
+    }
+
+    /**
+     * Get authority.
+     *
+     * @return int
+     */
+    public function getAuthority()
+    {
+        return $this->authority;
     }
 }

@@ -54,6 +54,7 @@ class ClientExtension extends \Twig_Extension
 			new \Twig_SimpleFunction('getDelimiterSyn', array($this, 'getDelimiterSyn')),
 			new \Twig_SimpleFunction('getTerm', array($this, 'getTerm')),
 			new \Twig_SimpleFunction('getKana', array($this, 'getKana')),
+			new \Twig_SimpleFunction('getMaxVersion', array($this, 'getMaxVersion')),
 		);
 	}
 
@@ -230,6 +231,13 @@ class ClientExtension extends \Twig_Extension
 		}
 		return $rtn;
 	}
+
+	public function getMaxVersion($cur){
+		$em = $this->container->get('doctrine')->getManager();
+		$max_ver = $em->getRepository('CCKCommonBundle:Version')->getRecentVersion($cur);
+		return $max_ver['id'];
+	}
+
 
 	public function twigFileExists($filename){
 		return file_exists($filename);

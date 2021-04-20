@@ -25,7 +25,7 @@
 <div class="row">
 	<div class="col-xs-12">
 		<div class="text-center">
-			<button type="button" class="btn btn-primary js-yougo-submit">{{ 'btn.submit'|trans }}</button>
+			<button type="button" class="btn btn-primary js-yougo-submit" {{ is_latest_ver == false ? ' disabled' : '' }}>{{ 'btn.submit'|trans }}</button>
 			<a href="{{ path('client.yougo.index') }}"><div class="btn btn-default js-yougo-back" name="back">{{ 'btn.back'|trans }}</div></a>
 		</div>
 	</div>

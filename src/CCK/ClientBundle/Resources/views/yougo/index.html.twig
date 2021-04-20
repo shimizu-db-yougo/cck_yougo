@@ -184,7 +184,7 @@
 		{{ knp_pagination_render(pagination) }}
 	</div>
 	<div class="col-xs-1 text-center">
-		<a href="{{ path('client.yougo.new') }}"><button class="btn btn-primary btn-sm" name="id">{{ 'btn.new.default'|trans }}</button></a>
+		<a href="{{ path('client.yougo.new') }}"><button class="btn btn-primary btn-sm" name="id" >{{ 'btn.new.default'|trans }}</button></a>
 	</div>
 	<div class="col-xs-1 text-center">
 		<a href="{{ path('client.yougo.preview.search') }}"  target="_blank"><button class="btn btn-primary btn-sm" name="id">{{ 'btn.preview'|trans }}</button></a>
@@ -266,7 +266,7 @@
 					<td width="60px">
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{{ path('client.yougo.delete', {'id': yougo.id,'page': cur_page}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" onClick="return checkDelete(this.form)">{{ 'btn.delete'|trans }}</button></a>
+								<a href="{{ path('client.yougo.delete', {'id': yougo.id,'page': cur_page}) }}"><button class="btn btn-primary btn-sm button_yougo_list" name="id" value="{{ yougo.id }}" onClick="return checkDelete(this.form)" {{ (getMaxVersion(yougo.cur_id) != yougo.ver_id) ? ' disabled' : '' }}>{{ 'btn.delete'|trans }}</button></a>
 							</div>
 						</div>
 					</td>
@@ -280,7 +280,9 @@
 					<td width="20px">
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="{{ path('client.yougo.copy', {'term_id': yougo.term_id,'page': cur_page}) }}"><button class="btn btn-link" name="id" value="{{ yougo.id }}" ><i class="fa fa-plus-square-o"></i></button></a>
+								{% if(getMaxVersion(yougo.cur_id) == yougo.ver_id) %}
+								<a href="{{ path('client.yougo.copy', {'term_id': yougo.term_id,'page': cur_page}) }}"><button class="btn btn-link" name="id" value="{{ yougo.id }}"><i class="fa fa-plus-square-o"></i></button></a>
+								{% endif %}
 							</div>
 						</div>
 					</td>

@@ -337,7 +337,7 @@ class YougoController extends BaseController {
 				'list_count' => $list_count,
 				'sort_order' => $sort_order_link,
 				'sort_field' => $sort_field,
-				'term_cnt' => count($entities)
+				'term_cnt' => count($entities),
 		);
 	}
 
@@ -765,6 +765,7 @@ class YougoController extends BaseController {
 				'center_syn' => '',
 				'ranka' => '',
 				'rankb' => '',
+				'is_latest_ver' => true,
 		);
 	}
 
@@ -1505,6 +1506,15 @@ class YougoController extends BaseController {
 
 		$arr_syn = $this->summaryCenterFreqSub($entityMain->getTermId(), '3', $entityVersion->getYear(), $entitySyn);
 
+		// 一般ユーザの場合、最新の版のみ編集可能にする
+		$is_latest_ver = true;
+		if($user->getAuthority() == 1){
+			$max_ver = $em->getRepository('CCKCommonBundle:Version')->getRecentVersion($entityVersion->getCurriculumId());
+			if($max_ver['id'] != $entityMain->getCurriculumId()){
+				$is_latest_ver = false;
+			}
+		}
+
 		return array(
 				'term_id' => $id,
 				'yougo' => $entityMain,
@@ -1532,6 +1542,7 @@ class YougoController extends BaseController {
 				'center_syn' => $arr_syn,
 				'ranka' => $entityVersion->getRankA(),
 				'rankb' => $entityVersion->getRankB(),
+				'is_latest_ver' => $is_latest_ver,
 		);
 	}
 
@@ -2491,6 +2502,32 @@ class YougoController extends BaseController {
 			));
 
 			$response = new JsonResponse(array("return_cd" => false, "name" => $edit_user->getName()));
+		}
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/yougo/max_ver/ajax", name="client.yougo.max_ver.ajax")
+	 */
+	public function getMaxVerAjaxAction(Request $request){
+		$user = $this->getUser();
+
+		if($request->request->has('cur_id')){
+			$cur_id = $request->request->get('cur_id');
+			$ver_id = $request->request->get('han_id');
+
+			$is_latest_ver = true;
+			if($user->getAuthority() == 1){
+				$max_ver = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->getRecentVersion($cur_id);
+				if($max_ver['id'] != $ver_id){
+					$is_latest_ver = false;
+				}
+			}
+
+			$response = new JsonResponse($is_latest_ver);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
 		}
 
 		return $response;
