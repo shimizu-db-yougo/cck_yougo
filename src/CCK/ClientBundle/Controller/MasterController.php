@@ -1419,7 +1419,7 @@ class MasterController extends BaseController {
 
 			foreach($entityCenter as $entityCenterRec){
 				$idx++;
-				//$this->get('logger')->error("★●".$idx.":".$entityCenterRec->getId());
+				$this->get('logger')->error("★●".$idx.":".$entityCenterRec->getId());
 
 				if($idx > 10){
 					// DBから10件読み込んだ後、対象年がある場合は、初期データを登録する
@@ -1438,7 +1438,7 @@ class MasterController extends BaseController {
 						$sql .= "0);";
 
 						fputs($handle, $sql."\n");
-						//$this->get('logger')->error("★１".$sql);
+						$this->get('logger')->error("★１".$sql);
 					}
 
 					$wkYear = $wkStartYear;
@@ -1450,7 +1450,7 @@ class MasterController extends BaseController {
 				if($idx < 11){
 					if($wkYear > $entityCenterRec->getYear()){
 						// DBの実施年より対象年が大きい場合、スキップ
-						//$this->get('logger')->error("★4");
+						$this->get('logger')->error("★4");
 					}else{
 						// DBの実施年と対象年が等しい場合、元データを複製する
 						if($entityCenterRec->getYougoFlag() == 1){
@@ -1461,14 +1461,14 @@ class MasterController extends BaseController {
 							}else{
 								$arr_freq_main[$newTermId] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
 							}
-							//$this->get('logger')->error("★5");
+							$this->get('logger')->error("★5");
 						}elseif($entityCenterRec->getYougoFlag() == 2){
-							//$this->get('logger')->error("★9");
-							//$this->get('logger')->error("★9:".serialize($newSubId));
+							$this->get('logger')->error("★9");
+							$this->get('logger')->error("★9:".serialize($newSubId));
 
 							$wkSubTermId = $newSubId[$idx_sub];
 
-							//$this->get('logger')->error("★10");
+							$this->get('logger')->error("★10");
 
 							if(isset($arr_freq_sub[$wkSubTermId])){
 								$arr_freq_sub[$wkSubTermId] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
@@ -1476,12 +1476,12 @@ class MasterController extends BaseController {
 								$arr_freq_sub[$wkSubTermId] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
 							}
 
-							//$this->get('logger')->error("★11");
+							$this->get('logger')->error("★11");
 
 							if($idx == 10){
 								$idx_sub++;
 							}
-							//$this->get('logger')->error("★6");
+							$this->get('logger')->error("★6");
 						}elseif($entityCenterRec->getYougoFlag() == 3){
 							$wkSubTermId = $newSynId[$idx_syn];
 
@@ -1494,7 +1494,7 @@ class MasterController extends BaseController {
 							if($idx == 10){
 								$idx_syn++;
 							}
-							//$this->get('logger')->error("★7");
+							$this->get('logger')->error("★7");
 						}else{
 							$wkSubTermId = $newExpId[$idx_exp];
 
@@ -1507,7 +1507,7 @@ class MasterController extends BaseController {
 							if($idx == 10){
 								$idx_exp++;
 							}
-							//$this->get('logger')->error("★8");
+							$this->get('logger')->error("★8");
 						}
 
 						$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
@@ -1524,7 +1524,7 @@ class MasterController extends BaseController {
 						$sql .= "0);";
 
 						fputs($handle, $sql."\n");
-						//$this->get('logger')->error("★２".$sql);
+						$this->get('logger')->error("★２".$sql);
 						$wkYear++;
 
 					}
@@ -1547,7 +1547,7 @@ class MasterController extends BaseController {
 				$sql .= "0);";
 
 				fputs($handle, $sql."\n");
-				//$this->get('logger')->error("★３".$sql);
+				$this->get('logger')->error("★３".$sql);
 			}
 
 			// 画面に入力した開始年がDBに登録された年を超えていると頻度データの配列ができないので、初期値を設定
@@ -1576,7 +1576,7 @@ class MasterController extends BaseController {
 			$this->get('logger')->error($e->getTraceAsString());
 
 
-			//$this->get('logger')->error("★exception".$sql);
+			$this->get('logger')->error("★exception".$sql);
 			return $this->redirect($this->generateUrl('client.yougo.list'));
 		}
 		return array($arr_freq_main,$arr_freq_sub,$arr_freq_syn,$arr_freq_exp);
@@ -1727,6 +1727,7 @@ class MasterController extends BaseController {
 			$user_id = $request->request->get('user_id');
 			$password = $request->request->get('password');
 			$name = $request->request->get('name');
+			$roles = $request->request->get('roles');
 
 			$user_obj = new User();
 
@@ -1738,6 +1739,7 @@ class MasterController extends BaseController {
 
 			$user_obj->setName($name);
 			$user_obj->setListCnt(0);
+			$user_obj->setAuthority($roles);
 
 			$em->persist($user_obj);
 			$em->flush();
@@ -1790,6 +1792,9 @@ class MasterController extends BaseController {
 			}
 			if($request->request->has('name')){
 				$entity->setName($request->request->get('name'));
+			}
+			if($request->request->has('roles')){
+				$entity->setAuthority($request->request->get('roles'));
 			}
 
 			$em->flush();

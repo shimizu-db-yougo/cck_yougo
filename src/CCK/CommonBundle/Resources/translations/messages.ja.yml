@@ -132,6 +132,8 @@ text:
         createDate: 作成日付
         modifyDate: 編集日付
         roles: 権限
+        admin: 管理者
+        general: 一般
         delete.description: ユーザーを本当に削除して宜しいでしょうか
         user_id: ユーザID
         login_id: ログインID
@@ -158,7 +160,7 @@ text:
     csv.import.term:
         title: 用語取り込み
     csv.import_term:
-        download: 上書き用Excelダウンロード
+        download: 上書き用CSVダウンロード
         upload: 上書きアップロード
     optional: (任意)
     mail:

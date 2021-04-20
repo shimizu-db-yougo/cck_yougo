@@ -36,6 +36,7 @@
 					<th width="90px" class="text-left">{{ 'text.user.id'|trans }}</th>
 					<th width="70px" class="text-left">{{ 'text.user.login_id'|trans }}</th>
 					<th width="120px" class="text-left">{{ 'text.user.name'|trans }}</th>
+					<th width="80px" class="text-left">{{ 'text.user.roles'|trans }}</th>
 					<th width="60px" class="text-center">{{ 'btn.edit'|trans }}</th>
 					<th width="40px" class="text-center">{{ 'text.delete'|trans }}</th>
 				</tr>
@@ -46,9 +47,10 @@
 					<td class="text-left">{{ user.id }}</td>
 					<td class="text-left">{{ user.userId }}</td>
 					<td class="text-left">{{ user.name }}</td>
+					<td class="text-left">{{ (user.authority == 0) ? 'text.user.admin'|trans : 'text.user.general'|trans }}</td>
 					<td>
 						<div class="form-inline">
-							<button class="btn btn-primary btn-sm js-user-target" user-key = "{{ user.id }}" user-id = "{{ user.userId }}" user-name = "{{ user.name }}" data-toggle="modal" master-target="#userModal">{{ 'btn.edit'|trans }}</button>
+							<button class="btn btn-primary btn-sm js-user-target" user-key = "{{ user.id }}" user-id = "{{ user.userId }}" user-name = "{{ user.name }}" roles-id = "{{ user.authority }}" data-toggle="modal" master-target="#userModal">{{ 'btn.edit'|trans }}</button>
 						</div>
 					</td>
 					<td>
@@ -104,6 +106,17 @@
 						</div>
 					</div>
 				</div>
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.user.roles'|trans }}</label>
+						<div class="col-sm-4">
+							<select class="form-control" id="roles_n" name="roles_n">
+								<option value="0">{{ 'text.user.admin'|trans }}</option>
+								<option value="1">{{ 'text.user.general'|trans }}</option>
+							</select>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer">
 					<div class="text-center">
@@ -150,6 +163,17 @@
 						</div>
 					</div>
 				</div>
+				<div class="row master-update-row">
+					<div class="col-sm-12">
+						<label class="col-sm-3">{{ 'text.user.roles'|trans }}</label>
+						<div class="col-sm-4">
+							<select class="form-control js-roles" id="roles" name="roles">
+								<option value="0">{{ 'text.user.admin'|trans }}</option>
+								<option value="1">{{ 'text.user.general'|trans }}</option>
+							</select>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer">
 					<div class="text-center">
@@ -173,6 +197,7 @@
 			$('#user_id_n').val('');
 			$('#password_n').val('');
 			$('#name_n').val('');
+			$('#roles_n').val(0);
 
 			$('.user_id-err').text('');
 			$('.password-err').text('');
@@ -196,6 +221,7 @@
 			var user_id = $('#user_id_n').val();
 			var password = $('#password_n').val();
 			var name = $('#name_n').val();
+			var roles = $('#roles_n').val();
 
 			// ユーザID重複チェック
 			if(userDuplicatedCheck(user_id,'') == true){
@@ -226,7 +252,8 @@
 			var str_html = '';
 			str_html = "<input type='hidden' name='user_id' value=\"" + user_id.replace(/"/i, "&quot;") + "\">" +
 			"<input type='hidden' name='password' value=\"" + password.replace(/"/i, "&quot;") + "\">" +
-			"<input type='hidden' name='name' value=\"" + name.replace(/"/i, "&quot;") + "\">";
+			"<input type='hidden' name='name' value=\"" + name.replace(/"/i, "&quot;") + "\">" +
+			"<input type='hidden' name='roles' value=\"" + roles + "\">";
 
 			// create form
 			$('<form>', {
@@ -246,10 +273,12 @@
 			index_id = target.attr('user-key');
 			user_id = target.attr('user-id');
 			name = target.attr('user-name');
+			roles_id = target.attr('roles-id');
 
 			// modal open
 			$('#user_id').val(user_id);
 			$('#name').val(name);
+			$('#roles').val(roles_id);
 
 			$('#userModal').modal();
 
@@ -260,6 +289,7 @@
 			var user_id = $('#user_id').val();
 			var password = $('#password').val();
 			var name = $('#name').val();
+			var roles = $('#roles').val();
 
 			// ユーザID重複チェック
 			if(userDuplicatedCheck(user_id,index_id) == true){
@@ -291,7 +321,8 @@
 			var str_html = '';
 			str_html = "<input type='hidden' name='user_id' value=\"" + user_id.replace(/"/i, "&quot;") + "\">" +
 						"<input type='hidden' name='password' value=\"" + password.replace(/"/i, "&quot;") + "\">" +
-						"<input type='hidden' name='name' value=\"" + name.replace(/"/i, "&quot;") + "\">";
+						"<input type='hidden' name='name' value=\"" + name.replace(/"/i, "&quot;") + "\">" +
+						"<input type='hidden' name='roles' value=\"" + roles + "\">";
 
 			if(index_id !== void 0){
 				// create form
