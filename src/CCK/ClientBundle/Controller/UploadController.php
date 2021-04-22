@@ -46,6 +46,8 @@ class UploadController extends BaseController {
 			$status_message = "csvファイルの取込みが完了しました。";
 		}elseif($status == 201){
 			$status_message = "csvファイルの取込みが完了しましたが、エラーがありますのでログ出力ボタンからダウンロードしてください。";
+		}elseif($status == 202){
+			$status_message = "項目が合っていません。CSVをご確認ください。";
 		}elseif($status == 'default'){
 			$status_message = "";
 		}else{
@@ -157,6 +159,13 @@ class UploadController extends BaseController {
 					//ヘッダーはスキップ
 					if($lineCnt == 1) {
 						continue;
+					}
+
+					// ファイルチェック
+					if(count($data) < 3){
+						$this->OutputLog("ERROR1", "nombre_check.log", "項目が合っていません。CSVをご確認ください。");
+						$status = 202;
+						return $this->redirect($this->generateUrl('client.csv.import', array('status' => $status)));
 					}
 
 					if($lineCnt > 1) {

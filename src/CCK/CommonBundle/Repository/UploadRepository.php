@@ -37,6 +37,9 @@ class UploadRepository extends EntityRepository
 				AND Version.delete_flag = FALSE
 				AND Upload.delete_flag = FALSE";
 
+		if($cond == null){
+			$sql .= " AND Upload.contents is NULL";
+		}
 		if($cond == "term"){
 			$sql .= " AND Upload.contents is not NULL";
 		}
