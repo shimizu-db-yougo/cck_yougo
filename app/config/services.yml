@@ -28,6 +28,12 @@ parameters:
         - up_submit_freq
         - image
 
+    api.upload.term_new:
+        - curriculum
+        - version3
+        - up_submit_new
+        - image
+
 services:
     # default configuration for services in *this* file
     _defaults:

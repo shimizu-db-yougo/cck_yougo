@@ -94,10 +94,62 @@
 									<input type="file" id="up_file" name="image">
 								</div>
 								<div class="col-xs-4">
-									{{ return_message }}
+									{{ return_upload }}
 								</div>
 								<div class="col-xs-2"><button id="up_submit" name="up_submit_all" class="btn btn-primary btn-block" type="submit" onClick="return checkUpload('全項目')" disabled>{{ 'btn.upload.all'|trans }}</button></div>
 								<div class="col-xs-2"><button id="up_submit2" name="up_submit_freq" class="btn btn-primary btn-block" type="submit" onClick="return checkUpload('頻度のみ')" disabled>{{ 'btn.upload.freq'|trans }}</button></div>
+								<div id="status" style="visibility: hidden;">{{ status }}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+
+<form action="{{ path('client.import_term.upload') }}" class="form-horizontal" enctype='multipart/form-data' method='POST' novalidate>
+<div class="row">
+	<div class="col-xs-12">
+		<div class="panel panel-primary">
+			<div class="panel-body">
+				<div class="row">
+					<div class="form-horizontal">
+						<div class="">
+							<div class="col-xs-12">
+								<label class="col-xs-2">{{ 'text.csv.import_term.new'|trans }}</label>
+								<div class="col-xs-2">
+									<select class="form-control js-cur3 input-sm" name="curriculum">
+										<option value="0">--------------</option>
+										{% for cur in cur_list %}
+											<option value="{{ cur.id }}">{{ cur.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-xs-2">
+									<select class="form-control js-han3 input-sm" name="version3" disabled>
+										<option value="0">--------------</option>
+										{% for ver in ver_list %}
+											<option value="{{ ver.id }}">{{ ver.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-horizontal">
+						<div class="">
+							<div class="col-xs-12">
+								<div class="col-xs-4">
+									<input type="file" id="up_file_new" name="image">
+								</div>
+								<div class="col-xs-4">
+									{{ return_new }}
+								</div>
+								<div class="col-xs-2"><button id="up_submit_new" name="up_submit_new" class="btn btn-primary btn-block" type="submit" onClick="return checkUploadNew()" disabled>{{ 'btn.upload'|trans }}</button></div>
 								<div id="status" style="visibility: hidden;">{{ status }}</div>
 							</div>
 						</div>
@@ -169,6 +221,10 @@
 			changeCurriculumHeader($('.js-cur2'),'version2');
 		});
 
+		$('.js-cur3').bind('change', function(){
+			changeCurriculumHeader($('.js-cur3'),'version3');
+		});
+
 	});
 
 	function checkUpload(range){
@@ -178,6 +234,19 @@
 		}
 
 		if(confirm('教科・版に' + range +  '上書きされますがよろしいですか？')){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	function checkUploadNew(range){
+		if(($('.js-cur3').val() == 0)||($('.js-han3').val() == 0)){
+			alert("教科・版を選択してください。");
+			return false;
+		}
+
+		if(confirm('教科・版に用語を追加しますがよろしいですか？')){
 			return true;
 		}else{
 			return false;
@@ -203,6 +272,12 @@
 		if(this.files && this.files[0]){
 			$('#up_submit').attr('disabled', false);
 			$('#up_submit2').attr('disabled', false);
+		}
+	});
+
+	$('#up_file_new').bind('change', function(){
+		if(this.files && this.files[0]){
+			$('#up_submit_new').attr('disabled', false);
 		}
 	});
 	</script>

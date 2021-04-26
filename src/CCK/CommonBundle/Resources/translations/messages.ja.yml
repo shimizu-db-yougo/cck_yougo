@@ -162,6 +162,7 @@ text:
     csv.import_term:
         download: 上書き用CSVダウンロード
         upload: 上書きアップロード
+        new: 新語登録
     optional: (任意)
     mail:
         alert:
