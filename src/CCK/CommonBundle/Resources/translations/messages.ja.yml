@@ -291,8 +291,8 @@ csv:
         kana_exist_flag: 主用語_読み有
         index_kana: 主用語_さくいん用語読み仮名
         index_add_letter: 主用語_さくいん文字
-        index_original: 原典資料さくいん
-        index_original_kana: 原典資料さくいんよみ
+        index_original: 原典資料索引
+        index_original_kana: 原典資料索引読み
         index_abbreviation: 欧文略語さくいん
         modify_date: 
         delimiter: 主用語_区切り文字
@@ -711,7 +711,9 @@ csv:
         ref2_refer_term_id: 指矢印2_参照先
         ref2_nombre: 指矢印2
         ref2_main_term: 指矢印用語2
-
+        ref3_refer_term_id: 指矢印3_参照先
+        ref3_nombre: 指矢印3
+        ref3_main_term: 指矢印用語3
 
 
 error:

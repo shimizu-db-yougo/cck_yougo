@@ -22,6 +22,7 @@ use CCK\CommonBundle\Entity\Synonym;
 use CCK\CommonBundle\Entity\ExplainIndex;
 use CCK\CommonBundle\Entity\Refer;
 use CCK\CommonBundle\Entity\Center;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * importTerm controller.
@@ -131,7 +132,7 @@ class ImportTermController extends BaseController {
 			'synxxx_index_kana'
 	];
 
-	/* 2件 -NS */
+	/* 3件 -NS */
 	private $termCsvHeaderRef = [
 			'refxxx_refer_term_id'
 	];
@@ -185,7 +186,7 @@ class ImportTermController extends BaseController {
 			$status_message = "項目数が異なっています。項目数：336";
 		}elseif($status == 205){
 			$status_download = "用語の登録がありません。教科・版を確認してください。";
-		}elseif(($status == 206)||($status == 207)){
+		}elseif(($status == 206)||($status == 207)||($status == 208)||($status == 209)){
 			$status_message =  $session->get(self::SES_REQUIRED_KEY);
 		}elseif($status == 'default'){
 			$status_message = "";
@@ -432,7 +433,7 @@ class ImportTermController extends BaseController {
 		}
 
 		// 指矢印用語
-		for($idx=1;$idx<=2;$idx++){
+		for($idx=1;$idx<=3;$idx++){
 			$result['ref'.$idx.'_refer_term_id'] = $translator->trans('csv.macro.ref'.$idx.'_refer_term_id');
 			$result['ref'.$idx.'_nombre'] = $translator->trans('csv.macro.ref'.$idx.'_nombre');
 			$result['ref'.$idx.'_main_term'] = $translator->trans('csv.macro.ref'.$idx.'_main_term');
@@ -479,7 +480,12 @@ class ImportTermController extends BaseController {
 
 			$cnt = 1;
 			for($year = $entityVer->getYear(); $year <= $entityVer->getYear()+9; $year++){
-				$sub['sub'.$idx.'_center_frequency'.$cnt] = (empty($subterm[$idx-1])) ? "" : $subterm[$idx-1]['center_frequency'.$year];
+				if(isset($subterm[$idx-1]['center_frequency'.$year])){
+					$sub['sub'.$idx.'_center_frequency'.$cnt] = (empty($subterm[$idx-1])) ? "" : $subterm[$idx-1]['center_frequency'.$year];
+				}else{
+					//センター頻度開始年を用語登録後に変更した場合、頻度が取得されない年があるので初期値を設定
+					$sub['sub'.$idx.'_center_frequency'.$cnt] = (empty($subterm[$idx-1])) ? "" : "0/0";
+				}
 				$cnt++;
 			}
 
@@ -499,6 +505,7 @@ class ImportTermController extends BaseController {
 
 		$cnt = 1;
 		for($i = $entityVer->getYear(); $i <= $entityVer->getYear() + 9; $i++){
+			$exp['exp_center_frequency'.$i] = "";
 			$exp['exp_center_frequency'.$cnt] = "";
 			$cnt++;
 		}
@@ -509,7 +516,7 @@ class ImportTermController extends BaseController {
 			foreach ($expterm as $exptermRec) {
 				$this->replaceExpField($exptermRec,$entityVer);
 
-				$exp['exp_id'] .= $exptermRec['id'] . ';';
+				$exp['exp_id'] .= 'K'.str_pad($exptermRec['id'], 6, 0, STR_PAD_LEFT) . ';';
 				$exp['exp_index_kana'] .= $exptermRec['indexKana'] . ';';
 				$exp['exp_term'] .= $exptermRec['indexTerm'] . ';';
 				$exp['exp_text_frequency'] .= $exptermRec['textFrequency'] . ';';
@@ -523,13 +530,20 @@ class ImportTermController extends BaseController {
 				),
 				array('year' => 'ASC'));
 
-				$cnt = 1;
-				foreach ($entityCenter as $entityCenterRec){
-					if(($entityCenterRec->getYear() >= $entityVer->getYear())&&($entityCenterRec->getYear() <= $entityVer->getYear()+9)){
-						$exp['exp_center_frequency'.$cnt] .= $entityCenterRec->getMainExam() . "/" . $entityCenterRec->getSubExam() . ';';
-						$cnt++;
+				if($entityCenter){
+					foreach ($entityCenter as $entityCenterRec){
+						if(($entityCenterRec->getYear() >= $entityVer->getYear())&&($entityCenterRec->getYear() <= $entityVer->getYear()+9)){
+							$exp['exp_center_frequency'.$entityCenterRec->getYear()] .= $entityCenterRec->getMainExam() . "/" . $entityCenterRec->getSubExam() .";";
+						}
+					}
+				}else{
+					for($year = $entityVer->getYear(); $year <= $entityVer->getYear()+9; $year++){
+						if(($year >= $entityVer->getYear())&&($year <= $entityVer->getYear()+9)){
+							$exp['exp_center_frequency'.$year] .= "0/0;";
+						}
 					}
 				}
+
 
 				$exp['exp_news_exam'] .= (($exptermRec['newsExam'] == '') ? 0 : $exptermRec['newsExam']) . ';';
 			}
@@ -537,6 +551,19 @@ class ImportTermController extends BaseController {
 			foreach ($exp as $key => $val) {
 				$exp[$key] = mb_substr($val,0,mb_strlen($val)-1);
 			}
+		}
+
+		$idx = 1;
+		for($year = $entityVer->getYear(); $year <= $entityVer->getYear()+9; $year++){
+			if(($exp['exp_center_frequency'.$year] != "0/0")&&($exp['exp_center_frequency'.$year] != "")){
+				$exp['exp_center_frequency'.$idx] = $exp['exp_center_frequency'.$year];
+			}else{
+				foreach ($expterm as $exptermRec) {
+					$exp['exp_center_frequency'.$idx] .= "0/0;";
+				}
+				$exp['exp_center_frequency'.$idx] = substr($exp['exp_center_frequency'.$idx],0,strlen($exp['exp_center_frequency'.$idx])-1);
+			}
+			$idx++;
 		}
 
 		$main['western_sentence'] = '';
@@ -558,7 +585,12 @@ class ImportTermController extends BaseController {
 
 			$cnt = 1;
 			for($year = $entityVer->getYear(); $year <= $entityVer->getYear()+9; $year++){
-				$syn['syn'.$idx.'_center_frequency'.$cnt] = (empty($synterm[$idx-1])) ? "" : $synterm[$idx-1]['center_frequency'.$year];
+				if(isset($synterm[$idx-1]['center_frequency'.$year])){
+					$syn['syn'.$idx.'_center_frequency'.$cnt] = (empty($synterm[$idx-1])) ? "" : $synterm[$idx-1]['center_frequency'.$year];
+				}else{
+					//センター頻度開始年を用語登録後に変更した場合、頻度が取得されない年があるので初期値を設定
+					$syn['syn'.$idx.'_center_frequency'.$cnt] = (empty($synterm[$idx-1])) ? "" : "0/0";
+				}
 				$cnt++;
 			}
 
@@ -572,7 +604,7 @@ class ImportTermController extends BaseController {
 		// 指矢印参照
 		$ref = [];
 
-		for($idx=1;$idx<=2;$idx++){
+		for($idx=1;$idx<=3;$idx++){
 			$ref['ref'.$idx.'_refer_term_id'] = (empty($refterm[$idx-1])) ? "" : 'M'.str_pad($refterm[$idx-1]['refer_term_id'], 6, 0, STR_PAD_LEFT);
 			$ref['ref'.$idx.'_nombre'] = '';
 			$ref['ref'.$idx.'_main_term'] = (empty($refterm[$idx-1])) ? "" : $refterm[$idx-1]['main_term'];
@@ -624,7 +656,7 @@ class ImportTermController extends BaseController {
 		$field_list_ref = [];
 		$idx = 0;
 		// 指矢印参照用語
-		for ($i=1; $i<=2; $i++) {
+		for ($i=1; $i<=3; $i++) {
 			foreach ($this->termCsvHeaderRef as $key => $value){
 				$field_list_ref[$idx] = str_replace('xxx', $i, $value);
 				$idx++;
@@ -689,13 +721,28 @@ class ImportTermController extends BaseController {
 		),
 		array('year' => 'ASC'));
 
-		$idx = 1;
 		foreach ($entityCenter as $entityCenterRec){
 			if(($entityCenterRec->getYear() >= $entityVer->getYear())&&($entityCenterRec->getYear() <= $entityVer->getYear()+9)){
-				$main['center_frequency'.$idx] = $entityCenterRec->getMainExam() . "/" . $entityCenterRec->getSubExam();
+				$main['center_frequency'.$entityCenterRec->getYear()] = $entityCenterRec->getMainExam() . "/" . $entityCenterRec->getSubExam();
 			}
-			$idx++;
 		}
+
+		$idx = 1;
+		if($entityCenter){
+			for($year = $entityVer->getYear(); $year <= $entityVer->getYear()+9; $year++){
+				if(isset($main['center_frequency'.$year])){
+					$main['center_frequency'.$idx] = $main['center_frequency'.$year];
+				}else{
+					$main['center_frequency'.$idx] = "0/0";
+				}
+				$idx++;
+			}
+		}else{
+			for($idx=1;$idx<11;$idx++){
+				$main['center_frequency'.$idx] = "0/0";
+			}
+		}
+
 
 		if($main['news_exam'] == '1'){
 			$main['news_exam'] = 'N';
@@ -807,6 +854,10 @@ class ImportTermController extends BaseController {
 		}elseif($sub['delimiter_kana'] == '8'){
 			$sub['delimiter_kana'] = '）と';
 		}
+
+		if($sub['id'] != ''){
+			$sub['id'] = 'S'.str_pad($sub['id'], 6, 0, STR_PAD_LEFT);
+		}
 	}
 
 	private function replaceSynField(&$syn,$entityVer,$main,&$arr_err_list,$term_id){
@@ -872,6 +923,11 @@ class ImportTermController extends BaseController {
 		}elseif($syn['delimiter'] == '6'){
 			$syn['delimiter'] = '）《rtn》';
 		}
+
+		if($syn['id'] != ""){
+			$syn['id'] = 'D'.str_pad($syn['id'], 6, 0, STR_PAD_LEFT);
+		}
+
 	}
 
 	private function getHeaderName(&$record){
@@ -1145,21 +1201,20 @@ class ImportTermController extends BaseController {
 					}
 
 					// 入力データチェック
-					$status = $this->inputDataCheck($lineCnt,$data,$header,$filePointer,$curriculum_name,$version_name,$entityVersion,$request,$import_new);
+					$status = $this->inputDataCheck($lineCnt,$data,$header,$filePointer,$curriculum_name,$version_name,$entityVersion,$request,$import_new,$header_id);
 					if($status != 200){
 						return $this->redirect($this->generateUrl('client.csv.import.term', array('status' => $status)));
 					}
 
 					try {
+						$em->getConnection()->beginTransaction();
 						// 主用語
 						if($import_new){
 							$newTermId++;
-							$this->insertMainTerm($data,$em,$update_all,$handleMain[0],$handleCenter[0],$entityVersion,$user,$newTermId);
+							$this->insertMainTerm($data,$em,$update_all,$handleMain[0],$handleCenter[0],$entityVersion,$user,$newTermId,$header_id);
 						}else{
-							$this->updateMainTerm($data,$em,$update_all,$handleMain[0],$handleCenter[0],$entityVersion);
+							$this->updateMainTerm($data,$em,$update_all,$handleMain[0],$handleCenter[0],$entityVersion,$header_id);
 						}
-
-						$em->getConnection()->beginTransaction();
 
 						// サブ用語の更新
 						$sub_id = [];
@@ -1207,14 +1262,14 @@ class ImportTermController extends BaseController {
 						if($update_all){
 							// 指矢印参照用語
 							$ref_id = [];
-							for($idx=0;$idx<2;$idx++){
+							for($idx=0;$idx<3;$idx++){
 								array_push($ref_id, $this->updateRefTerm($data, $idx,$em));
 							}
 							// 指矢印用語の削除
 							$this->deleteRefTerm($data, $ref_id, $em, 'Refer',$handleRefer[0]);
 						}
 						if($import_new){
-							for($idx=0;$idx<2;$idx++){
+							for($idx=0;$idx<3;$idx++){
 								$this->insertRefTerm($data, $idx,$em,$handleRefer[0],$newTermId);
 							}
 						}
@@ -1230,7 +1285,26 @@ class ImportTermController extends BaseController {
 						$this->get('logger')->error($e->getMessage());
 						$this->get('logger')->error($e->getTraceAsString());
 
-						return $this->redirect($this->generateUrl('client.csv.import.term', array('status' => 453)));
+						$errcode = $e->getCode();
+
+						if($errcode == 209){
+							// ファイルをクローズする
+							fclose($filePointer);
+							fclose($handleMain[0]);
+							fclose($handleExplain[0]);
+							fclose($handleSub[0]);
+							fclose($handleSyn[0]);
+							fclose($handleRefer[0]);
+							fclose($handleCenter[0]);
+
+							$rtn_message = $e->getMessage();
+							$this->OutputLog("ERROR9", "import_term.log",$rtn_message);
+							$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+						}else{
+							$errcode = 453;
+						}
+
+						return $this->redirect($this->generateUrl('client.csv.import.term', array('status' => $errcode)));
 					}
 				}
 				// ファイルをクローズする
@@ -1278,7 +1352,7 @@ class ImportTermController extends BaseController {
 
 	}
 
-	private function inputDataCheck($lineCnt,$data,$header,$filePointer,$curriculum_name,$version_name,$entityVersion,$request,$import_new){
+	private function inputDataCheck($lineCnt,$data,$header,$filePointer,$curriculum_name,$version_name,$entityVersion,$request,$import_new,&$header_id){
 		$session = $request->getSession();
 		$status = 200;
 
@@ -1293,9 +1367,9 @@ class ImportTermController extends BaseController {
 		}
 
 		// 項目数チェック
-		if(count($data) != 336){
+		if(count($data) != 337){
 			fclose($filePointer);
-			$this->OutputLog("ERROR2", "import_term.log", "[".$data[0]."]の項目数が異なっています。正しい項目数：336。項目数：".count($data));
+			$this->OutputLog("ERROR2", "import_term.log", "[".$data[0]."]の項目数が異なっています。正しい項目数：337。項目数：".count($data));
 			$status = 204;
 			return $status;
 		}
@@ -1311,7 +1385,7 @@ class ImportTermController extends BaseController {
 		// 必須項目チェック
 		$required_check = true;
 		$blank_list = "";
-		$required_filed = array(1,2,3,4,9,26);
+		$required_filed = array(1,2,3,4,8,9,11,12,13,14,15,16,17,18,19,20,26);
 		// 主用語
 		foreach($required_filed as $required_idx){
 			if($data[$required_idx] == ""){
@@ -1319,7 +1393,7 @@ class ImportTermController extends BaseController {
 				$required_check = false;
 			}
 		}
-		$required_filed_sub = array(31,46);
+		$required_filed_sub = array(31,33,34,35,36,37,38,39,40,41,42,46);
 		// サブ用語
 		for($idx=0;$idx<5;$idx++){
 			if($data[30+$idx*17] != ""){
@@ -1331,7 +1405,7 @@ class ImportTermController extends BaseController {
 				}
 			}
 		}
-		$required_filed_syn = array(133,148);
+		$required_filed_syn = array(133,135,136,137,138,139,140,141,142,143,144,148);
 		// 同対類用語
 		for($idx=0;$idx<11;$idx++){
 			if($data[132+$idx*18] != ""){
@@ -1343,6 +1417,18 @@ class ImportTermController extends BaseController {
 				}
 			}
 		}
+		$required_filed_exp = array(117,120,121,122,123,124,125,126,127,128,129);
+		// 解説内さくいん用語
+		if($data[117] != ""){
+			foreach($required_filed_exp as $required_idx){
+				$arr_exp = explode(";",$data[$required_idx]);
+
+				if(in_array("",$arr_exp)){
+					$blank_list .= $header[$required_idx].",";
+					$required_check = false;
+				}
+			}
+		}
 
 		if(!$required_check){
 			fclose($filePointer);
@@ -1350,6 +1436,56 @@ class ImportTermController extends BaseController {
 			$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
 			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
 			$status = 206;
+			return $status;
+		}
+
+		// 見出しチェック
+		$headerRecordSet = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy(array(
+				'versionId' => $entityVersion->getId(),
+				'deleteFlag' => FALSE
+		),
+				array('id' => 'ASC'));
+
+		if ($data[7] != ""){
+			//小見出しID取得
+			$header_id = $this->getHeaderId($headerRecordSet, $data[3], $data[4], $data[5], $data[6], $data[7]);
+		}elseif($data[6] != ""){
+			//中見出しID取得
+			$header_id = $this->getHeaderId($headerRecordSet, $data[3], $data[4], $data[5], $data[6]);
+		}elseif($data[5] != ""){
+			//大見出しID取得
+			$header_id = $this->getHeaderId($headerRecordSet, $data[3], $data[4], $data[5]);
+		}elseif($data[4] != ""){
+			//章見出しID取得
+			$header_id = $this->getHeaderId($headerRecordSet, $data[3], $data[4]);
+		}elseif($data[3] != ""){
+			//編見出しID取得
+			$header_id = $this->getHeaderId($headerRecordSet, $data[3]);
+		}
+
+		$header_str = "";
+		if($data[3] != ""){
+			$header_str .= "編見出し：".$data[3].",";
+		}
+		if($data[4] != ""){
+			$header_str .= "章見出し：".$data[4].",";
+		}
+		if($data[5] != ""){
+			$header_str .= "大見出し：".$data[5].",";
+		}
+		if($data[6] != ""){
+			$header_str .= "中見出し：".$data[6].",";
+		}
+		if($data[7] != ""){
+			$header_str .= "小見出し：".$data[7].",";
+		}
+
+		if($header_id == 0){
+			fclose($filePointer);
+			$rtn_message = "マスタに登録のない見出しが登録されています。：".$header_str;
+			$this->OutputLog("ERROR5", "import_term.log",$rtn_message);
+			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+			$status = 208;
 			return $status;
 		}
 
@@ -1367,6 +1503,69 @@ class ImportTermController extends BaseController {
 				$status = 207;
 				return $status;
 			}
+		}
+
+		// センター頻度スラッシュチェック
+		$center_check = true;
+		$center_list = "";
+		$center_filed = array(11,12,13,14,15,16,17,18,19,20);
+		// 主用語
+		foreach($center_filed as $required_idx){
+			if(preg_match('/^(\d+)\/(\d+)$/', $data[$required_idx])||preg_match('/(\d+)月(\d+)日/', $data[$required_idx])){
+			}else{
+				$center_list .= $header[$required_idx].",";
+				$center_check = false;
+			}
+		}
+		$center_filed_sub = array(33,34,35,36,37,38,39,40,41,42);
+		// サブ用語
+		for($idx=0;$idx<5;$idx++){
+			if($data[30+$idx*17] != ""){
+				foreach($center_filed_sub as $required_idx){
+					if(preg_match('/^(\d+)\/(\d+)$/', $data[$required_idx+$idx*17])||preg_match('/(\d+)月(\d+)日/', $data[$required_idx+$idx*17])){
+					}else{
+						$center_list .= $header[$required_idx+$idx*17].",";
+						$center_check = false;
+					}
+				}
+			}
+		}
+		$center_filed_syn = array(135,136,137,138,139,140,141,142,143,144);
+		// 同対類用語
+		for($idx=0;$idx<11;$idx++){
+			if($data[132+$idx*18] != ""){
+				foreach($center_filed_syn as $required_idx){
+					if(preg_match('/^(\d+)\/(\d+)$/', $data[$required_idx+$idx*18])||preg_match('/(\d+)月(\d+)日/', $data[$required_idx+$idx*18])){
+					}else{
+						$center_list .= $header[$required_idx+$idx*18].",";
+						$center_check = false;
+					}
+				}
+			}
+		}
+		$center_filed_exp = array(120,121,122,123,124,125,126,127,128,129);
+		// 解説内さくいん用語
+		if($data[117] != ""){
+			foreach($center_filed_exp as $required_idx){
+				$arr_exp = explode(";",$data[$required_idx]);
+
+				foreach($arr_exp as $ele_exp){
+					if(preg_match('/^(\d+)\/(\d+)$/', $ele_exp)||preg_match('/(\d+)月(\d+)日/', $ele_exp)){
+					}else{
+						$center_list .= $header[$required_idx].",";
+						$center_check = false;
+					}
+				}
+			}
+		}
+
+		if(!$center_check){
+			fclose($filePointer);
+			$rtn_message = "[".$data[0]."]のセンター頻度項目にスラッシュをいれてください：".$center_list;
+			$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
+			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+			$status = 206;
+			return $status;
 		}
 
 		return $status;
@@ -1439,30 +1638,7 @@ class ImportTermController extends BaseController {
 		return 0;
 	}
 
-	private function insertMainTerm($data,$em,$update_all,$handle,$handle_center,$entityVersion,$user,$newTermId){
-		// 見出しIDの取得
-		$headerRecordSet = $em->getRepository('CCKCommonBundle:Header')->findBy(array(
-				'versionId' => $entityVersion->getId(),
-				'deleteFlag' => FALSE
-		),
-				array('id' => 'ASC'));
-
-		if ($data[7] != ""){
-			//小見出しID取得
-			$header_id = $this->getHeaderId($headerRecordSet, $data[3], $data[4], $data[5], $data[6], $data[7]);
-		}elseif($data[6] != ""){
-			//中見出しID取得
-			$header_id = $this->getHeaderId($headerRecordSet, $data[3], $data[4], $data[5], $data[6]);
-		}elseif($data[5] != ""){
-			//大見出しID取得
-			$header_id = $this->getHeaderId($headerRecordSet, $data[3], $data[4], $data[5]);
-		}elseif($data[4] != ""){
-			//章見出しID取得
-			$header_id = $this->getHeaderId($headerRecordSet, $data[3], $data[4]);
-		}elseif($data[3] != ""){
-			//編見出しID取得
-			$header_id = $this->getHeaderId($headerRecordSet, $data[3]);
-		}
+	private function insertMainTerm($data,$em,$update_all,$handle,$handle_center,$entityVersion,$user,$newTermId,$header_id){
 
 		// センター頻度の取得
 		$year = $entityVersion->getYear();
@@ -1506,6 +1682,8 @@ class ImportTermController extends BaseController {
 			$delimiter = 5;
 		}elseif($data[22] == "）"){
 			$delimiter = 6;
+		}else{
+			throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[22], 209);
 		}
 
 		$sql = "INSERT INTO `MainTerm` (`id`, `term_id`, `curriculum_id`, `header_id`, `print_order`, `main_term`, `red_letter`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `western_language`, `birth_year`, `kana`, `index_add_letter`, `index_kana`, `index_original`, `index_original_kana`, `index_abbreviation`, `nombre`, `term_explain`, `handover`, `illust_filename`, `illust_caption`, `illust_kana`, `illust_nombre`, `user_id`, `create_date`, `modify_date`, `delete_date`, `delete_flag`, `nombre_bold`) VALUES";
@@ -1516,7 +1694,7 @@ class ImportTermController extends BaseController {
 		$sql .= $data[8].",";
 		$sql .= "'".$data[9]."',";
 		$sql .= "0,";
-		$sql .= $data[10].",";
+		$sql .= (($data[10] == "") ? "0" : $data[10]) .",";
 		$sql .= $center_freq_sum.",";
 		$sql .= (($data[21] == 'N') ? "1" : "0").",";
 		$sql .= "'".$delimiter."',";
@@ -1525,28 +1703,28 @@ class ImportTermController extends BaseController {
 		$sql .= "'',";
 		$sql .= "'".$data[25]."',";
 		$sql .= "'".$data[26]."',";
-		$sql .= "'".$data[27]."',";
-		$sql .= "'".$data[28]."',";
+		$sql .= "'".$data[28]."',"; // 原典資料索引
+		$sql .= "'".$data[27]."',"; // 原典資料索引よみ
 		$sql .= "'".$data[29]."',";
 		$sql .= "0,";
 		$sql .= "'".$data[115]."',";
-		$sql .= "'".$data[331]."',";
 		$sql .= "'".$data[332]."',";
 		$sql .= "'".$data[333]."',";
 		$sql .= "'".$data[334]."',";
+		$sql .= "'".$data[335]."',";
 		$sql .= "0,";
 		$sql .= "'".$user->getUserId()."',";
 		$sql .= "NOW(),";
 		$sql .= "null,";
 		$sql .= "null,";
 		$sql .= "0,";
-		$sql .= (($data[335] == '●') ? "1" : "0").");";
+		$sql .= (($data[336] == '●') ? "1" : "0").");";
 
 		fputs($handle, $sql."\n");
 
 	}
 
-	private function updateMainTerm($data,$em,$update_all,$handle,$handle_center,$entityVersion){
+	private function updateMainTerm($data,$em,$update_all,$handle,$handle_center,$entityVersion,$header_id){
 		// センター頻度の年別データ
 		$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
 				'mainTermId' => intval(substr($data[0], 1)),
@@ -1573,7 +1751,18 @@ class ImportTermController extends BaseController {
 			$idx++;
 		}
 
-		$sql = "UPDATE `MainTerm` SET `text_frequency` = " . $data[10] . ",`center_frequency` = " . $center_freq_sum . ",`news_exam` = " . ($data[21] == "N" ? 1 : 0);
+		// センター頻度未登録の場合
+		if(!$entityCenter){
+			for ($idx=0;$idx<10;$idx++){
+				$arr_freq = $this->splitCenterFreq($data[11+$idx]);
+
+				if(count($arr_freq) == 2){
+					$center_freq_sum += intval($arr_freq[0]) + intval($arr_freq[1]);
+				}
+			}
+		}
+
+		$sql = "UPDATE `MainTerm` SET `text_frequency` = " . (($data[10] == "") ? "0" : $data[10]) . ",`center_frequency` = " . $center_freq_sum . ",`news_exam` = " . ($data[21] == "N" ? 1 : 0);
 
 		if($update_all){
 			if($data[22] == ""){
@@ -1590,15 +1779,41 @@ class ImportTermController extends BaseController {
 				$delimiter = 5;
 			}elseif($data[22] == "）"){
 				$delimiter = 6;
+			}else{
+				throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[22], 209);
 			}
 
-			$sql .= ",`print_order` = " . $data[8] . ",`main_term` = '" . $data[9] . "',`delimiter` = '" . $delimiter . "',`western_language` = '" . $data[23] . "',`birth_year` = '" . $data[24] . "',`index_add_letter` = '" . $data[25] . "'";
-			$sql .= ",`index_kana` = '" . $data[26] . "',`index_original` = '" . $data[27] . "',`index_original_kana` = '" . $data[28] . "',`index_abbreviation` = '" . $data[29] . "',`term_explain` = '" . $data[115] . "',`handover` = '" . $data[331] . "'";
-			$sql .= ",`illust_filename` = '" . $data[332] . "',`illust_caption` = '" . $data[333] . "',`illust_kana` = '" . $data[334] . "',`nombre_bold` = " . (($data[335] == "●") ? 1 : 0);
+			$sql .= ",`header_id` = " . $header_id . ",`print_order` = " . $data[8] . ",`main_term` = '" . $data[9] . "',`delimiter` = '" . $delimiter . "',`western_language` = '" . $data[23] . "',`birth_year` = '" . $data[24] . "',`index_add_letter` = '" . $data[25] . "'";
+			$sql .= ",`index_kana` = '" . $data[26] . "',`index_original` = '" . $data[28] . "',`index_original_kana` = '" . $data[27] . "',`index_abbreviation` = '" . $data[29] . "',`term_explain` = '" . $data[115] . "',`handover` = '" . $data[332] . "'";
+			$sql .= ",`illust_filename` = '" . $data[333] . "',`illust_caption` = '" . $data[334] . "',`illust_kana` = '" . $data[335] . "',`nombre_bold` = " . (($data[336] == "●") ? 1 : 0);
 		}
 
 		$sql .= ",`modify_date` = NOW() WHERE `term_id` = ".intval(substr($data[0], 1))." AND `delete_flag` = 0;";
 		fputs($handle, $sql."\n");
+
+		// センター頻度未登録の場合
+		if(!$entityCenter){
+			for ($idx=0;$idx<10;$idx++){
+				$entityCenter = new Center();
+
+				$entityCenter->setMainTermId(intval(substr($data[0], 1)));
+				$entityCenter->setSubTermId(0);
+				$entityCenter->setYougoFlag(1);
+				$entityCenter->setYear($year+$idx);
+
+				$arr_freq = $this->splitCenterFreq($data[11+$idx]);
+				if(count($arr_freq) == 2){
+					$entityCenter->setMainExam(intval($arr_freq[0]));
+					$entityCenter->setSubExam(intval($arr_freq[1]));
+				}else{
+					$entityCenter->setMainExam(0);
+					$entityCenter->setSubExam(0);
+				}
+
+				$em->persist($entityCenter);
+				$em->flush();
+			}
+		}
 
 	}
 
@@ -1653,6 +1868,8 @@ class ImportTermController extends BaseController {
 			$delimiter = 6;
 		}elseif($data[44+$offset] == "）と"){
 			$delimiter = 8;
+		}else{
+			throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[44+$offset], 209);
 		}
 
 		$sql = "INSERT INTO `SubTerm` (`id`, `main_term_id`, `sub_term`, `red_letter`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `kana`, `delimiter_kana`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
@@ -1660,9 +1877,9 @@ class ImportTermController extends BaseController {
 		$sql .= $newTermId.",";
 		$sql .= "'".$data[31+$offset]."',";
 		$sql .= "0,";
-		$sql .= $data[32+$offset].",";
+		$sql .= (($data[32+$offset] == "") ? "0" : $data[32+$offset]) .",";
 		$sql .= $center_freq_sum.",";
-		$sql .= (($data[43+$offset]) ? "1" : "0").",";
+		$sql .= (($data[43+$offset] == "N") ? "1" : "0").",";
 		$sql .= "'".$delimiter."',";
 		$sql .= "'',";
 		$sql .= "'',";
@@ -1683,15 +1900,20 @@ class ImportTermController extends BaseController {
 			return false;
 		}
 
+		$sub_id = "";
+		if($data[30+$offset] != ""){
+			$sub_id = ltrim(substr($data[30+$offset], 1),'0');
+		}
+
 		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
-				'id' =>$data[30+$offset],
+				'id' =>$sub_id,
 				'mainTermId' =>intval(substr($data[0], 1)),
 				'deleteFlag' => FALSE
 		));
 
 		$update_mode = 'update';
 		if(!$entity){
-			if($data[30+$offset] == ""){
+			if($sub_id == ""){
 				// 用語IDが設定されていない場合、新規登録
 				$entity = new SubTerm();
 				$update_mode = 'new';
@@ -1703,7 +1925,7 @@ class ImportTermController extends BaseController {
 		// センター頻度の年別データ
 		$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
 				'mainTermId' => intval(substr($data[0], 1)),
-				'subTermId' => $data[30+$offset],
+				'subTermId' => $sub_id,
 				'yougoFlag' => '2',
 				'deleteFlag' => FALSE
 		),
@@ -1720,7 +1942,7 @@ class ImportTermController extends BaseController {
 					$center_freq_sum += intval($arr_freq[0]) + intval($arr_freq[1]);
 
 					$sql = "UPDATE `Center` SET `main_exam` = " . $arr_freq[0] . ",`sub_exam` = " . $arr_freq[1];
-					$sql .= ",`modify_date` = NOW() WHERE `main_term_id` = ".intval(substr($data[0], 1))." AND `sub_term_id` = ".$data[30+$offset]." AND `yougo_flag` = 2 AND `year` = " . ($year+$idx) . " AND `delete_flag` = 0;";
+					$sql .= ",`modify_date` = NOW() WHERE `main_term_id` = ".intval(substr($data[0], 1))." AND `sub_term_id` = ".$sub_id." AND `yougo_flag` = 2 AND `year` = " . ($year+$idx) . " AND `delete_flag` = 0;";
 					fputs($handle_center, $sql."\n");
 				}
 			}
@@ -1739,11 +1961,11 @@ class ImportTermController extends BaseController {
 		}
 
 		// サブ用語情報の更新(頻度)
-		$entity->setTextFrequency($data[32+$offset]);
+		$entity->setTextFrequency($data[32+$offset] == "" ? 0 : $data[32+$offset]);
 		$entity->setCenterFrequency($center_freq_sum);
 		$entity->setNewsExam($data[43+$offset] == "N" ? 1 : 0);
 
-		$sql = "UPDATE `SubTerm` SET `text_frequency` = " . $data[32+$offset] . ",`center_frequency` = " . $center_freq_sum . ",`news_exam` = " . ($data[43+$offset] == "N" ? 1 : 0);
+		$sql = "UPDATE `SubTerm` SET `text_frequency` = " . ($data[32+$offset] == "" ? "0" : $data[32+$offset]) . ",`center_frequency` = " . $center_freq_sum . ",`news_exam` = " . ($data[43+$offset] == "N" ? 1 : 0);
 
 		if($update_all){
 			// サブ用語情報の更新
@@ -1773,6 +1995,8 @@ class ImportTermController extends BaseController {
 			}elseif($data[44+$offset] == "）と"){
 				$entity->setDelimiter(8);
 				$delimiter = 8;
+			}else{
+				throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[44+$offset], 209);
 			}
 
 			$entity->setIndexAddLetter($data[45+$offset]);
@@ -1817,10 +2041,10 @@ class ImportTermController extends BaseController {
 		}
 
 		if($update_mode == 'update'){
-			$sql .= ",`modify_date` = NOW() WHERE `id` = ".$data[30+$offset]." AND `delete_flag` = 0;";
+			$sql .= ",`modify_date` = NOW() WHERE `id` = ".$sub_id." AND `delete_flag` = 0;";
 			fputs($handle, $sql."\n");
 
-			$rtn_id = $data[30+$offset];
+			$rtn_id = $sub_id;
 		}else{
 			$rtn_id = $new_id;
 		}
@@ -1915,6 +2139,8 @@ class ImportTermController extends BaseController {
 			$delimiter = 5;
 		}elseif($data[146+$offset] == "）＋改行"){
 			$delimiter = 6;
+		}else{
+			throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[146+$offset], 209);
 		}
 
 		$sql = "INSERT INTO `Synonym` (`id`, `main_term_id`, `term`, `red_letter`, `synonym_id`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `kana`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
@@ -1923,9 +2149,9 @@ class ImportTermController extends BaseController {
 		$sql .= "'".$data[133+$offset]."',";
 		$sql .= "0,";
 		$sql .= $synid.",";
-		$sql .= $data[134+$offset].",";
+		$sql .= (($data[134+$offset] == "") ? "0" : $data[134+$offset]) .",";
 		$sql .= $center_freq_sum.",";
-		$sql .= (($data[145+$offset]) ? "1" : "0").",";
+		$sql .= (($data[145+$offset] == "N") ? "1" : "0").",";
 		$sql .= "'".$delimiter."',";
 		$sql .= "'',";
 		$sql .= "'".$data[147+$offset]."',";
@@ -1945,15 +2171,20 @@ class ImportTermController extends BaseController {
 			return false;
 		}
 
+		$syn_id = "";
+		if($data[132+$offset] != ""){
+			$syn_id = ltrim(substr($data[132+$offset], 1),'0');
+		}
+
 		$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
-				'id' =>$data[132+$offset],
+				'id' =>$syn_id,
 				'mainTermId' =>intval(substr($data[0], 1)),
 				'deleteFlag' => FALSE
 		));
 
 		$update_mode = 'update';
 		if(!$entity){
-			if($data[132+$offset] == ""){
+			if($syn_id == ""){
 				// 用語IDが設定されていない場合、新規登録
 				$entity = new Synonym();
 				$update_mode = 'new';
@@ -1965,7 +2196,7 @@ class ImportTermController extends BaseController {
 		// センター頻度の年別データ
 		$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
 				'mainTermId' => intval(substr($data[0], 1)),
-				'subTermId' => $data[132+$offset],
+				'subTermId' => $syn_id,
 				'yougoFlag' => '3',
 				'deleteFlag' => FALSE
 		),
@@ -1982,7 +2213,7 @@ class ImportTermController extends BaseController {
 					$center_freq_sum += intval($arr_freq[0]) + intval($arr_freq[1]);
 
 					$sql = "UPDATE `Center` SET `main_exam` = " . $arr_freq[0] . ",`sub_exam` = " . $arr_freq[1];
-					$sql .= ",`modify_date` = NOW() WHERE `main_term_id` = ".intval(substr($data[0], 1))." AND `sub_term_id` = ".$data[132+$offset]." AND `yougo_flag` = 3 AND `year` = " . ($year+$idx) . " AND `delete_flag` = 0;";
+					$sql .= ",`modify_date` = NOW() WHERE `main_term_id` = ".intval(substr($data[0], 1))." AND `sub_term_id` = ".$syn_id." AND `yougo_flag` = 3 AND `year` = " . ($year+$idx) . " AND `delete_flag` = 0;";
 					fputs($handle_center, $sql."\n");
 
 				}
@@ -2002,11 +2233,11 @@ class ImportTermController extends BaseController {
 		}
 
 		// 同対類用語情報の更新(頻度)
-		$entity->setTextFrequency($data[134+$offset]);
+		$entity->setTextFrequency($data[134+$offset] == "" ? 0 : $data[134+$offset]);
 		$entity->setCenterFrequency($center_freq_sum);
 		$entity->setNewsExam($data[145+$offset] == "N" ? 1 : 0);
 
-		$sql = "UPDATE `Synonym` SET `text_frequency` = " . $data[134+$offset] . ",`center_frequency` = " . $center_freq_sum . ",`news_exam` = " . ($data[145+$offset] == "N" ? 1 : 0);
+		$sql = "UPDATE `Synonym` SET `text_frequency` = " . ($data[134+$offset] == "" ? "0" : $data[134+$offset]) . ",`center_frequency` = " . $center_freq_sum . ",`news_exam` = " . ($data[145+$offset] == "N" ? 1 : 0);
 
 		if($update_all){
 			// 同対類用語情報の更新
@@ -2044,6 +2275,8 @@ class ImportTermController extends BaseController {
 			}elseif($data[146+$offset] == "）＋改行"){
 				$entity->setDelimiter(6);
 				$delimiter = 6;
+			}else{
+				throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[146+$offset], 209);
 			}
 
 			$entity->setIndexAddLetter($data[147+$offset]);
@@ -2088,10 +2321,10 @@ class ImportTermController extends BaseController {
 		}
 
 		if($update_mode == 'update'){
-			$sql .= ",`modify_date` = NOW() WHERE `id` = ".$data[132+$offset]." AND `delete_flag` = 0;";
+			$sql .= ",`modify_date` = NOW() WHERE `id` = ".$syn_id." AND `delete_flag` = 0;";
 			fputs($handle, $sql."\n");
 
-			$rtn_id = $data[132+$offset];
+			$rtn_id = $syn_id;
 		}else{
 			$rtn_id = $new_id;
 		}
@@ -2168,16 +2401,16 @@ class ImportTermController extends BaseController {
 			$sql .= "(".$newExpTermId.",";
 			$sql .= $newTermId.",";
 			$sql .= "'".$exp_term[$elem]."',";
-			$sql .= "'".$exp['exp_term'][$elem]."',";
+			$sql .= "'".(($data[118] == "") ? "" : $exp['exp_term'][$elem])."',";
 			$sql .= "'".$exp_id_ele."',";
 			$sql .= "0,";
 			$sql .= "NOW(),";
 			$sql .= "null,";
 			$sql .= "null,";
 			$sql .= "0,";
-			$sql .= $exp['exp_text_frequency'][$elem].",";
+			$sql .= ((($data[119] == "")||($exp['exp_text_frequency'][$elem] == "")) ? "0" : $exp['exp_text_frequency'][$elem]) .",";
 			$sql .= $center_freq_sum.",";
-			$sql .= (($exp['exp_news_exam'][$elem]) ? "1" : "0").");";
+			$sql .= (($exp['exp_news_exam'][$elem] == "N") ? "1" : "0").");";
 
 			fputs($handle, $sql."\n");
 
@@ -2218,7 +2451,7 @@ class ImportTermController extends BaseController {
 			if($data[116] == ""){
 				$exp_id = "";
 			}else{
-				$exp_id = $exp['exp_id'][$elem];
+				$exp_id = ltrim(substr($exp['exp_id'][$elem], 1),'0');
 			}
 
 			$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
@@ -2237,6 +2470,7 @@ class ImportTermController extends BaseController {
 					continue;
 				}
 			}
+			$this->get('logger')->error("***updateExpTerm:1***");
 
 			// センター頻度の年別データ
 			$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
@@ -2265,6 +2499,7 @@ class ImportTermController extends BaseController {
 				$idx++;
 			}
 
+			$this->get('logger')->error("***updateExpTerm:2***");
 			// センター頻度未登録の場合
 			if(!$entityCenter){
 				for ($idx=0;$idx<10;$idx++){
@@ -2276,16 +2511,18 @@ class ImportTermController extends BaseController {
 				}
 			}
 
+			$this->get('logger')->error("***updateExpTerm:3***");
 			// 解説内用語情報の更新(頻度)
-			$entity->setTextFrequency($exp['exp_text_frequency'][$elem]);
+			$entity->setTextFrequency((($data[119] == "")||($exp['exp_text_frequency'][$elem] == "")) ? 0 : $exp['exp_text_frequency'][$elem]);
 			$entity->setCenterFrequency($center_freq_sum);
 			$entity->setNewsExam($exp['exp_news_exam'][$elem] == "N" ? 1 : 0);
 
-			$sql = "UPDATE `ExplainIndex` SET `text_frequency` = " . $exp['exp_text_frequency'][$elem] . ",`center_frequency` = " . $center_freq_sum . ",`news_exam` = " . ($exp['exp_news_exam'][$elem] == "N" ? 1 : 0);
+			$sql = "UPDATE `ExplainIndex` SET `text_frequency` = " . ((($data[119] == "")||($exp['exp_text_frequency'][$elem] == "")) ? "0" : $exp['exp_text_frequency'][$elem]) . ",`center_frequency` = " . $center_freq_sum . ",`news_exam` = " . ($exp['exp_news_exam'][$elem] == "N" ? 1 : 0);
 
+			$this->get('logger')->error("***updateExpTerm:4***");
 			if($update_all){
 				// 解説内用語情報の更新
-				$entity->setIndexAddLetter($exp['exp_term'][$elem]);
+				$entity->setIndexAddLetter(($data[118] == "") ? "" : $exp['exp_term'][$elem]);
 				$entity->setIndexKana($exp['exp_index_kana'][$elem]);
 
 				if($update_mode == 'new'){
@@ -2296,13 +2533,15 @@ class ImportTermController extends BaseController {
 					$em->flush();
 
 				}else{
-					$sql .= ",`index_add_letter` = '" . $exp['exp_term'][$elem] . "',`index_kana` = '" . $exp['exp_index_kana'][$elem] . "'";
+					$sql .= ",`index_add_letter` = '" . ($data[118] == "") ? "" : $exp['exp_term'][$elem] . "',`index_kana` = '" . $exp['exp_index_kana'][$elem] . "'";
 				}
+				$this->get('logger')->error("***updateExpTerm:5***");
 			}
 
 			$new_id = $entity->getId();
 			array_push($rtn_exp_id,$new_id);
 
+			$this->get('logger')->error("***updateExpTerm:6***");
 			// センター頻度未登録の場合
 			if(!$entityCenter){
 				for ($idx=0;$idx<10;$idx++){
@@ -2326,6 +2565,7 @@ class ImportTermController extends BaseController {
 					$em->persist($entityCenter);
 					$em->flush();
 				}
+				$this->get('logger')->error("***updateExpTerm:7***");
 			}
 
 			if($update_mode == 'update'){
