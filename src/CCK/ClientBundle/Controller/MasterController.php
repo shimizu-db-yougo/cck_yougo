@@ -1932,17 +1932,26 @@ class MasterController extends BaseController {
 		if($request->request->has('cur_name')){
 			$cur_name = $request->request->get('cur_name');
 
+			$this->get('logger')->error("***Curriculum:Name***".$cur_name);
+
 			$is_exists = false;
 			$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findOneBy(array(
-					'name' =>$cur_name
+					'name' =>$cur_name,
+					'deleteFlag' => FALSE
 			));
 
 			$entity_ver = false;
 			if($entity){
+				$this->get('logger')->error("***Curriculum:Entity***".$entity->getId().":".$entity->getName());
+
 				$entity_ver = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
 						'curriculumId' =>$entity->getId(),
 						'deleteFlag' => FALSE
 				));
+
+				if($entity_ver){
+					$this->get('logger')->error("***Version:Entity***".serialize($entity_ver));
+				}
 			}
 
 			if(($entity)&&($entity_ver)){
