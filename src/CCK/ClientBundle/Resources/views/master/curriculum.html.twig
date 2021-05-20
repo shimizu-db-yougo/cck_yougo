@@ -84,6 +84,7 @@
 
 <div class="row">
 	{% for cur_elem in cur_list %}
+	{% dump(cur_elem) %}
 	<div class="col-lg-4">
 		<table class="table table-responsive table-striped">
 			<tbody>
@@ -437,6 +438,33 @@
 
 			if(Number(ranka) <= Number(rankb)){
 				$('.ranka-err').text('ランクAの頻度を大きくして入力してください');
+				return false;
+			}
+
+			var data = {
+					'cur_name': cur_name
+				};
+			var jqxhr;
+			var is_exists = false;
+			jqxhr = $.ajax({
+					url: "{{ path('client.master.curriculum.ajax') }}",
+					data: data,
+					method: 'POST',
+					async: false,
+					success: function (response) {
+						is_exists = response;
+					},
+					error: function (response) {
+						alert('ネットワークエラー。');
+						return false;
+					}
+				}).done(function(data){
+				}).fail(function(){
+					jqxhr.abort();
+				});
+
+			if(is_exists){
+				$('.curriculum-err').text('教科名が重複しています');
 				return false;
 			}
 

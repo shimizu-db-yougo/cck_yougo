@@ -595,6 +595,8 @@ class MasterController extends BaseController {
 		$entity->setModifyDate(new \DateTime());
 		$entity->setDeleteDate(new \DateTime());
 
+		$cur_id = $entity->getCurriculumId();
+
 		// transaction
 		$em = $this->get('doctrine.orm.entity_manager');
 		$em->getConnection()->beginTransaction();
@@ -604,6 +606,32 @@ class MasterController extends BaseController {
 			$em->flush();
 			// 実行
 			$em->getConnection()->commit();
+
+			// 版マスタから削除したことによって、対象の教科に版データがなくなった場合は教科マスタから教科も削除する
+			$entity_after = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+					'curriculumId' =>$cur_id,
+					'deleteFlag' => FALSE
+			));
+
+			if(!$entity_after){
+				$entity_cur = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findOneBy(array(
+						'id' =>$cur_id,
+						'deleteFlag' => FALSE
+				));
+				if(!$entity_cur){
+					return $this->redirect($this->generateUrl('client.master.curriculum'));
+				}
+				$entity_cur->setDeleteFlag(true);
+				$entity_cur->setModifyDate(new \DateTime());
+				$entity_cur->setDeleteDate(new \DateTime());
+
+				$em->getConnection()->beginTransaction();
+				// 登録
+				$em->flush();
+				// 実行
+				$em->getConnection()->commit();
+			}
+
 		} catch(\Exception $e){
 			// もし、DBに登録失敗した場合rollbackする
 			$em->getConnection()->rollback();
@@ -1891,6 +1919,40 @@ class MasterController extends BaseController {
 		}
 
 		$response = new JsonResponse($is_used);
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/master/curriculum/ajax", name="client.master.curriculum.ajax")
+	 */
+	public function getCurriculumAjaxAction(Request $request){
+		$user = $this->getUser();
+
+		if($request->request->has('cur_name')){
+			$cur_name = $request->request->get('cur_name');
+
+			$is_exists = false;
+			$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Curriculum')->findOneBy(array(
+					'name' =>$cur_name
+			));
+
+			$entity_ver = false;
+			if($entity){
+				$entity_ver = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->findBy(array(
+						'curriculumId' =>$entity->getId(),
+						'deleteFlag' => FALSE
+				));
+			}
+
+			if(($entity)&&($entity_ver)){
+				$is_exists = true;
+			}
+
+			$response = new JsonResponse($is_exists);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
 
 		return $response;
 	}

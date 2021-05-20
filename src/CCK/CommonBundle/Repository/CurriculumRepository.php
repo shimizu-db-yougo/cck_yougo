@@ -42,4 +42,28 @@ class CurriculumRepository extends EntityRepository
 
 		return $result;
 	}
+
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function getUniqueCurriculumList(){
+		$sql = "
+			SELECT
+				DISTINCT Curriculum.id,
+				Curriculum.name,
+				Curriculum.year
+			FROM
+				Curriculum
+					INNER JOIN
+				Version ON (Curriculum.id = Version.curriculum_id)
+			WHERE
+				Curriculum.delete_flag = FALSE
+				AND Version.delete_flag = FALSE
+			ORDER BY Curriculum.id";
+
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result;
+	}
+
 }
