@@ -766,6 +766,7 @@ class YougoController extends BaseController {
 				'ranka' => '',
 				'rankb' => '',
 				'is_latest_ver' => true,
+				'is_copy' => false,
 		);
 	}
 
@@ -1432,6 +1433,13 @@ class YougoController extends BaseController {
 			exit();
 		}
 
+		if($request->query->has('is_copy')){
+			//「＋」(コピー)ボタンから遷移
+			$is_copy = true;
+		}else{
+			//「編集」ボタンから遷移
+			$is_copy = false;
+		}
 
 		$session = $request->getSession();
 
@@ -1543,6 +1551,7 @@ class YougoController extends BaseController {
 				'ranka' => $entityVersion->getRankA(),
 				'rankb' => $entityVersion->getRankB(),
 				'is_latest_ver' => $is_latest_ver,
+				'is_copy' => $is_copy,
 		);
 	}
 
@@ -2472,7 +2481,50 @@ class YougoController extends BaseController {
 			$page = $request->query->get('page');
 		}
 
-		return $this->redirect($this->generateUrl('client.yougo.edit', array('term_id' => $newTermId)));
+		return $this->redirect($this->generateUrl('client.yougo.edit', array('term_id' => $newTermId, 'is_copy' => true)));
+	}
+
+	/**
+	 * @Route("/copy/delete/ajax", name="client.copy.delete.ajax")
+	 * @Method("POST")
+	 */
+	public function copyDeleteAjaxAction(Request $request){
+		$this->get('logger')->error("***copyDeleteAjaxAction start***");
+		$this->get('logger')->error(serialize($request->request->get('term_id')));
+
+		$ret = ['result'=>'ok','error'=>''];
+
+		if(!($request->request->has('term_id'))){
+			$ret = ['result'=>'ng','error'=>'parameter error'];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		$term_id = $request->request->get('term_id');
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$conn = $em->getConnection();
+		$conn->beginTransaction();
+		try {
+			$conn->delete('MainTerm', array('term_id' => $term_id));
+			$conn->delete('SubTerm', array('main_term_id' => $term_id));
+			$conn->delete('Synonym', array('main_term_id' => $term_id));
+			$conn->delete('Refer', array('main_term_id' => $term_id));
+			$conn->delete('ExplainIndex', array('main_term_id' => $term_id));
+
+			$em->getConnection()->commit();
+		}catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$ret = ['result'=>'ng','error'=>'copyDeleteAjaxAction error id:'.$term_id];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
 	}
 
 	/**
