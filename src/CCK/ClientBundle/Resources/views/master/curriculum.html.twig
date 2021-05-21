@@ -406,39 +406,46 @@
 			var ranka = $('#ranka_n').val();
 			var rankb = $('#rankb_n').val();
 
+			$('.curriculum-err').text('');
+			$('.version-err').text('');
+			$('.startyear-err').text('');
+			$('.ranka-err').text('');
+			$('.rankb-err').text('');
+
+			var is_checked = true;
 			if(cur_name == ''){
 				$('.curriculum-err').text('必須項目です');
-				return false;
+				is_checked = false;
 			}
 
 			if(ver_name == ''){
 				$('.version-err').text('必須項目です');
-				return false;
+				is_checked = false;
 			}
 
 			if(start_year == ''){
 				$('.startyear-err').text('必須項目です');
-				return false;
+				is_checked = false;
 			}
 
 			if(start_year.length != 4){
 				$('.startyear-err').text('開始年は4桁で入力してください');
-				return false;
+				is_checked = false;
 			}
 
 			if(ranka == ''){
 				$('.ranka-err').text('必須項目です');
-				return false;
+				is_checked = false;
 			}
 
 			if(rankb == ''){
 				$('.rankb-err').text('必須項目です');
-				return false;
+				is_checked = false;
 			}
 
 			if(Number(ranka) <= Number(rankb)){
 				$('.ranka-err').text('ランクAの頻度を大きくして入力してください');
-				return false;
+				is_checked = false;
 			}
 
 			var data = {
@@ -465,6 +472,10 @@
 
 			if(is_exists){
 				$('.curriculum-err').text('教科名が重複しています');
+				is_checked = false;
+			}
+
+			if(!is_checked){
 				return false;
 			}
 
