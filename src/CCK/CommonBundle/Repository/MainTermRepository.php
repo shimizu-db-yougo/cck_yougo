@@ -119,13 +119,13 @@ class MainTermRepository extends EntityRepository
 		if($text_freq){
 			if($text_freq == '1'){
 				// A
-				$sql .= " AND IF(Curriculum.id = 1, MainTerm.text_frequency >= 8, MainTerm.text_frequency >= 6)";
+				$sql .= " AND MainTerm.text_frequency >= Version.rank_a";
 			}elseif($text_freq == '2'){
 				// B
-				$sql .= " AND IF(Curriculum.id = 1, (MainTerm.text_frequency >= 4 AND MainTerm.text_frequency <= 7), (MainTerm.text_frequency >= 3 AND MainTerm.text_frequency <= 5))";
+				$sql .= " AND (MainTerm.text_frequency >= Version.rank_b AND MainTerm.text_frequency < Version.rank_a)";
 			}else{
 				// C
-				$sql .= " AND IF(Curriculum.id = 1, MainTerm.text_frequency <= 3, MainTerm.text_frequency <= 2)";
+				$sql .= " AND MainTerm.text_frequency < rank_b";
 			}
 		}
 

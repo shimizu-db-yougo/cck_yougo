@@ -706,6 +706,9 @@
 			}else if((value >= 1)&&(value <= num_rankb-1)){
 				rank = 'C';
 			}
+			if((num_ranka == 0)&&(num_rankb == 0)){
+				rank = '';
+			}
 			$('#text_rank' + term_id + ' #text_rank').text(rank);
 		}
 
