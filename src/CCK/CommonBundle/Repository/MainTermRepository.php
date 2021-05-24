@@ -66,8 +66,7 @@ class MainTermRepository extends EntityRepository
 					)
 					INNER JOIN
 				User ON (MainTerm.user_id = User.user_id
-					AND MainTerm.delete_flag = false
-					AND User.delete_flag = false)
+					AND MainTerm.delete_flag = false)
 					INNER JOIN
 				Version ON (MainTerm.curriculum_id = Version.id
 					AND MainTerm.delete_flag = false
