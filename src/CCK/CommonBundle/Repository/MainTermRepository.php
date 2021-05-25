@@ -124,7 +124,7 @@ class MainTermRepository extends EntityRepository
 				$sql .= " AND (MainTerm.text_frequency >= Version.rank_b AND MainTerm.text_frequency < Version.rank_a)";
 			}else{
 				// C
-				$sql .= " AND MainTerm.text_frequency < rank_b";
+				$sql .= " AND (MainTerm.text_frequency > 0 AND MainTerm.text_frequency < rank_b)";
 			}
 		}
 
