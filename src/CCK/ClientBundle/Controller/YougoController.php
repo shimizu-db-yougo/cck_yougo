@@ -470,13 +470,13 @@ class YougoController extends BaseController {
 
 			$param_header = array('hen' => $hen,'deleteFlag' => FALSE);
 			if($request->request->has('sho')){
-				$param_header = array_merge($param_header, array('sho' => $request->request->get('sho')));
+				if($request->request->get('sho') > 0){$param_header = array_merge($param_header, array('sho' => $request->request->get('sho')));}
 			}
 			if($request->request->has('dai')){
-				$param_header = array_merge($param_header, array('dai' => $request->request->get('dai')));
+				if($request->request->get('dai') > 0){$param_header = array_merge($param_header, array('dai' => $request->request->get('dai')));}
 			}
 			if($request->request->has('chu')){
-				$param_header = array_merge($param_header, array('chu' => $request->request->get('chu')));
+				if($request->request->get('chu') > 0){$param_header = array_merge($param_header, array('chu' => $request->request->get('chu')));}
 			}
 			$header = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Header')->findBy($param_header);
 			$list_header_id = '';
@@ -500,8 +500,8 @@ class YougoController extends BaseController {
 						break;
 					}
 				}
+				$term_add = array();
 				if(!$is_meinterm_exist){
-					$term_add = array();
 					array_push($term_add,array('id'=>$term_id,'name'=>$main_term));
 					foreach ($term as $term_ele){
 						array_push($term_add,$term_ele);

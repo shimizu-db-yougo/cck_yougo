@@ -115,6 +115,10 @@
 					option.attr('value', list.id);
 					// 掲載順リストの場合、修正対象の主用語のみ選択可能にする
 					if(term_id){
+						// "M000XXXX"->XXXX へ変換
+						if(term_id.indexOf("M") !== -1){
+							term_id = String(Number(term_id.substr(1)));
+						}
 						if(term_id == list.id){
 							option.attr('selected', true);
 						}else{
@@ -430,6 +434,7 @@
 							'dai': selected_dai,
 							'chu': selected_chu
 					};
+					console.log(data);
 					$.ajax({
 						url: "{{ path('client.yougo.term.ajax') }}",
 						data: data,
