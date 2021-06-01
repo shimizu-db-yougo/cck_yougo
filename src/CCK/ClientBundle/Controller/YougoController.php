@@ -1285,9 +1285,42 @@ class YougoController extends BaseController {
 				'deleteFlag' => FALSE
 		));
 
+		$arr_not_exist_index_term = [];
+		if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $request->request->get('term_explain'), $match_data, PREG_SET_ORDER)){
+			foreach($match_data as $main_explain_ele){
+				array_push($arr_not_exist_index_term,$main_explain_ele[1]);
+			}
+		}
+
 		$arr_exp_indexTerm = [];
 		foreach($entity as $entity_rec){
 			array_push($arr_exp_indexTerm, $entity_rec->getIndexTerm());
+
+			if(!in_array($entity_rec->getIndexTerm(),$arr_not_exist_index_term)){
+				// 解説textareaから削除したさくいん用語はDBからも削除
+				$em->getConnection()->beginTransaction();
+
+				try{
+					$entity_rec->setDeleteFlag(true);
+					$entity_rec->setModifyDate(new \DateTime());
+					$entity_rec->setDeleteDate(new \DateTime());
+
+					$rtncd = $em->getRepository('CCKCommonBundle:Center')->deleteDataByMainId($request->request->get('term_id'),$entity_rec->getId(),'4');
+
+					$em->flush();
+					$em->getConnection()->commit();
+				} catch (\Exception $e){
+					$em->getConnection()->rollback();
+					$em->close();
+
+					// log
+					$this->get('logger')->error($e->getMessage());
+					$this->get('logger')->error($e->getTraceAsString());
+
+					$ret = ['result'=>'ng','error'=>'ExplainDB error id:'.$entity_rec->getIndexTerm()];
+					return false;
+				}
+			}
 		}
 
 		$arr_not_exist_index_term = [];
