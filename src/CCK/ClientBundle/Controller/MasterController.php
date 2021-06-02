@@ -20,6 +20,7 @@ use CCK\CommonBundle\Entity\Header;
 use CCK\CommonBundle\Entity\Version;
 use CCK\CommonBundle\Entity\User;
 use CCK\CommonBundle\Entity\Curriculum;
+use CCK\CommonBundle\Entity\Center;
 
 /**
  * Master controller.
@@ -675,6 +676,104 @@ class MasterController extends BaseController {
 			}
 
 			$em->flush();
+
+			// 開始年の変更に対応してセンター頻度データの削除
+			$mainTermList = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
+					'curriculumId' => $id,
+					'deleteFlag' => false
+			));
+
+			$startyear = $request->request->get('startyear');
+			foreach($mainTermList as $mainTermRec){
+				// センター頻度存在チェック、追加処理
+				$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
+						'mainTermId' => $mainTermRec->getTermId(),
+						'deleteFlag' => FALSE
+				),
+						array('yougoFlag' => 'ASC','subTermId' => 'ASC','year' => 'ASC'));
+
+				$center_freq = 0;
+				$center_freq_sub = [];
+				$center_freq_syn = [];
+				$center_freq_exp = [];
+				$is_update = false;
+				foreach($entityCenter as $entityCenterRec){
+					if($entityCenterRec->getYear() < $startyear){
+						$is_update = true;
+						//設定された開始年より古いデータは削除
+						//代わりに10年後のデータを追加
+						$entityCenterRec->setYear($entityCenterRec->getYear()+10);
+						$entityCenterRec->setMainExam(0);
+						$entityCenterRec->setSubExam(0);
+						$em->flush();
+					}
+
+					if($entityCenterRec->getYear() > $startyear+9){
+						$is_update = true;
+						//設定された終了年より新しいデータは削除
+						//代わりに10年前のデータを追加
+						$entityCenterRec->setYear($entityCenterRec->getYear()-10);
+						$entityCenterRec->setMainExam(0);
+						$entityCenterRec->setSubExam(0);
+						$em->flush();
+					}
+
+					//開始年～終了年の範囲が変わるので、対応するセンター頻度を集計
+					if($entityCenterRec->getYougoFlag() == "1"){
+						$center_freq += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+					}elseif($entityCenterRec->getYougoFlag() == "2"){
+						if(isset($center_freq_sub[$entityCenterRec->getSubTermId()])){
+							$center_freq_sub[$entityCenterRec->getSubTermId()] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+						}else{
+							$center_freq_sub[$entityCenterRec->getSubTermId()] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+						}
+					}elseif($entityCenterRec->getYougoFlag() == "3"){
+						if(isset($center_freq_syn[$entityCenterRec->getSubTermId()])){
+							$center_freq_syn[$entityCenterRec->getSubTermId()] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+						}else{
+							$center_freq_syn[$entityCenterRec->getSubTermId()] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+						}
+					}else{
+						if(isset($center_freq_exp[$entityCenterRec->getSubTermId()])){
+							$center_freq_exp[$entityCenterRec->getSubTermId()] += $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+						}else{
+							$center_freq_exp[$entityCenterRec->getSubTermId()] = $entityCenterRec->getMainExam() + $entityCenterRec->getSubExam();
+						}
+					}
+				}
+
+				if($is_update){
+					//集計したセンター頻度を各用語テーブルへ設定
+					$mainTermRec->setCenterFrequency($center_freq);
+
+					foreach ($center_freq_sub as $key => $val){
+						$entity_sub = $em->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
+								'id' => $key,
+								'deleteFlag' => FALSE
+						));
+						$entity_sub->setCenterFrequency($val);
+					}
+
+					foreach ($center_freq_syn as $key => $val){
+						$entity_sub = $em->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
+								'id' => $key,
+								'deleteFlag' => FALSE
+						));
+						$entity_sub->setCenterFrequency($val);
+					}
+
+					foreach ($center_freq_exp as $key => $val){
+						$entity_sub = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+								'id' => $key,
+								'deleteFlag' => FALSE
+						));
+						$entity_sub->setCenterFrequency($val);
+					}
+
+					$em->flush();
+				}
+			}
+
 			$em->getConnection()->commit();
 
 		} catch (\Exception $e){
