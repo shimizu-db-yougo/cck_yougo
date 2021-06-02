@@ -1469,6 +1469,14 @@ class MasterController extends BaseController {
 						$this->get('logger')->error("★１".$sql);
 					}
 
+					// DBから10件読み込んだ後、センター頻度開始年+10以上の場合はスキップする
+					if($wkYear >= $wkEndYear){
+						$wkYear = $entityCenterRec->getYear();
+						if($wkYear >= $wkEndYear){
+							continue;
+						}
+					}
+
 					$wkYear = $wkStartYear;
 					$idx = 1;
 
@@ -1538,6 +1546,26 @@ class MasterController extends BaseController {
 							$this->get('logger')->error("★8");
 						}
 
+						for($i = $wkYear; $wkYear < $entityCenterRec->getYear(); $wkYear++){
+							// DBの実施年より対象年が小さい場合、初期データを登録する
+							$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
+							$sql .= "(null,";
+							$sql .= $newTermId.",";
+							$sql .= $wkSubTermId.",";
+							$sql .= $wkYougoFlag.",";
+							$sql .= $wkYear.",";
+							$sql .= "0,";
+							$sql .= "0,";
+							$sql .= "NOW(),";
+							$sql .= "null,";
+							$sql .= "null,";
+							$sql .= "0);";
+
+							fputs($handle, $sql."\n");
+							$this->get('logger')->error("★12".$sql);
+							$idx++;
+						}
+
 						$sql = "INSERT INTO `Center` (`id`, `main_term_id`, `sub_term_id`, `yougo_flag`, `year`, `main_exam`, `sub_exam`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
 						$sql .= "(null,";
 						$sql .= $newTermId.",";
@@ -1554,7 +1582,6 @@ class MasterController extends BaseController {
 						fputs($handle, $sql."\n");
 						$this->get('logger')->error("★２".$sql);
 						$wkYear++;
-
 					}
 				}
 			}
