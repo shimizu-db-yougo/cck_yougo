@@ -183,10 +183,10 @@ class ImportTermController extends BaseController {
 		}elseif($status == 203){
 			$status_message = "教科・版が異なっています。";
 		}elseif($status == 204){
-			$status_message = "項目数が異なっています。項目数：336";
+			$status_message = "項目数が異なっています。項目数：337";
 		}elseif($status == 205){
 			$status_download = "用語の登録がありません。教科・版を確認してください。";
-		}elseif(($status == 206)||($status == 207)||($status == 208)||($status == 209)){
+		}elseif(($status == 206)||($status == 207)||($status == 208)||($status == 209)||($status == 210)||($status == 211)){
 			$status_message =  $session->get(self::SES_REQUIRED_KEY);
 		}elseif($status == 'default'){
 			$status_message = "";
@@ -513,12 +513,31 @@ class ImportTermController extends BaseController {
 		$exp['exp_news_exam'] = "";
 
 		if($expterm){
+			$exp_term_text = [];
+			// 解説内のタグ出現順にソート
+			if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $main['term_explain'], $match_data, PREG_SET_ORDER)){
+				foreach($match_data as $main_explain_ele){
+					array_push($exp_term_text, $main_explain_ele[1]);
+				}
+			}
+
+			$wk_exp = [];
+			foreach ($exp_term_text as $exp_term_ele) {
+				foreach ($expterm as $exptermRec) {
+					if($exp_term_ele == $exptermRec['indexTerm']){
+						array_push($wk_exp,$exptermRec);
+						break;
+					}
+				}
+			}
+			$expterm = $wk_exp;
+
 			foreach ($expterm as $exptermRec) {
 				$this->replaceExpField($exptermRec,$entityVer);
 
 				$exp['exp_id'] .= 'K'.str_pad($exptermRec['id'], 6, 0, STR_PAD_LEFT) . ';';
 				$exp['exp_index_kana'] .= $exptermRec['indexKana'] . ';';
-				$exp['exp_term'] .= $exptermRec['indexTerm'] . ';';
+				$exp['exp_term'] .= $exptermRec['indexAddLetter'] . ';';
 				$exp['exp_text_frequency'] .= $exptermRec['textFrequency'] . ';';
 
 				// センター頻度10年分の取得
@@ -545,7 +564,7 @@ class ImportTermController extends BaseController {
 				}
 
 
-				$exp['exp_news_exam'] .= (($exptermRec['newsExam'] == '') ? 0 : $exptermRec['newsExam']) . ';';
+				$exp['exp_news_exam'] .= (($exptermRec['newsExam'] == '1') ? 'N' : '') . ';';
 			}
 
 			foreach ($exp as $key => $val) {
@@ -555,7 +574,7 @@ class ImportTermController extends BaseController {
 
 		$idx = 1;
 		for($year = $entityVer->getYear(); $year <= $entityVer->getYear()+9; $year++){
-			if(($exp['exp_center_frequency'.$year] != "0/0")&&($exp['exp_center_frequency'.$year] != "")){
+			if(($exp['exp_center_frequency'.$year] != "0/0")&&($exp['exp_center_frequency'.$year] != "")&&($exp['exp_center_frequency'.$year] != "/")){
 				$exp['exp_center_frequency'.$idx] = $exp['exp_center_frequency'.$year];
 			}else{
 				foreach ($expterm as $exptermRec) {
@@ -917,11 +936,11 @@ class ImportTermController extends BaseController {
 		}elseif($syn['delimiter'] == '3'){
 			$syn['delimiter'] = '）';
 		}elseif($syn['delimiter'] == '4'){
-			$syn['delimiter'] = '《rtn》';
+			$syn['delimiter'] = '改行';
 		}elseif($syn['delimiter'] == '5'){
-			$syn['delimiter'] = '《rtn》（';
+			$syn['delimiter'] = '改行＋（';
 		}elseif($syn['delimiter'] == '6'){
-			$syn['delimiter'] = '）《rtn》';
+			$syn['delimiter'] = '）＋改行';
 		}
 
 		if($syn['id'] != ""){
@@ -1287,7 +1306,7 @@ class ImportTermController extends BaseController {
 
 						$errcode = $e->getCode();
 
-						if($errcode == 209){
+						if(($errcode == 209)||($errcode == 210)){
 							// ファイルをクローズする
 							fclose($filePointer);
 							fclose($handleMain[0]);
@@ -1568,6 +1587,37 @@ class ImportTermController extends BaseController {
 			return $status;
 		}
 
+		// 解説内さくいん用語　項目数チェック
+		$exp_term = [];
+		if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $data[115], $match_data, PREG_SET_ORDER)){
+			foreach($match_data as $main_explain_ele){
+				array_push($exp_term, $main_explain_ele[1]);
+			}
+		}
+
+		$cnt_check_exp = array(116,117,118,119,120,121,122,123,124,125,126,127,128,129,130);
+		$cnt_check_list = "";
+		$cnt_check = true;
+		if($data[117] != ""){
+			foreach($cnt_check_exp as $checked_idx){
+				$arr_exp = explode(";",$data[$checked_idx]);
+
+				if(count($exp_term) != count($arr_exp)){
+					$cnt_check_list .= $header[$checked_idx].",";
+					$cnt_check = false;
+				}
+			}
+		}
+
+		if(!$cnt_check){
+			fclose($filePointer);
+			$rtn_message = "[".$data[0]."]の解説内さくいん用語の項目数が一致していません：".$cnt_check_list;
+			$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
+			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+			$status = 211;
+			return $status;
+		}
+
 		return $status;
 	}
 
@@ -1680,8 +1730,6 @@ class ImportTermController extends BaseController {
 			$delimiter = 4;
 		}elseif($data[22] == "（"){
 			$delimiter = 5;
-		}elseif($data[22] == "）"){
-			$delimiter = 6;
 		}else{
 			throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[22], 209);
 		}
@@ -1777,8 +1825,6 @@ class ImportTermController extends BaseController {
 				$delimiter = 4;
 			}elseif($data[22] == "（"){
 				$delimiter = 5;
-			}elseif($data[22] == "）"){
-				$delimiter = 6;
 			}else{
 				throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[22], 209);
 			}
@@ -1918,7 +1964,19 @@ class ImportTermController extends BaseController {
 				$entity = new SubTerm();
 				$update_mode = 'new';
 			}else{
-				return false;
+				// 削除済IDと未登録IDの判別
+				$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
+						'id' =>$sub_id,
+						'mainTermId' =>intval(substr($data[0], 1))
+				));
+
+				if($entity){
+					// 削除済ID
+					throw new Exception("[".$data[0]."]削除済のIDです。追加・新規登録の場合はIDを空欄にしてください：".$data[30+$offset], 210);
+				}else{
+					// 未登録ID
+					throw new Exception("[".$data[0]."]の追加項目にIDが入力されています。CSVをご確認ください：".$data[30+$offset], 210);
+				}
 			}
 		}
 
@@ -2189,7 +2247,19 @@ class ImportTermController extends BaseController {
 				$entity = new Synonym();
 				$update_mode = 'new';
 			}else{
-				return false;
+				// 削除済IDと未登録IDの判別
+				$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
+						'id' =>$syn_id,
+						'mainTermId' =>intval(substr($data[0], 1))
+				));
+
+				if($entity){
+					// 削除済ID
+					throw new Exception("[".$data[0]."]削除済のIDです。追加・新規登録の場合はIDを空欄にしてください：".$data[132+$offset], 210);
+				}else{
+					// 未登録ID
+					throw new Exception("[".$data[0]."]の追加項目にIDが入力されています。CSVをご確認ください：".$data[132+$offset], 210);
+				}
 			}
 		}
 
@@ -2467,7 +2537,19 @@ class ImportTermController extends BaseController {
 					$entity = new ExplainIndex();
 					$update_mode = 'new';
 				}else{
-					continue;
+					// 削除済IDと未登録IDの判別
+					$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
+							'id' =>$exp_id,
+							'mainTermId' =>intval(substr($data[0], 1))
+					));
+
+					if($entity){
+						// 削除済ID
+						throw new Exception("[".$data[0]."]削除済のIDです。追加・新規登録の場合はIDを空欄にしてください：".$exp['exp_id'][$elem], 210);
+					}else{
+						// 未登録ID
+						throw new Exception("[".$data[0]."]の追加項目にIDが入力されています。CSVをご確認ください：".$exp['exp_id'][$elem], 210);
+					}
 				}
 			}
 			$this->get('logger')->error("***updateExpTerm:1***");
