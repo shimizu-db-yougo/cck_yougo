@@ -154,8 +154,8 @@
 								+'<div class="col-xs-2"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
 								+'<div class="col-xs-2"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
 
-								+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq4" term-id="' + explain_list[i].id + '" id="explain_text_freq" name="explain_text_freq" value="' + explain_list[i].textFrequency + '"></div>'
-								+'<div class="col-xs-1"><div id="' + 'text_rank' + explain_list[i].id + '" value=""><div id="text_rank"></div></div></div>'
+								+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq4" term-id="' + ((explain_list[i].id) ? explain_list[i].id : explain_list[i].indexTerm) + '" id="explain_text_freq" name="explain_text_freq" value="' + explain_list[i].textFrequency + '"></div>'
+								+'<div class="col-xs-1"><div id="' + 'text_rank' + ((explain_list[i].id) ? explain_list[i].id : explain_list[i].indexTerm) + '" value=""><div id="text_rank"></div></div></div>'
 
 								+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target4" index-term="' + explain_list[i].indexTerm + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="4" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
 								+'<div class="col-xs-1"><div id="' + 'center_freq' + explain_list[i].indexTerm + '" value=""><div id="center_freq" value="">' + ((center_sum) ? center_sum : explain_list[i].centerFrequency) + '</div><input type="hidden" id="center_freq_text" name="center_freq_text" value="test"></div></div>'
