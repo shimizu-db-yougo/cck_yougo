@@ -278,13 +278,13 @@
 						</div>
 					</td>
 					<td width="20px">
-						<div class="form-inline">
+						<!-- 用語の複製は復活できるようにコメント化する <div class="form-inline">
 							<div class="form-group">
 								{% if((currentUser.auth == '0') or (getMaxVersion(yougo.cur_id) == yougo.ver_id)) %}
 								<a href="{{ path('client.yougo.copy', {'term_id': yougo.term_id,'page': cur_page}) }}"><button class="btn btn-link" name="id" value="{{ yougo.id }}"><i class="fa fa-plus-square-o"></i></button></a>
 								{% endif %}
 							</div>
-						</div>
+						</div> -->
 					</td>
 				</tr>
 				{% endfor %}
