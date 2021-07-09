@@ -675,8 +675,6 @@ class MasterController extends BaseController {
 				$entity->setYear($request->request->get('startyear'));
 			}
 
-			$em->flush();
-
 			// 開始年の変更に対応してセンター頻度データの削除
 			$mainTermList = $em->getRepository('CCKCommonBundle:MainTerm')->findBy(array(
 					'curriculumId' => $id,
@@ -705,7 +703,6 @@ class MasterController extends BaseController {
 						$entityCenterRec->setYear($entityCenterRec->getYear()+10);
 						$entityCenterRec->setMainExam(0);
 						$entityCenterRec->setSubExam(0);
-						$em->flush();
 					}
 
 					if($entityCenterRec->getYear() > $startyear+9){
@@ -715,7 +712,6 @@ class MasterController extends BaseController {
 						$entityCenterRec->setYear($entityCenterRec->getYear()-10);
 						$entityCenterRec->setMainExam(0);
 						$entityCenterRec->setSubExam(0);
-						$em->flush();
 					}
 
 					//開始年～終了年の範囲が変わるので、対応するセンター頻度を集計
@@ -770,10 +766,10 @@ class MasterController extends BaseController {
 						$entity_sub->setCenterFrequency($val);
 					}
 
-					$em->flush();
 				}
 			}
 
+			$em->flush();
 			$em->getConnection()->commit();
 
 		} catch (\Exception $e){
