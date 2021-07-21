@@ -495,6 +495,25 @@ class DownloadController extends BaseController {
 
 		$arr_exp_indexTerm = [];
 		if($expterm){
+			$exp_term_text = [];
+			// 解説内のタグ出現順にソート
+			if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $main['term_explain'], $match_data, PREG_SET_ORDER)){
+				foreach($match_data as $main_explain_ele){
+					array_push($exp_term_text, $main_explain_ele[1]);
+				}
+			}
+
+			$wk_exp = [];
+			foreach ($exp_term_text as $exp_term_ele) {
+				foreach ($expterm as $exptermRec) {
+					if($exp_term_ele == $exptermRec['indexTerm']){
+						array_push($wk_exp,$exptermRec);
+						break;
+					}
+				}
+			}
+			$expterm = $wk_exp;
+
 			foreach ($expterm as $exptermRec) {
 				$exptermRec['id'] = 'K'.str_pad($exptermRec['id'], 6, 0, STR_PAD_LEFT);
 				$this->replaceExpField($exptermRec,$entityVer);
