@@ -23,4 +23,23 @@ class SubTermRepository extends EntityRepository
 
 		return $result;
 	}
+
+	/**
+	 * @return Ambigous <multitype:, \Doctrine\ORM\mixed, mixed, \Doctrine\DBAL\Driver\Statement, \Doctrine\Common\Cache\mixed>
+	 */
+	public function getSubTermByCurriculumId($curriculum_id, $term){
+		$sql = "
+				SELECT * FROM
+						MainTerm
+					INNER JOIN
+						SubTerm ON (MainTerm.term_id = SubTerm.main_term_id
+							AND MainTerm.delete_flag = false
+							AND SubTerm.delete_flag = false)
+					WHERE REPLACE_TAGS(SubTerm.sub_term) collate utf8_unicode_ci  = '" . $term . "'
+						AND MainTerm.curriculum_id = ". $curriculum_id;
+
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result;
+	}
 }

@@ -186,7 +186,7 @@ class ImportTermController extends BaseController {
 			$status_message = "項目数が異なっています。項目数：337";
 		}elseif($status == 205){
 			$status_download = "用語の登録がありません。教科・版を確認してください。";
-		}elseif(($status == 206)||($status == 207)||($status == 208)||($status == 209)||($status == 210)||($status == 211)){
+		}elseif(($status >= 206)&&($status <= 215)){
 			$status_message =  $session->get(self::SES_REQUIRED_KEY);
 		}elseif($status == 'default'){
 			$status_message = "";
@@ -1375,9 +1375,16 @@ class ImportTermController extends BaseController {
 		$session = $request->getSession();
 		$status = 200;
 
+		// 新語登録は主用語を、上書きは用語IDをエラーメッセージに表記する
+		if($import_new){
+			$term_info = $data[9];
+		}else{
+			$term_info = $data[0];
+		}
+
 		if($lineCnt > 1) {
 			//エンコードチェック
-			if (mb_detect_encoding($data[0], "UTF-8") === false){
+			if (mb_detect_encoding($data[9], "UTF-8") === false){
 				fclose($filePointer);
 				$this->OutputLog("ERROR0", "import_term.log", "テキストファイルのエンコード形式を確認してください。取込可能な形式はUTF-8です。");
 				$status = 202;
@@ -1388,7 +1395,7 @@ class ImportTermController extends BaseController {
 		// 項目数チェック
 		if(count($data) != 337){
 			fclose($filePointer);
-			$this->OutputLog("ERROR2", "import_term.log", "[".$data[0]."]の項目数が異なっています。正しい項目数：337。項目数：".count($data));
+			$this->OutputLog("ERROR2", "import_term.log", "[".$term_info."]の項目数が異なっています。正しい項目数：337。項目数：".count($data));
 			$status = 204;
 			return $status;
 		}
@@ -1451,7 +1458,7 @@ class ImportTermController extends BaseController {
 
 		if(!$required_check){
 			fclose($filePointer);
-			$rtn_message = "[".$data[0]."]の必須項目が未入力です。未入力項目：".$blank_list;
+			$rtn_message = "[".$term_info."]の必須項目が未入力です。未入力項目：".$blank_list;
 			$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
 			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
 			$status = 206;
@@ -1580,7 +1587,7 @@ class ImportTermController extends BaseController {
 
 		if(!$center_check){
 			fclose($filePointer);
-			$rtn_message = "[".$data[0]."]のセンター頻度項目にスラッシュをいれてください：".$center_list;
+			$rtn_message = "[".$term_info."]のセンター頻度項目にスラッシュをいれてください：".$center_list;
 			$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
 			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
 			$status = 206;
@@ -1611,11 +1618,73 @@ class ImportTermController extends BaseController {
 
 		if(!$cnt_check){
 			fclose($filePointer);
-			$rtn_message = "[".$data[0]."]の解説内さくいん用語の項目数が一致していません：".$cnt_check_list;
+			$rtn_message = "[".$term_info."]の解説内さくいん用語の項目数が一致していません：".$cnt_check_list;
 			$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
 			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
 			$status = 211;
 			return $status;
+		}
+
+		// 指矢印用語 版IDチェック
+		for($idx=0;$idx<3;$idx++){
+			if($data[329+$idx] != ""){
+				$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+						'curriculumId' => $entityVersion->getId(),
+						'mainTerm' => $data[329+$idx],
+						'deleteFlag' => FALSE
+				));
+
+				if(!$entity){
+					fclose($filePointer);
+					$rtn_message = "[".$term_info."]に異なる版の指矢印用語IDが設定されています：".$data[329+$idx];
+					$this->OutputLog("ERROR3", "import_term.log", $rtn_message);
+					$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+					$status = 215;
+					return $status;
+				}
+			}
+		}
+
+		// 新語登録チェック
+		if($import_new){
+			// 用語ID空欄チェック
+			if($data[0] != ""){
+				fclose($filePointer);
+				$rtn_message = "[".$data[9]."]にIDが入力されています。CSVをご確認ください";
+				$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
+				$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+				$status = 212;
+				return $status;
+			}
+
+			// 用語重複チェック
+			$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+					'curriculumId' => $entityVersion->getId(),
+					'mainTerm' => $data[9],
+					'deleteFlag' => FALSE
+			));
+			if($entity){
+				fclose($filePointer);
+				$rtn_message = "既に登録されている用語です。：[".$data[9]."]";
+				$this->OutputLog("ERROR3", "import_term.log", $rtn_message);
+				$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+				$status = 213;
+				return $status;
+			}
+
+			for($idx=0;$idx<5;$idx++){
+				if($data[31+$idx*17] != ""){
+					$recordset = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:SubTerm')->getSubTermByCurriculumId($entityVersion->getId(),$data[31+$idx*17]);
+					if(count($recordset) > 0){
+						fclose($filePointer);
+						$rtn_message = "主用語[".$term_info."]に既に登録されているサブ用語があります。：[".$data[31+$idx*17]."]";
+						$this->OutputLog("ERROR3", "import_term.log", $rtn_message);
+						$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+						$status = 214;
+						return $status;
+					}
+				}
+			}
 		}
 
 		return $status;
@@ -1718,7 +1787,7 @@ class ImportTermController extends BaseController {
 		}
 
 		// 区切り文字IDの取得
-		if($data[22] == ""){
+		if(($data[22] == "")||($data[22] == "なし")){
 			$delimiter = 0;
 		}elseif($data[22] == "と"){
 			$delimiter = 1;
@@ -1731,7 +1800,7 @@ class ImportTermController extends BaseController {
 		}elseif($data[22] == "（"){
 			$delimiter = 5;
 		}else{
-			throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[22], 209);
+			throw new Exception("[".$data[9]."]の区切り文字が間違っています。：".$data[22], 209);
 		}
 
 		$sql = "INSERT INTO `MainTerm` (`id`, `term_id`, `curriculum_id`, `header_id`, `print_order`, `main_term`, `red_letter`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `western_language`, `birth_year`, `kana`, `index_add_letter`, `index_kana`, `index_original`, `index_original_kana`, `index_abbreviation`, `nombre`, `term_explain`, `handover`, `illust_filename`, `illust_caption`, `illust_kana`, `illust_nombre`, `user_id`, `create_date`, `modify_date`, `delete_date`, `delete_flag`, `nombre_bold`) VALUES";
@@ -1813,7 +1882,7 @@ class ImportTermController extends BaseController {
 		$sql = "UPDATE `MainTerm` SET `text_frequency` = " . (($data[10] == "") ? "0" : $data[10]) . ",`center_frequency` = " . $center_freq_sum . ",`news_exam` = " . ($data[21] == "N" ? 1 : 0);
 
 		if($update_all){
-			if($data[22] == ""){
+			if(($data[22] == "")||($data[22] == "なし")){
 				$delimiter = 0;
 			}elseif($data[22] == "と"){
 				$delimiter = 1;
@@ -1898,7 +1967,7 @@ class ImportTermController extends BaseController {
 			$year++;
 		}
 
-		if($data[44+$offset] == ""){
+		if(($data[44+$offset] == "")||($data[44+$offset] == "なし")){
 			$delimiter = 0;
 		}elseif($data[44+$offset] == "と"){
 			$delimiter = 1;
@@ -1915,7 +1984,7 @@ class ImportTermController extends BaseController {
 		}elseif($data[44+$offset] == "）と"){
 			$delimiter = 8;
 		}else{
-			throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[44+$offset], 209);
+			throw new Exception("[".$data[9]."]の区切り文字が間違っています。：".$data[44+$offset], 209);
 		}
 
 		$sql = "INSERT INTO `SubTerm` (`id`, `main_term_id`, `sub_term`, `red_letter`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `kana`, `delimiter_kana`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
@@ -2029,7 +2098,7 @@ class ImportTermController extends BaseController {
 			// サブ用語情報の更新
 			$entity->setSubTerm($data[31+$offset]);
 
-			if($data[44+$offset] == ""){
+			if(($data[44+$offset] == "")||($data[44+$offset] == "なし")){
 				$entity->setDelimiter(0);
 				$delimiter = 0;
 			}elseif($data[44+$offset] == "と"){
@@ -2183,7 +2252,7 @@ class ImportTermController extends BaseController {
 			$synid = 3;
 		}
 
-		if($data[146+$offset] == ""){
+		if(($data[146+$offset] == "")||($data[146+$offset] == "なし")){
 			$delimiter = 0;
 		}elseif($data[146+$offset] == "　"){
 			$delimiter = 1;
@@ -2198,7 +2267,7 @@ class ImportTermController extends BaseController {
 		}elseif($data[146+$offset] == "）＋改行"){
 			$delimiter = 6;
 		}else{
-			throw new Exception("[".$data[0]."]の区切り文字が間違っています。：".$data[146+$offset], 209);
+			throw new Exception("[".$data[9]."]の区切り文字が間違っています。：".$data[146+$offset], 209);
 		}
 
 		$sql = "INSERT INTO `Synonym` (`id`, `main_term_id`, `term`, `red_letter`, `synonym_id`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `kana`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
@@ -2324,7 +2393,7 @@ class ImportTermController extends BaseController {
 
 			$entity->setTerm($data[133+$offset]);
 
-			if($data[146+$offset] == ""){
+			if(($data[146+$offset] == "")||($data[146+$offset] == "なし")){
 				$entity->setDelimiter(0);
 				$delimiter = 0;
 			}elseif($data[146+$offset] == "　"){
