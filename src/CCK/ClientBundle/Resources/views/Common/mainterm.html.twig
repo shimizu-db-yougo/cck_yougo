@@ -11,7 +11,7 @@
 						<div class="col-xs-12">
 							<label class="col-xs-1">{{ 'text.yougo.freq.text'|trans }}</label>
 							<div class="col-xs-1">
-								<input type="text" class="form-control input-sm js-text-freq" name="text_freq" value="{{ yougo.textFrequency }}">
+								<input type="text" class="form-control input-sm js-text-freq" name="text_freq" value="{{ (term_id == '') ? '' : yougo.textFrequency }}">
 							</div>
 							<div class="col-xs-1">
 								<div id="{{ 'text_rank'~yougo.termId }}" value=""><div id="text_rank"></div></div>
@@ -34,7 +34,8 @@
 							<label class="col-xs-1">{{ 'text.yougo.delimiter'|trans }}</label>
 							<div class="col-xs-1">
 								<select class="form-control input-sm" name="delimiter">
-									<option value="0">{{ 'delimiter.nashi'|trans }}</option>
+									<option value="">--------------</option>
+									<option value="0" {{ yougo.delimiter == '0' ? " selected " : '' }}>{{ 'delimiter.nashi'|trans }}</option>
 									<option value="1" {{ yougo.delimiter == '1' ? " selected " : '' }}">{{ 'delimiter.to'|trans }}</option>
 									<option value="2" {{ yougo.delimiter == '2' ? " selected " : '' }}">{{ 'delimiter.comma'|trans }}</option>
 									<option value="3" {{ yougo.delimiter == '3' ? " selected " : '' }}">{{ 'delimiter.nakaguro'|trans }}</option>

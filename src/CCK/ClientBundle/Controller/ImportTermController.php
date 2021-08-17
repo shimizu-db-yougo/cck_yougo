@@ -1411,7 +1411,7 @@ class ImportTermController extends BaseController {
 		// 必須項目チェック
 		$required_check = true;
 		$blank_list = "";
-		$required_filed = array(1,2,3,4,8,9,11,12,13,14,15,16,17,18,19,20,26);
+		$required_filed = array(1,2,3,4,8,9,10,11,12,13,14,15,16,17,18,19,20,22,26);
 		// 主用語
 		foreach($required_filed as $required_idx){
 			if($data[$required_idx] == ""){
@@ -1419,7 +1419,7 @@ class ImportTermController extends BaseController {
 				$required_check = false;
 			}
 		}
-		$required_filed_sub = array(31,33,34,35,36,37,38,39,40,41,42,46);
+		$required_filed_sub = array(31,32,33,34,35,36,37,38,39,40,41,42,44,46);
 		// サブ用語
 		for($idx=0;$idx<5;$idx++){
 			if($data[30+$idx*17] != ""){
@@ -1431,7 +1431,7 @@ class ImportTermController extends BaseController {
 				}
 			}
 		}
-		$required_filed_syn = array(133,135,136,137,138,139,140,141,142,143,144,148);
+		$required_filed_syn = array(131,133,134,135,136,137,138,139,140,141,142,143,144,148);
 		// 同対類用語
 		for($idx=0;$idx<11;$idx++){
 			if($data[132+$idx*18] != ""){
@@ -1443,7 +1443,7 @@ class ImportTermController extends BaseController {
 				}
 			}
 		}
-		$required_filed_exp = array(117,120,121,122,123,124,125,126,127,128,129);
+		$required_filed_exp = array(117,119,120,121,122,123,124,125,126,127,128,129);
 		// 解説内さくいん用語
 		if($data[117] != ""){
 			foreach($required_filed_exp as $required_idx){

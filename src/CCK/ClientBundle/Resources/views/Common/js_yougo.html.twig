@@ -26,6 +26,12 @@
 						return false;
 					}
 
+					// 空欄チェック
+					if(point_list[i].value == ""){
+						alert("頻度を入力して下さい。");
+						return false;
+					}
+
 					center_cnt += Number(point_list[i].value);
 
 					if(point_list[i].id.indexOf("center_main") !== -1){
@@ -154,11 +160,11 @@
 								+'<div class="col-xs-2"><input class="form-control input-sm" type="text" id="explain_index_kana" name="explain_index_kana" value="'+ explain_list[i].indexKana + '"></div>'
 								+'<div class="col-xs-2"><input class="form-control input-sm" type="text" id="explain_index_add_letter" name="explain_index_add_letter" value="'+ explain_list[i].indexAddLetter + '"></div>'
 
-								+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq4" term-id="' + ((explain_list[i].id) ? explain_list[i].id : explain_list[i].indexTerm) + '" id="explain_text_freq" name="explain_text_freq" value="' + explain_list[i].textFrequency + '"></div>'
+								+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq4" term-id="' + ((explain_list[i].id) ? explain_list[i].id : explain_list[i].indexTerm) + '" id="explain_text_freq" name="explain_text_freq" value="' + (("{{ term_id }}" == '') ? "" : explain_list[i].textFrequency) + '"></div>'
 								+'<div class="col-xs-1"><div id="' + 'text_rank' + ((explain_list[i].id) ? explain_list[i].id : explain_list[i].indexTerm) + '" value=""><div id="text_rank"></div></div></div>'
 
 								+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target4" index-term="' + explain_list[i].indexTerm + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="4" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
-								+'<div class="col-xs-1"><div id="' + 'center_freq' + explain_list[i].indexTerm + '" value=""><div id="center_freq" value="">' + ((center_sum) ? center_sum : explain_list[i].centerFrequency) + '</div><input type="hidden" id="center_freq_text" name="center_freq_text" value="test"></div></div>'
+								+'<div class="col-xs-1"><div id="' + 'center_freq' + explain_list[i].indexTerm + '" value=""><div id="center_freq" value="">' + (("{{ term_id }}" == '') ? '' : explain_list[i].centerFrequency) + '</div><input type="hidden" id="center_freq_text" name="center_freq_text" value="test"></div></div>'
 
 								+'<div class="col-xs-1"><input type="checkbox" id="explain_news_exam" name="explain_news_exam" ' + ((explain_list[i].newsExam == '1') ? ' checked ' : '') + '></div>'
 
@@ -177,6 +183,7 @@
 
 		$('.js-explain-submit').bind('click', function(e){
 			console.log($('#form_mainterm [id=term_explain]').val());
+
 			var explain = {term_id:[],index_term:[],index_add_letter:[],index_kana:[],nombre:[],mainterm_explain:'',text_freq:[],center_freq:[],news_exam:[]};
 			explain.term_id = setExplainList('explain_main_term_id',explain.term_id);
 			explain.index_term = setExplainList('explain_index_term',explain.index_term);
@@ -190,6 +197,20 @@
 			explain.nombre = setExplainList('explain_nombre',explain.nombre);
 			explain.mainterm_explain = $('#form_mainterm [id=term_explain]').val();
 			console.log(explain);
+
+			// 教科書頻度必須チェック
+			var is_blank = false;
+			for (var elem_text_freq in explain.text_freq){
+				if(explain.text_freq[elem_text_freq] == ""){
+					is_blank = true;
+				}
+			}
+
+			if(is_blank){
+				alert("必須項目です：教科書頻度");
+				return false;
+			}
+
 
 			$.post("{{ path('client.explain.save.ajax') }}", explain)
 			.done(function(r,s){
@@ -446,6 +467,14 @@
 			if($('#form_mainterm [name=index_kana]').val() == ""){
 				err_filed += '主用語_索引用語読み,';
 			}
+
+			if($('#form_mainterm [name=text_freq]').val() == ""){
+				err_filed += '教科書頻度,';
+			}
+			if($('#form_mainterm [name=delimiter]').val() == ""){
+				err_filed += '区切り文字,';
+			}
+
 			return err_filed;
 		}
 
@@ -457,6 +486,14 @@
 			if(elem.find('#index_kana').val() == ""){
 				err_field_sub += 'サブ用語_索引用語読み,';
 			}
+
+			if(elem.find('#text_freq').val() == ""){
+				err_field_sub += 'サブ用語_教科書頻度,';
+			}
+			if(elem.find('#delimiter').val() == ""){
+				err_field_sub += 'サブ用語_区切り文字,';
+			}
+
 			return err_field_sub;
 		}
 
@@ -468,6 +505,17 @@
 			if(elem.find('#index_kana').val() == ""){
 				err_field_syn += '同対類用語_索引用語読み,';
 			}
+
+			if(elem.find('#synonym_id').val() == "0"){
+				err_field_syn += '同対類用語_アイコン,';
+			}
+			if(elem.find('#text_freq').val() == ""){
+				err_field_syn += '同対類用語_教科書頻度,';
+			}
+			if(elem.find('#delimiter').val() == ""){
+				err_field_syn += '同対類用語_区切り文字,';
+			}
+
 			return err_field_syn;
 		}
 
@@ -487,6 +535,7 @@
 		}
 
 		function constructSubForm(record,center_sum){
+			console.log("***"+"{{ term_id }}"+"***");
 			var html =
 			'<div class="form-horizontal form_subterm">'
 			+'<div class="form-group"><div class="col-xs-12">'
@@ -495,7 +544,7 @@
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((((record)&&(record.text_frequency))&&("{{ term_id }}" != '')) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-xs-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
 			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
 			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((center_sum)||(center_sum==0) ? center_sum : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
@@ -505,7 +554,7 @@
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.delimiter"|trans }}</label>'
 			+'<div class="col-xs-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
-					+'<option value="0">なし</option>';
+					+'<option value="">--------------</option><option value="0" ' + (((record)&&(record.delimiter == '0')&&("{{ term_id }}" != '')) ? ' selected ' : '') + '>なし</option>';
 
 			html += '<option value="1" ' + (((record)&&(record.delimiter == '1')) ? ' selected ' : '') + '>と</option>'
 			+'<option value="2" ' + (((record)&&(record.delimiter == '2')) ? ' selected ' : '') + '>，</option>'
@@ -539,6 +588,7 @@
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.icon"|trans }}</label>'
 			+'<div class="col-xs-1"><select class="form-control input-sm" id="synonym_id" name="synonym_id">'
+			+'<option value="0" ' + '>--------------</option>'
 			+'<option value="1" ' + (((record)&&(record.synonym_id == '1')) ? ' selected ' : '') + '>同</option>'
 			+'<option value="2" ' + (((record)&&(record.synonym_id == '2')) ? ' selected ' : '') + '>対</option>'
 			+'<option value="3" ' + (((record)&&(record.synonym_id == '3')) ? ' selected ' : '') + '>類</option>'
@@ -548,7 +598,7 @@
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + (((record)&&(record.text_frequency)) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((((record)&&(record.text_frequency))&&("{{ term_id }}" != '')) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-xs-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
 			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target3" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="3" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
 			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((center_sum)||(center_sum==0) ? center_sum : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
@@ -558,7 +608,7 @@
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.delimiter"|trans }}</label>'
 			+'<div class="col-xs-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
-					+'<option value="0">なし</option>';
+					+'<option value="">--------------</option><option value="0" ' + (((record)&&(record.delimiter == '0')&&("{{ term_id }}" != '')) ? ' selected ' : '') + '>なし</option>';
 
 			html += '<option value="1" ' + (((record)&&(record.delimiter == '1')) ? ' selected ' : '') + '>全角スペース</option>'
 			+'<option value="2" ' + (((record)&&(record.delimiter == '2')) ? ' selected ' : '') + '>（</option>'
@@ -724,6 +774,8 @@
 			$('#yougo_flag').val(yougo_flag);
 			$('#formcenter').empty();
 
+			var center_freq_display = $('#center_freq' + term_id + ' #center_freq').text();
+
 			// センター頻度の取得
 			var data = {
 				'term_id': term_id,
@@ -746,8 +798,8 @@
 						console.log(list.year);
 
 						html = '<div class="row"><div class="col-xs-12"><label class="col-xs-4">' + list.year + '</label>'
-						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + list.mainExam + '">'
-						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + list.subExam + '">'
+						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + ((("{{ term_id }}" == '')&&(center_freq_display == '')) ? '' : list.mainExam) + '">'
+						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + ((("{{ term_id }}" == '')&&(center_freq_display == '')) ? '' : list.subExam) + '">'
 						+'</div>';
 
 						$('#formcenter').append(html);
@@ -773,6 +825,8 @@
 			$('#yougo_flag').val(yougo_flag);
 			$('#formcenter').empty();
 
+			var center_freq_display = $('#center_freq' + index_term + ' #center_freq').text();
+
 			// センター頻度の取得
 			var data = {
 				'index_term': index_term,
@@ -795,8 +849,8 @@
 						console.log(list.year);
 
 						html = '<div class="row"><div class="col-xs-12"><label class="col-xs-4">' + list.year + '</label>'
-						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + list.mainExam + '">'
-						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + list.subExam + '">'
+						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + ((("{{ term_id }}" == '')&&(center_freq_display == '')) ? '' : list.mainExam) + '">'
+						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + ((("{{ term_id }}" == '')&&(center_freq_display == '')) ? '' : list.subExam) + '">'
 						+'</div>';
 
 						$('#formcenter').append(html);
