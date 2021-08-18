@@ -1422,7 +1422,7 @@ class ImportTermController extends BaseController {
 		$required_filed_sub = array(31,32,33,34,35,36,37,38,39,40,41,42,44,46);
 		// サブ用語
 		for($idx=0;$idx<5;$idx++){
-			if($data[30+$idx*17] != ""){
+			if($data[31+$idx*17] != ""){
 				foreach($required_filed_sub as $required_idx){
 					if($data[$required_idx+$idx*17] == ""){
 						$blank_list .= $header[$required_idx+$idx*17].",";
@@ -1434,7 +1434,7 @@ class ImportTermController extends BaseController {
 		$required_filed_syn = array(131,133,134,135,136,137,138,139,140,141,142,143,144,148);
 		// 同対類用語
 		for($idx=0;$idx<11;$idx++){
-			if($data[132+$idx*18] != ""){
+			if($data[133+$idx*18] != ""){
 				foreach($required_filed_syn as $required_idx){
 					if($data[$required_idx+$idx*18] == ""){
 						$blank_list .= $header[$required_idx+$idx*18].",";
@@ -1546,7 +1546,7 @@ class ImportTermController extends BaseController {
 		$center_filed_sub = array(33,34,35,36,37,38,39,40,41,42);
 		// サブ用語
 		for($idx=0;$idx<5;$idx++){
-			if($data[30+$idx*17] != ""){
+			if($data[31+$idx*17] != ""){
 				foreach($center_filed_sub as $required_idx){
 					if(preg_match('/^(\d+)\/(\d+)$/', $data[$required_idx+$idx*17])||preg_match('/(\d+)月(\d+)日/', $data[$required_idx+$idx*17])){
 					}else{
@@ -1559,7 +1559,7 @@ class ImportTermController extends BaseController {
 		$center_filed_syn = array(135,136,137,138,139,140,141,142,143,144);
 		// 同対類用語
 		for($idx=0;$idx<11;$idx++){
-			if($data[132+$idx*18] != ""){
+			if($data[133+$idx*18] != ""){
 				foreach($center_filed_syn as $required_idx){
 					if(preg_match('/^(\d+)\/(\d+)$/', $data[$required_idx+$idx*18])||preg_match('/(\d+)月(\d+)日/', $data[$required_idx+$idx*18])){
 					}else{
@@ -1674,7 +1674,7 @@ class ImportTermController extends BaseController {
 
 			for($idx=0;$idx<5;$idx++){
 				if($data[31+$idx*17] != ""){
-					$recordset = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:SubTerm')->getSubTermByCurriculumId($entityVersion->getId(),$data[31+$idx*17]);
+					$recordset = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:SubTerm')->getSubTermByCurriculumId($entityVersion->getId(),$data[9],$data[31+$idx*17]);
 					if(count($recordset) > 0){
 						fclose($filePointer);
 						$rtn_message = "主用語[".$term_info."]に既に登録されているサブ用語があります。：[".$data[31+$idx*17]."]";
@@ -1933,11 +1933,12 @@ class ImportTermController extends BaseController {
 	}
 
 	private function insertSubTerm($data,$offset,$em,$update_all,$handle,$handle_center,$entityVersion,$user,$newTermId,&$newSubTermId){
+		$this->get('logger')->error("***1***");
 		// 用語が設定されていない場合
 		if($data[31+$offset] == ""){
 			return false;
 		}
-
+		$this->get('logger')->error("***2***");
 		$newSubTermId++;
 
 		// センター頻度の取得
@@ -1962,11 +1963,11 @@ class ImportTermController extends BaseController {
 			$sql .= "null,";
 			$sql .= "null,";
 			$sql .= "0);";
-
+			$this->get('logger')->error("******".$sql);
 			fputs($handle_center, $sql."\n");
 			$year++;
 		}
-
+		$this->get('logger')->error("***3***");
 		if(($data[44+$offset] == "")||($data[44+$offset] == "なし")){
 			$delimiter = 0;
 		}elseif($data[44+$offset] == "と"){
@@ -1986,7 +1987,7 @@ class ImportTermController extends BaseController {
 		}else{
 			throw new Exception("[".$data[9]."]の区切り文字が間違っています。：".$data[44+$offset], 209);
 		}
-
+		$this->get('logger')->error("***4***");
 		$sql = "INSERT INTO `SubTerm` (`id`, `main_term_id`, `sub_term`, `red_letter`, `text_frequency`, `center_frequency`, `news_exam`, `delimiter`, `kana`, `delimiter_kana`, `index_add_letter`, `index_kana`, `nombre`, `create_date`, `modify_date`, `delete_date`, `delete_flag`) VALUES";
 		$sql .= "(".$newSubTermId.",";
 		$sql .= $newTermId.",";
@@ -2005,7 +2006,7 @@ class ImportTermController extends BaseController {
 		$sql .= "null,";
 		$sql .= "null,";
 		$sql .= "0);";
-
+		$this->get('logger')->error("***5***");
 		fputs($handle, $sql."\n");
 	}
 
