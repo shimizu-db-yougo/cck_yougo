@@ -1121,6 +1121,8 @@ class YougoController extends BaseController {
 		));
 
 		foreach($entityTmp as $entity_rec){
+			/** 同じ解説内用語が登録されていて削除済が先、登録有が後に登録されていると削除済の方が選択されて一時テーブルから登録される。
+			 *結果として解説内用語が重複して登録されるので注意する **/
 			$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findOneBy(array(
 					'mainTermId' => $entity_rec->getMainTermId(),
 					'indexTerm' => $entity_rec->getIndexTerm()
@@ -2611,6 +2613,26 @@ class YougoController extends BaseController {
 			}
 
 			$response = new JsonResponse($is_latest_ver);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/yougo/version/ajax", name="client.yougo.version.ajax")
+	 */
+	public function getVersionInfoAjaxAction(Request $request){
+		$user = $this->getUser();
+
+		if($request->request->has('cur_id')){
+			$cur_id = $request->request->get('cur_id');
+			$ver_id = $request->request->get('han_id');
+
+			$ver_info = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Version')->getVersionInfo($cur_id,$ver_id);
+
+			$response = new JsonResponse(array("rank_a" => $ver_info["rank_a"], "rank_b" => $ver_info["rank_b"]));
 		}else{
 			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
 		}

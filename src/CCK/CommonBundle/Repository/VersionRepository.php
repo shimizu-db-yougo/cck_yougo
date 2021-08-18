@@ -46,4 +46,12 @@ class VersionRepository extends EntityRepository
 		return $result[0];
 	}
 
+	public function getVersionInfo($cur,$ver){
+		$sql = "SELECT year,rank_a,rank_b FROM Version WHERE curriculum_id = " . $cur . " AND id = " . $ver . " AND delete_flag = false";
+
+		$result = $this->getEntityManager()->getConnection()->executeQuery($sql)->fetchAll();
+
+		return $result[0];
+	}
+
 }

@@ -745,6 +745,30 @@
 		});
 
 		function getTextPoint(value,term_id,ranka,rankb){
+
+			// 新規登録の場合、プルダウンで選択した教科・版の教科書頻度を取得する
+			if((ranka == '')&&(rankb == '')){
+				var data = {
+						'cur_id': $('.js-cur').val(),
+						'han_id': $('.js-han').val(),
+					};
+					$.ajax({
+						url: "{{ path('client.yougo.version.ajax') }}",
+						data: data,
+						method: 'POST',
+						async: false,
+						success: function(response){
+							console.log(response);
+
+							ranka = response.rank_a;
+							rankb = response.rank_b;
+						},
+						error: function(response){
+							//alert('DBエラー');
+						}
+					});
+			}
+
 			var rank = '';
 			var num_ranka = Number(ranka);
 			var num_rankb = Number(rankb);
