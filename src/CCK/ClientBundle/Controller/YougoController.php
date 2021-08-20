@@ -1937,6 +1937,42 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/yougo/center/exist/ajax", name="client.yougo.center.exist.ajax")
+	 */
+	public function getCenterExistAjaxAction(Request $request){
+		if($request->request->has('term_id')){
+			$term_id = $request->request->get('term_id');
+			$yougo_flag = $request->request->get('yougo_flag');
+
+			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:Center')->getCenterPoints($term_id,$yougo_flag);
+
+			$response = new JsonResponse($center_point);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
+	 * @Route("/yougo/centertmp/exist/ajax", name="client.yougo.centertmp.exist.ajax")
+	 */
+	public function getCenterTmpExistAjaxAction(Request $request){
+		if($request->request->has('term_id')){
+			$term_id = $request->request->get('term_id');
+			$yougo_flag = $request->request->get('yougo_flag');
+
+			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CenterTmp')->getCenterPoints($term_id,$yougo_flag);
+
+			$response = new JsonResponse($center_point);
+		}else{
+			$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * @Route("/yougo/explain/ajax", name="client.yougo.explain.ajax")
 	 */
 	public function getExplainAjaxAction(Request $request){
