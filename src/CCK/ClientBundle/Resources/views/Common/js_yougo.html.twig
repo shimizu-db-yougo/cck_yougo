@@ -163,7 +163,7 @@
 								+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq4" term-id="' + ((explain_list[i].id) ? explain_list[i].id : explain_list[i].indexTerm) + '" id="explain_text_freq" name="explain_text_freq" value="' + ((explain_list[i].is_saved == "not") ? "" : explain_list[i].textFrequency) + '"></div>'
 								+'<div class="col-xs-1"><div id="' + 'text_rank' + ((explain_list[i].id) ? explain_list[i].id : explain_list[i].indexTerm) + '" value=""><div id="text_rank"></div></div></div>'
 
-								+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target4" index-term="' + explain_list[i].indexTerm + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="4" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+								+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target4" index-term="' + explain_list[i].indexTerm + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="4" append-flag="' + ((explain_list[i].is_saved == "not") ? true : '') + '" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
 								+'<div class="col-xs-1"><div id="' + 'center_freq' + explain_list[i].indexTerm + '" value=""><div id="center_freq" value="">' + ((explain_list[i].is_saved == "not") ? '' : explain_list[i].centerFrequency) + '</div><input type="hidden" id="center_freq_text" name="center_freq_text" value="test"></div></div>'
 
 								+'<div class="col-xs-1"><input type="checkbox" id="explain_news_exam" name="explain_news_exam" ' + ((explain_list[i].newsExam == '1') ? ' checked ' : '') + '></div>'
@@ -636,7 +636,7 @@
 			return err_field_wk;
 		}
 
-		function constructSubForm(record,center_sum){
+		function constructSubForm(record,center_sum,append_flg){
 			console.log("***"+"{{ term_id }}"+"***");
 			var html =
 			'<div class="form-horizontal form_subterm">'
@@ -646,9 +646,9 @@
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((((record)&&(record.text_frequency))&&("{{ term_id }}" != '')) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq2" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((((record)&&(record.text_frequency))&&("{{ term_id }}" != '')&&(!append_flg)) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-xs-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
-			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="2" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target2" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="2" append-flag="' + append_flg + '" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
 			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((center_sum)||(center_sum==0) ? center_sum : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
 			+'<label class="col-xs-1">{{ "text.yougo.news.exam"|trans }}</label>'
 			+'<div class="col-xs-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
@@ -656,7 +656,7 @@
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.delimiter"|trans }}</label>'
 			+'<div class="col-xs-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
-					+'<option value="">--------------</option><option value="0" ' + (((record)&&(record.delimiter == '0')&&("{{ term_id }}" != '')) ? ' selected ' : '') + '>なし</option>';
+					+'<option value="">--------------</option><option value="0" ' + (((record)&&(record.delimiter == '0')&&("{{ term_id }}" != '')&&(!append_flg)) ? ' selected ' : '') + '>なし</option>';
 
 			html += '<option value="1" ' + (((record)&&(record.delimiter == '1')) ? ' selected ' : '') + '>と</option>'
 			+'<option value="2" ' + (((record)&&(record.delimiter == '2')) ? ' selected ' : '') + '>，</option>'
@@ -684,7 +684,7 @@
 			return html;
 		}
 
-		function constructSynForm(record,center_sum){
+		function constructSynForm(record,center_sum,append_flg){
 			var html =
 			'<div class="form-horizontal form_synterm">'
 			+'<div class="form-group"><div class="col-xs-12">'
@@ -700,9 +700,9 @@
 			+'</div></div>'
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.freq.text"|trans }}</label>'
-			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((((record)&&(record.text_frequency))&&("{{ term_id }}" != '')) ? record.text_frequency : '') + '"></div>'
+			+'<div class="col-xs-1"><input type="text" class="form-control input-sm js-text-freq3" term-id="' + ((record) ? record.id : '') + '" id="text_freq" name="text_freq" value="' + ((((record)&&(record.text_frequency))&&("{{ term_id }}" != '')&&(!append_flg)) ? record.text_frequency : '') + '"></div>'
 			+'<div class="col-xs-1"><div id="' + 'text_rank' + ((record) ? record.id : '') + '" value=""><div id="text_rank"></div></div></div>'
-			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target3" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="3" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
+			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-center-target3" term-id="' + ((record) ? record.id : '') + '" main-term-id="' + $('#form_mainterm [name=term_id]').text() + '" yougo-flag="3" append-flag="' + append_flg + '" data-toggle="modal" center-target="#centerModal">{{ "text.yougo.freq.center"|trans }}</button></div>'
 			+'<div class="col-xs-1"><div id="' + 'center_freq' + ((record) ? record.id : '') + '" value=""><div id="center_freq" value="">' + ((center_sum)||(center_sum==0) ? center_sum : '') + '</div><input type="hidden" name="center_freq_text" value="test"></div></div>'
 			+'<label class="col-xs-1">{{ "text.yougo.news.exam"|trans }}</label>'
 			+'<div class="col-xs-2"><input type="checkbox" id="news_exam" name="news_exam" ' + (((record)&&(record.news_exam == '1')) ? ' checked ' : '') + '></div>'
@@ -710,7 +710,7 @@
 			+'<div class="form-group"><div class="col-xs-12">'
 			+'<label class="col-xs-1">{{ "text.yougo.delimiter"|trans }}</label>'
 			+'<div class="col-xs-1"><select class="form-control input-sm" id="delimiter" name="delimiter">'
-					+'<option value="">--------------</option><option value="0" ' + (((record)&&(record.delimiter == '0')&&("{{ term_id }}" != '')) ? ' selected ' : '') + '>なし</option>';
+					+'<option value="">--------------</option><option value="0" ' + (((record)&&(record.delimiter == '0')&&("{{ term_id }}" != '')&&(!append_flg)) ? ' selected ' : '') + '>なし</option>';
 
 			html += '<option value="1" ' + (((record)&&(record.delimiter == '1')) ? ' selected ' : '') + '>全角スペース</option>'
 			+'<option value="2" ' + (((record)&&(record.delimiter == '2')) ? ' selected ' : '') + '>（</option>'
@@ -800,7 +800,7 @@
 				success: function(response){
 						console.log(response);
 						$('#form_subterms').append(
-								constructSubForm(JSON.parse(response))
+								constructSubForm(JSON.parse(response),'',true)
 						);
 				},
 				error: function(response){
@@ -819,7 +819,7 @@
 				success: function(response){
 						console.log(response);
 						$('#form_synterms').append(
-								constructSynForm(JSON.parse(response))
+								constructSynForm(JSON.parse(response),'',true)
 						);
 				},
 				error: function(response){
@@ -895,6 +895,7 @@
 			var main_term_id = target.attr('main-term-id');
 			var yougo_flag = target.attr('yougo-flag');
 			var ver_id = $('#form_mainterm [name=version]').val();
+			var append_flag = target.attr('append-flag');
 
 			$('#term_id').val(term_id);
 			$('#yougo_flag').val(yougo_flag);
@@ -924,8 +925,8 @@
 						console.log(list.year);
 
 						html = '<div class="row"><div class="col-xs-12"><label class="col-xs-4">' + list.year + '</label>'
-						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + ((("{{ term_id }}" == '')&&(center_freq_display == '')) ? '' : list.mainExam) + '">'
-						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + ((("{{ term_id }}" == '')&&(center_freq_display == '')) ? '' : list.subExam) + '">'
+						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + (((("{{ term_id }}" == '')||(append_flag))&&(center_freq_display == '')) ? '' : list.mainExam) + '">'
+						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + (((("{{ term_id }}" == '')||(append_flag))&&(center_freq_display == '')) ? '' : list.subExam) + '">'
 						+'</div>';
 
 						$('#formcenter').append(html);
@@ -946,6 +947,7 @@
 			var main_term_id = target.attr('main-term-id');
 			var yougo_flag = target.attr('yougo-flag');
 			var ver_id = $('#form_mainterm [name=version]').val();
+			var append_flag = target.attr('append-flag');
 
 			$('#term_id').val(index_term);
 			$('#yougo_flag').val(yougo_flag);
@@ -975,8 +977,8 @@
 						console.log(list.year);
 
 						html = '<div class="row"><div class="col-xs-12"><label class="col-xs-4">' + list.year + '</label>'
-						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + ((("{{ term_id }}" == '')&&(center_freq_display == '')) ? '' : list.mainExam) + '">'
-						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + ((("{{ term_id }}" == '')&&(center_freq_display == '')) ? '' : list.subExam) + '">'
+						+'<input type="text" class="col-xs-4" id="center_main' + list.year + '" name="main' + list.year + '" value="' + (((("{{ term_id }}" == '')||(append_flag))&&(center_freq_display == '')) ? '' : list.mainExam) + '">'
+						+'<input type="text" class="col-xs-4" id="center_sub' + list.year + '" name="sub' + list.year + '" value="' + (((("{{ term_id }}" == '')||(append_flag))&&(center_freq_display == '')) ? '' : list.subExam) + '">'
 						+'</div>';
 
 						$('#formcenter').append(html);
