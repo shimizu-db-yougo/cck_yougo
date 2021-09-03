@@ -231,10 +231,10 @@ text:
         illust_nombre: 図版キャプションノンブル
         preview.title: プレビュー画面
         center.frequency: センター頻度追加
-        explain.index: 解説内さくいん用語設定
+        explain.index: 解説内索引用語設定
         explain.term: 用語
-        explain.index.kana: さくいん読み仮名
-        explain.index.add: さくいん文字
+        explain.index.kana: 索引読み
+        explain.index.add: 索引文字
         explain.nombre: ノンブル
         explain_term: 解説内索引用語
         upload_date: アップロード日時
