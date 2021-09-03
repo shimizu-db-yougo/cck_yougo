@@ -120,6 +120,19 @@ class DownloadController extends BaseController {
 		$entity = $em->getRepository('CCKCommonBundle:MainTerm')->getMainTermList('','','','','0');
 		$header = $this->generateHeader($entity[0]);
 
+		// フィールド選択出力リスト表示ように項目名の変更
+		$header_wk = str_replace('さくいん', '索引', $header);
+		$header_wk = str_replace('仮名', '', $header_wk);
+		unset($header_wk['header_position']);
+		array_splice($header_wk, 2, 0, array('var_name'=>"版"));
+
+		foreach($header_wk as $key => $value) {
+			if($key === 0){
+				$header_selectable['var_name'] = $header_wk[$key];
+			} else {
+				$header_selectable[$key] = $header_wk[$key];
+			}
+		}
 
 		$preset = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CSVPreset')->findBy(array(
 				'user_id' => $this->getUser()->getUserId(),
@@ -171,7 +184,7 @@ class DownloadController extends BaseController {
 				'ver_list' => $ver_list,
 				'hen_list' => array(),
 				'sho_list' => array(),
-				'field_list' => $header,
+				'field_list' => $header_selectable,
 				'preset_list' => $preset,
 				'message_honmon' => $message_honmon,
 				'message_sakuin' => $message_sakuin,
