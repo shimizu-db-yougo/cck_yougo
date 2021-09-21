@@ -1410,7 +1410,9 @@ class ImportTermController extends BaseController {
 
 		// 必須項目チェック
 		$required_check = true;
+		$extra_check = true;
 		$blank_list = "";
+		$extra_list = "";
 		$required_filed = array(1,2,3,4,8,9,10,11,12,13,14,15,16,17,18,19,20,22,26);
 		// 主用語
 		foreach($required_filed as $required_idx){
@@ -1419,7 +1421,9 @@ class ImportTermController extends BaseController {
 				$required_check = false;
 			}
 		}
+
 		$required_filed_sub = array(31,32,33,34,35,36,37,38,39,40,41,42,44,46);
+		$extra_filed_sub = array(31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46);
 		// サブ用語
 		for($idx=0;$idx<5;$idx++){
 			if($data[31+$idx*17] != ""){
@@ -1429,9 +1433,18 @@ class ImportTermController extends BaseController {
 						$required_check = false;
 					}
 				}
+			}else{
+				foreach($extra_filed_sub as $extra_idx){
+					if($data[$extra_idx+$idx*17] != ""){
+						$extra_list .= $header[$extra_idx+$idx*17].",";
+						$extra_check = false;
+					}
+				}
 			}
 		}
+
 		$required_filed_syn = array(131,133,134,135,136,137,138,139,140,141,142,143,144,148);
+		$extra_filed_syn = array(131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148);
 		// 同対類用語
 		for($idx=0;$idx<11;$idx++){
 			if($data[133+$idx*18] != ""){
@@ -1441,9 +1454,18 @@ class ImportTermController extends BaseController {
 						$required_check = false;
 					}
 				}
+			}else{
+				foreach($extra_filed_syn as $extra_idx){
+					if($data[$extra_idx+$idx*18] != ""){
+						$extra_list .= $header[$extra_idx+$idx*18].",";
+						$extra_check = false;
+					}
+				}
 			}
 		}
+
 		$required_filed_exp = array(117,119,120,121,122,123,124,125,126,127,128,129);
+		$extra_filed_exp = array(116,117,118,119,120,121,122,123,124,125,126,127,128,129,130);
 		// 解説内さくいん用語
 		if($data[117] != ""){
 			foreach($required_filed_exp as $required_idx){
@@ -1454,11 +1476,27 @@ class ImportTermController extends BaseController {
 					$required_check = false;
 				}
 			}
+		}else{
+			foreach($extra_filed_exp as $extra_idx){
+				if($data[$extra_idx] != ""){
+					$extra_list .= $header[$extra_idx].",";
+					$extra_check = false;
+				}
+			}
 		}
 
 		if(!$required_check){
 			fclose($filePointer);
 			$rtn_message = "[".$term_info."]の必須項目が未入力です。未入力項目：".$blank_list;
+			$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
+			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+			$status = 206;
+			return $status;
+		}
+
+		if(!$extra_check){
+			fclose($filePointer);
+			$rtn_message = "[".$term_info."]に不要な項目が入っています。項目：".$extra_list;
 			$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
 			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
 			$status = 206;
@@ -1648,7 +1686,27 @@ class ImportTermController extends BaseController {
 		// 新語登録チェック
 		if($import_new){
 			// 用語ID空欄チェック
-			if($data[0] != ""){
+			$exists_subid = false;
+			for($idx=0;$idx<5;$idx++){
+				if($data[30+$idx*17] != ""){
+					$exists_subid = true;
+				}
+			}
+
+			$arr_exp_id = explode(";",$data[116]);
+			foreach ($arr_exp_id as $ele_exp_id){
+				if($ele_exp_id != ""){
+					$exists_subid = true;
+				}
+			}
+
+			for($idx=0;$idx<11;$idx++){
+				if($data[132+$idx*18] != ""){
+					$exists_subid = true;
+				}
+			}
+
+			if(($data[0] != "")||($exists_subid)){
 				fclose($filePointer);
 				$rtn_message = "[".$data[9]."]にIDが入力されています。CSVをご確認ください";
 				$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
