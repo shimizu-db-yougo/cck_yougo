@@ -270,7 +270,8 @@ class DownloadController extends BaseController {
 		}
 
 		$status = 0;
-		if(($body_list === false)||($status_err > 0)){
+		$this->get('logger')->error("***body_list***".serialize($body_list)."***status_err***".$status_err);
+		if(($body_list === false)||(($status_err > 0)&&($type != '2'))){
 			if($type == '0'){
 				$status = 204;
 			}elseif ($type == '1'){
