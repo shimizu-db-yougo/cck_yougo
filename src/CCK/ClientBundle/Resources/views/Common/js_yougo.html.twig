@@ -213,6 +213,7 @@
 					err_field_wk += '教科書頻度,';
 				}
 
+				var center_flg = false
 				if (explain.id[elem_index_kana] === "undefined"){
 					var data = {
 							'term_id': explain.index_term[elem_index_kana],
@@ -225,12 +226,20 @@
 							async: false,
 							success: function(response){
 								if(response.length == 0){
-									err_field_wk += 'センター頻度,';
+									center_flg = true;
 								}
 							},
 							error: function(response){
 							}
 						});
+				}
+
+				if(explain.center_freq[elem_index_kana] == ""){
+					center_flg = true;
+				}
+
+				if(center_flg == true){
+					err_field_wk += 'センター頻度,';
 				}
 
 				if(err_field_wk != ''){
@@ -497,10 +506,12 @@
 			if($('#form_mainterm [name=text_freq]').val() == ""){
 				err_filed += '教科書頻度,';
 			}
+
 			if($('#form_mainterm [name=delimiter]').val() == ""){
 				err_filed += '区切り文字,';
 			}
 
+			var center_flg = false;
 			var data = {
 				'term_id': "{{ yougo.termId }}",
 				'yougo_flag': '1'
@@ -512,12 +523,20 @@
 				async: false,
 				success: function(response){
 					if(response.length == 0){
-						err_filed += 'センター頻度,';
+						center_flg = true;
 					}
 				},
 				error: function(response){
 				}
 			});
+
+			if($('#form_mainterm [id=center_freq]').text() == ""){
+				center_flg = true;
+			}
+
+			if(center_flg == true){
+				err_filed += 'センター頻度,';
+			}
 
 			if(err_filed != ''){
 				err_filed = err_filed + '\n';
@@ -536,6 +555,7 @@
 				err_field_wk += '教科書頻度,';
 			}
 
+			var center_flg = false;
 			var data = {
 					'term_id': elem.find('#sub_term_id').val(),
 					'yougo_flag': '2'
@@ -547,12 +567,20 @@
 					async: false,
 					success: function(response){
 						if(response.length == 0){
-							err_field_wk += 'センター頻度,';
+							center_flg = true;
 						}
 					},
 					error: function(response){
 					}
 				});
+
+			if($(elem).find('#center_freq').text() == ""){
+				center_flg = true;
+			}
+
+			if(center_flg == true){
+				err_field_wk += 'センター頻度,';
+			}
 
 			if(elem.find('#delimiter').val() == ""){
 				err_field_wk += '区切り文字,';
@@ -583,6 +611,7 @@
 				err_field_wk += '教科書頻度,';
 			}
 
+			var center_flg = false;
 			var data = {
 					'term_id': elem.find('#syn_term_id').val(),
 					'yougo_flag': '3'
@@ -594,12 +623,20 @@
 					async: false,
 					success: function(response){
 						if(response.length == 0){
-							err_field_wk += 'センター頻度,';
+							center_flg = true;
 						}
 					},
 					error: function(response){
 					}
 				});
+
+			if($(elem).find('#center_freq').text() == ""){
+				center_flg = true;
+			}
+
+			if(center_flg == true){
+				err_field_wk += 'センター頻度,';
+			}
 
 			if(elem.find('#delimiter').val() == ""){
 				err_field_wk += '区切り文字,';
