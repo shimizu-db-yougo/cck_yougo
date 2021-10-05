@@ -650,7 +650,7 @@ class DownloadController extends BaseController {
 				$ref['ref_chu'] .= $reftermRec['chu'] . '\v';
 				$ref['ref_ko'] .= $reftermRec['ko'] . '\v';
 				$ref['ref_refer_term_id'] .= $reftermRec['refer_term_id'] . '\v';
-				$ref['ref_main_term'] .= $reftermRec['main_term'] . '\v';
+				$ref['ref_main_term'] .= preg_replace('/【.*?】/', '', $reftermRec['main_term']) . '\v';
 				$ref['ref_nombre'] .= (($type != '0') ? $reftermRec['nombre'] : '') . '\v';
 			}
 			foreach ($ref as $key => $val) {
