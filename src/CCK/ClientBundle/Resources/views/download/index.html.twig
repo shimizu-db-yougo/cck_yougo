@@ -257,10 +257,11 @@
 					</table>
 				</div>
 			</div>
-			<div class="col-xs-5">
-				{{ message_preset|nl2br }}
+			<div class="col-xs-12">
+				<div class="col-xs-6">
+					{{ message_preset|nl2br }}
+				</div>
 			</div>
-
 		</div>
 	</div>
 	<div class="modal-footer">
@@ -355,7 +356,7 @@
 			clearField();
 		});
 
-		if(($('#status').text() == "210")||($('#status').text() == "211")||($('#status').text() == "212")){
+		if(($('#status').text() == "210")||($('#status').text() == "211")||($('#status').text() == "212")||($('#status').text() == "213")){
 			$('#log_download').attr('disabled', false);
 		}
 	});

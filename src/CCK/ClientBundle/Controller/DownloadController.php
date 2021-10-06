@@ -157,6 +157,8 @@ class DownloadController extends BaseController {
 			$message_sakuin = "IDが付加されていない用語があります。ログテキストをご確認ください。";
 		}elseif($status == 212){
 			$message_maemikaeshi = "IDが付加されていない用語があります。ログテキストをご確認ください。";
+		}elseif($status == 213){
+			$message_preset = "IDが付加されていない用語があります。ログテキストをご確認ください。";
 		}elseif(($status > 250)&&($status < 260)){
 
 			$arr_alert_list = $session->get(self::SES_CSV_FIELD_ALERT_KEY);
@@ -271,7 +273,7 @@ class DownloadController extends BaseController {
 
 		$status = 0;
 		$this->get('logger')->error("***body_list***".serialize($body_list)."***status_err***".$status_err);
-		if(($body_list === false)||(($status_err > 0)&&($type != '2'))){
+		if(($body_list === false)||($status_err > 0)){
 			if($type == '0'){
 				$status = 204;
 			}elseif ($type == '1'){
@@ -288,6 +290,8 @@ class DownloadController extends BaseController {
 					$status = 210;
 				}elseif ($type == '1'){
 					$status = 211;
+				}elseif ($type == '2'){
+					$status = 213;
 				}elseif ($type == '3'){
 					$status = 212;
 				}
@@ -608,7 +612,7 @@ class DownloadController extends BaseController {
 
 		if($synterm){
 			foreach ($synterm as $syntermRec) {
-				$this->replaceSynField($syntermRec,$entityVer,$main,$arr_err_list);
+				$this->replaceSynField($syntermRec,$entityVer,$main,$arr_err_list,$status_err);
 
 				$syn['syn_id'] .= $syntermRec['id'] . '\v';
 				$syn['syn_synonym_id'] .= $syntermRec['synonym_id'] . '\v';
@@ -840,7 +844,7 @@ class DownloadController extends BaseController {
 		}
 	}
 
-	private function replaceSynField(&$syn,$entityVer,$main,&$arr_err_list){
+	private function replaceSynField(&$syn,$entityVer,$main,&$arr_err_list,&$status_err){
 		$syn['id'] = 'D'.str_pad($syn['id'], 6, 0, STR_PAD_LEFT);
 
 		if($syn['synonym_id'] == '1'){
@@ -850,6 +854,10 @@ class DownloadController extends BaseController {
 		}elseif($syn['synonym_id'] == '3'){
 			$syn['synonym_id'] = '類';
 		}else{
+
+			$this->OutputLog("ERROR", "id_check.log", "同対類用語アイコンが空欄です。主用語ID:".$main['term_id'].",主用語:".$main['main_term'].",同対類用語:".$syn['term']);
+			$status_err = 210;
+
 			if(mb_strpos($main['hen'], "編") !== false){
 				$hen = mb_substr($main['hen'], 0, mb_strpos($main['hen'], "編")+1);
 			}else{
@@ -988,7 +996,7 @@ class DownloadController extends BaseController {
 		if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $main_explain, $match_data, PREG_SET_ORDER)){
 			foreach($match_data as $main_explain_ele){
 				if(!in_array($main_explain_ele[1], $explain_term)){
-					$this->OutputLog("ERROR", "id_check.log", "主用語ID:".$main_term_id.",主用語:".$main_term.",解説内さくいん用語:".$main_explain_ele[1]);
+					$this->OutputLog("ERROR", "id_check.log", "解説内さくいん用語IDが空欄です。主用語ID:".$main_term_id.",主用語:".$main_term.",解説内さくいん用語:".$main_explain_ele[1]);
 					$status_err = 210;
 				}
 			}
