@@ -124,6 +124,7 @@ class DownloadController extends BaseController {
 		$header_wk = str_replace('さくいん', '索引', $header);
 		$header_wk = str_replace('仮名', '', $header_wk);
 		unset($header_wk['header_position']);
+		unset($header_wk['ref_nombre']);
 		array_splice($header_wk, 2, 0, array('var_name'=>"版"));
 
 		foreach($header_wk as $key => $value) {
