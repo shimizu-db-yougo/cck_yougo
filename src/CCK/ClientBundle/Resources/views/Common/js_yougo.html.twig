@@ -204,8 +204,10 @@
 
 			// 必須チェック
 			var err_field_exp = '';
+			var err_field_nm_exp = '';
 			for (var elem_index_kana in explain.index_kana){
 				var err_field_wk = '';
+				var err_field_nm_wk = '';
 				if(explain.index_kana[elem_index_kana] == ""){
 					err_field_wk += 'さくいん読み仮名,';
 				}
@@ -245,10 +247,30 @@
 				if(err_field_wk != ''){
 					err_field_exp += '【' + explain.index_term[elem_index_kana] + '】' + err_field_wk + '\n';
 				}
+
+				// 数値チェック
+				if(isNaN(explain.text_freq[elem_index_kana])){
+					err_field_nm_wk += '教科書頻度,';
+				}
+
+				if(err_field_nm_wk != ''){
+					err_field_nm_exp += '【' + explain.index_term[elem_index_kana] + '】' + err_field_nm_wk + '\n';
+				}
 			}
 
+			var err_msg_str = '';
 			if(err_field_exp != ''){
-				alert("必須項目です：" + err_field_exp);
+				//alert("必須項目です：" + err_field_exp);
+				//return false;
+				err_msg_str = "必須項目です：" + err_field_exp;
+			}
+
+			if(err_field_nm_exp != ''){
+				err_msg_str += "数値で入力してください。：" + err_field_nm_exp;
+			}
+
+			if(err_msg_str != ''){
+				alert(err_msg_str);
 				return false;
 			}
 
@@ -357,6 +379,8 @@
 		$('.js-yougo-submit').bind('click', function(e){
 			// 入力チェック
 			var err_field = RequiredCheckMainTerm();
+			// 数値チェック
+			var err_field_nm = NumericCheckMainTerm();
 
 			// 主用語
 			var mainterm = {};
@@ -400,8 +424,10 @@
 			var subterm = {sub_term_id:[],sub_term:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],index_add_letter:[],index_kana:[],nombre:[]};
 			var form_subterm = $('.form_subterm');
 			var err_field_sub = '';
+			var err_field_nm_sub = '';
 			form_subterm.each(function(i,elem) {
 				err_field_sub += RequiredCheckSubTerm(i,$(elem));
+				err_field_nm_sub += NumericCheckSubTerm(i,$(elem));
 
 				subterm.sub_term_id.push($(elem).find('#sub_term_id').val());
 				subterm.sub_term.push($(elem).find('#sub_term').val());
@@ -421,8 +447,10 @@
 			var synterm = {syn_term_id:[],synonym_id:[],term:[],text_freq:[],center_freq:[],news_exam:[],delimiter:[],index_add_letter:[],index_kana:[],nombre:[]};
 			var form_synterm = $('.form_synterm');
 			var err_field_syn = '';
+			var err_field_nm_syn = '';
 			form_synterm.each(function(i,elem) {
 				err_field_syn += RequiredCheckSynTerm(i,$(elem));
+				err_field_nm_syn += NumericCheckSynTerm(i,$(elem));
 
 				synterm.syn_term_id.push($(elem).find('#syn_term_id').val());
 				synterm.synonym_id.push($(elem).find('#synonym_id').val());
@@ -459,8 +487,19 @@
 			console.log(mainterm.update_mode_exp);
 
 			// エラーチェック文言出力
+			var err_msg_str = '';
 			if((err_field != '')||(err_field_sub != '')||(err_field_syn != '')||(err_field_ref != '')){
-				alert("必須項目です。：" + err_field + err_field_sub + err_field_syn + err_field_ref);
+				//alert("必須項目です。：" + err_field + err_field_sub + err_field_syn + err_field_ref);
+				//return false;
+				err_msg_str = "必須項目です。：" + err_field + err_field_sub + err_field_syn + err_field_ref;
+			}
+
+			if((err_field_nm != '')||(err_field_nm_sub != '')||(err_field_nm_syn != '')){
+				err_msg_str += "数値で入力してください。：" + err_field_nm + err_field_nm_sub + err_field_nm_syn;
+			}
+
+			if(err_msg_str != ''){
+				alert(err_msg_str);
 				return false;
 			}
 
@@ -668,6 +707,43 @@
 
 			if(err_field_wk != ''){
 				err_field_wk = '【指矢印用語' + (i+1) + '】' + err_field_wk + '\n';
+			}
+
+			return err_field_wk;
+		}
+
+		function NumericCheckMainTerm(){
+			var err_filed = '';
+
+			if(isNaN($('#form_mainterm [name=text_freq]').val())){
+				err_filed += '教科書頻度,';
+			}
+			return err_filed;
+		}
+
+		function NumericCheckSubTerm(i,elem){
+			var err_field_wk = ''
+
+			if(isNaN(elem.find('#text_freq').val())){
+				err_field_wk += '教科書頻度,';
+			}
+
+			if(err_field_wk != ''){
+				err_field_wk = '【サブ用語' + (i+1) + '】' + err_field_wk + '\n';
+			}
+
+			return err_field_wk;
+		}
+
+		function NumericCheckSynTerm(i,elem){
+			var err_field_wk = '';
+
+			if(isNaN(elem.find('#text_freq').val())){
+				err_field_wk += '教科書頻度,';
+			}
+
+			if(err_field_wk != ''){
+				err_field_wk = '【同対類用語' + (i+1) + '】' + err_field_wk + '\n';
 			}
 
 			return err_field_wk;
