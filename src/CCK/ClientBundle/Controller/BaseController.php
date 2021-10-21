@@ -1081,13 +1081,15 @@ class BaseController extends Controller {
 		$month = date ( "m" );
 		$day = date ( "d" );
 		$hour = date ( "H" );
+		$minutes = date ( "i" );
+		$second = date ( "s" );
 
 		// ログ出力先の決定
 		$logDir = "./app/logs/" . "$year/$month/$day/";
 		$error_log = $logDir . $logName;
 
 		// ダウンロードファイル名設定
-		$finename = $prefix."_".$year.$month.$day.".log";
+		$finename = $prefix."_".$year.$month.$day.$hour.$minutes.$second.".log";
 
 		// 取込データエラーログ
 		$response = new BinaryFileResponse($error_log);
