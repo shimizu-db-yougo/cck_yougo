@@ -160,25 +160,6 @@ class DownloadController extends BaseController {
 			$message_maemikaeshi = "IDが付加されていない用語があります。ログテキストをご確認ください。";
 		}elseif($status == 213){
 			$message_preset = "IDが付加されていない用語があります。ログテキストをご確認ください。";
-		}elseif(($status > 250)&&($status < 260)){
-
-			$arr_alert_list = $session->get(self::SES_CSV_FIELD_ALERT_KEY);
-			$txt_alert = "";
-			foreach ($arr_alert_list as $ele_alert_list){
-				$txt_alert .= $ele_alert_list[0].$ele_alert_list[1]."　主用語：".$ele_alert_list[2]."　同対類語：".$ele_alert_list[3]."の同体類マークがブランクです\n\r";
-			}
-
-			if($status == 251){
-				$message_honmon = $txt_alert;
-			}elseif($status == 252){
-				$message_sakuin = $txt_alert;
-			}elseif($status == 253){
-				$message_preset = $txt_alert;
-			}else{
-				$message_maemikaeshi = $txt_alert;
-			}
-
-			$this->sessionRemove($request);
 		}
 
 		return array(
@@ -268,13 +249,32 @@ class DownloadController extends BaseController {
 			));
 
 			$body_list = $this->constructManuscriptCSV($term_id, $request, $entity, $outFileName, $entityVer, $arr_err_list, $status_err);
+
+			$is_generic_skip = false;
+			// ヘッダー
+			if($type == '2'){
+				// 汎用CSV
+				$header = $this->encoding(explode(",", $request->query->get('generic_field')), $request);
+
+				$translator = $this->get('translator');
+				if((!in_array($translator->trans('csv.term.syn_synonym_id'), $header))&&
+					(!in_array(str_replace('さくいん', '索引',$translator->trans('csv.term.exp_id')), $header))){
+					$is_generic_skip = true;
+				}
+
+			}else{
+				// 本文・索引組版
+				$header = $this->encoding($this->generateHeader($entity[0]), $request);
+			}
+
 		}else{
 			$body_list = false;
 		}
 
 		$status = 0;
 		$this->get('logger')->error("***body_list***".serialize($body_list)."***status_err***".$status_err);
-		if(($body_list === false)||($status_err > 0)){
+
+		if(($body_list === false)||(($status_err > 0)&&($is_generic_skip === false))){
 			if($type == '0'){
 				$status = 204;
 			}elseif ($type == '1'){
@@ -298,42 +298,12 @@ class DownloadController extends BaseController {
 				}
 			}
 
-			return $this->redirect($this->generateUrl('client.csv.export', array('status' => $status)));
-		}
-
-		// ヘッダー
-		if($type == '2'){
-			// 汎用CSV
-			$header = $this->encoding(explode(",", $request->query->get('generic_field')), $request);
-		}else{
-			// 本文・索引組版
-			$header = $this->encoding($this->generateHeader($entity[0]), $request);
-		}
-
-		// trans service
-		$translator = $this->get('translator');
-		// 入力データの不備の場合のアラート表示
-		if(count($arr_err_list) > 0){
-			if($type == '0'){
-				$status = 251;
-			}elseif ($type == '1'){
-				$status = 252;
-			}elseif ($type == '3'){
-				$status = 254;
+			if($term_id){
+				// アラート表示
+				setcookie('isalert',implode(",\n",$arr_err_list),0,'/');
+				return $this->redirect($this->generateUrl('client.yougo.index'));
 			}else{
-				if(in_array($translator->trans('csv.term.syn_synonym_id'), $header)){
-					$status = 253;
-				}
-			}
-			$session->set(self::SES_CSV_FIELD_ALERT_KEY, $arr_err_list);
-
-			if($status > 0){
-				if($term_id){
-					// アラート表示
-					setcookie('isalert',$arr_err_list[0][0].$arr_err_list[0][1]."　主用語：".$arr_err_list[0][2]."　同対類語：".$arr_err_list[0][3]."の同体類マークがブランクです",0,'/');
-				}else{
-					return $this->redirect($this->generateUrl('client.csv.export', array('status' => $status)));
-				}
+				return $this->redirect($this->generateUrl('client.csv.export', array('status' => $status)));
 			}
 		}
 
@@ -554,7 +524,7 @@ class DownloadController extends BaseController {
 			}
 		}
 		// 解説内用語存在チェック
-		$this->isExistsExplainTerm($main['term_id'],$main['main_term'],$main['term_explain'],$arr_exp_indexTerm,$status_err);
+		$this->isExistsExplainTerm($main['term_id'],$main['main_term'],$main['term_explain'],$arr_exp_indexTerm,$arr_err_list,$status_err);
 
 
 		// サブ用語
@@ -869,7 +839,7 @@ class DownloadController extends BaseController {
 			}else{
 				$sho = $main['sho'];
 			}
-			array_push($arr_err_list,array($hen,$sho,$main['main_term'],$syn['term']));
+			array_push($arr_err_list, "同対類用語アイコンが空欄です。主用語ID:".$main['term_id'].",主用語:".$main['main_term'].",同対類用語:".$syn['term']);
 		}
 
 		if($syn['center_frequency'] > 4){
@@ -993,12 +963,13 @@ class DownloadController extends BaseController {
 
 	}
 
-	private function isExistsExplainTerm($main_term_id,$main_term,$main_explain,$explain_term,&$status_err){
+	private function isExistsExplainTerm($main_term_id,$main_term,$main_explain,$explain_term,&$arr_err_list,&$status_err){
 		if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $main_explain, $match_data, PREG_SET_ORDER)){
 			foreach($match_data as $main_explain_ele){
 				if(!in_array($main_explain_ele[1], $explain_term)){
 					$this->OutputLog("ERROR", "id_check.log", "解説内さくいん用語IDが空欄です。主用語ID:".$main_term_id.",主用語:".$main_term.",解説内さくいん用語:".$main_explain_ele[1]);
 					$status_err = 210;
+					array_push($arr_err_list, "解説内さくいん用語IDが空欄です。主用語ID:".$main_term_id.",主用語:".$main_term.",解説内さくいん用語:".$main_explain_ele[1]);
 				}
 			}
 		}
