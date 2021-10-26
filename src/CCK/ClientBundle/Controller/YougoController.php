@@ -2324,6 +2324,45 @@ class YougoController extends BaseController {
 	}
 
 	/**
+	 * @Route("/newterm/delete/ajax", name="client.newterm.delete.ajax")
+	 * @Method("POST")
+	 */
+	public function deleteNewtermAjaxAction(Request $request){
+		$this->get('logger')->error("***deleteNewtermAjaxAction start***");
+		$this->get('logger')->error(serialize($request->request->get('term_id')));
+
+		$ret = ['result'=>'ok','error'=>''];
+
+		if(!($request->request->has('term_id'))){
+			$ret = ['result'=>'ng','error'=>'parameter error'];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		$term_id = $request->request->get('term_id');
+
+		$em = $this->get('doctrine.orm.entity_manager');
+		$conn = $em->getConnection();
+		$conn->beginTransaction();
+		try {
+			$conn->delete('SubTerm', array('main_term_id' => $term_id,'sub_term' => ''));
+			$conn->delete('Synonym', array('main_term_id' => $term_id,'term' => ''));
+			$em->getConnection()->commit();
+		}catch (\Exception $e){
+			$em->getConnection()->rollback();
+			$em->close();
+
+			// log
+			$this->get('logger')->error($e->getMessage());
+			$this->get('logger')->error($e->getTraceAsString());
+
+			$ret = ['result'=>'ng','error'=>'deleteNewterm error id:'.$term_id];
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+	}
+
+	/**
 	 * @Route("/edit/confirm", name="client.yougo.edit.confirm")
 	 * @Method("POST|GET")
 	 */

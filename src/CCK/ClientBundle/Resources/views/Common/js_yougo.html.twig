@@ -351,12 +351,27 @@
 			});
 		}
 
+		function deleteSubterm(){
+			var term_id = parseInt($('#form_mainterm [name=term_id]').text().slice(1));
+			var param = {term_id:''};
+			param.term_id = term_id;
+			$.post("{{ path('client.newterm.delete.ajax') }}", param)
+			.done(function(r,s){
+				console.log('deleteSubterm:done',s,r);
+			})
+			.fail(function(e,s){
+				console.log('deleteSubterm:fail',s,e.status);
+			});
+		}
+
 		$('.js-yougo-back').bind('click', function(e){
 			deleteExplainTmp();
 
 			if("{{ is_copy }}" == true){
 				deleteCopyTmp();
 			}
+
+			deleteSubterm();
 		});
 
 		$('.js-explain-cancel').bind('click', function(e){
