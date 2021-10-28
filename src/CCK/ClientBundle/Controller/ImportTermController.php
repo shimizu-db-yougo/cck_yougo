@@ -1377,9 +1377,21 @@ class ImportTermController extends BaseController {
 
 		// 新語登録は主用語を、上書きは用語IDをエラーメッセージに表記する
 		if($import_new){
-			$term_info = $data[9];
+			if(isset($data[9])){
+				$term_info = $data[9];
+			}else{
+				$term_info = $data[0];
+			}
 		}else{
 			$term_info = $data[0];
+		}
+
+		// 項目数チェック
+		if(count($data) != 337){
+			fclose($filePointer);
+			$this->OutputLog("ERROR2", "import_term.log", "[".$term_info."]の項目数が異なっています。正しい項目数：337。項目数：".count($data));
+			$status = 204;
+			return $status;
 		}
 
 		if($lineCnt > 1) {
@@ -1390,14 +1402,6 @@ class ImportTermController extends BaseController {
 				$status = 202;
 				return $status;
 			}
-		}
-
-		// 項目数チェック
-		if(count($data) != 337){
-			fclose($filePointer);
-			$this->OutputLog("ERROR2", "import_term.log", "[".$term_info."]の項目数が異なっています。正しい項目数：337。項目数：".count($data));
-			$status = 204;
-			return $status;
 		}
 
 		// 教科・版チェック
@@ -1681,6 +1685,60 @@ class ImportTermController extends BaseController {
 					return $status;
 				}
 			}
+		}
+
+		// 教科書頻度数値チェック
+		$textfreq_check = true;
+		$textfreq_list = "";
+		// 主用語
+		if(preg_match('/^(\d+)$/', $data[10])){
+		}else{
+			$textfreq_list .= $header[10].",";
+			$textfreq_check = false;
+		}
+
+		// サブ用語
+		for($idx=0;$idx<5;$idx++){
+			if($data[31+$idx*17] != ""){
+				if(preg_match('/^(\d+)$/', $data[32+$idx*17])){
+				}else{
+					$textfreq_list .= $header[32+$idx*17].",";
+					$textfreq_check = false;
+				}
+			}
+		}
+
+		// 同対類用語
+		for($idx=0;$idx<11;$idx++){
+			if($data[133+$idx*18] != ""){
+				if(preg_match('/^(\d+)$/', $data[134+$idx*18])){
+				}else{
+					$textfreq_list .= $header[134+$idx*18].",";
+					$textfreq_check = false;
+				}
+			}
+		}
+
+		// 解説内さくいん用語
+		if($data[117] != ""){
+			$arr_exp = explode(";",$data[119]);
+
+			foreach($arr_exp as $ele_exp){
+				if(preg_match('/^(\d+)$/', $ele_exp)){
+				}else{
+					$textfreq_list .= $header[119].",";
+					$textfreq_check = false;
+				}
+			}
+		}
+
+		if(!$textfreq_check){
+			fclose($filePointer);
+			$rtn_message = "[".$term_info."]の教科書頻度項目を数値にしてください：".$textfreq_list;
+			$this->OutputLog("ERROR3", "import_term.log",$rtn_message);
+			$session->set(self::SES_REQUIRED_KEY, $rtn_message);
+			$status = 206;
+			return $status;
 		}
 
 		// 新語登録チェック
