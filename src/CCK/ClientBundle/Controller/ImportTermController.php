@@ -770,7 +770,7 @@ class ImportTermController extends BaseController {
 		}
 
 		if($main['delimiter'] == '0'){
-			$main['delimiter'] = '';
+			$main['delimiter'] = 'なし';
 		}elseif($main['delimiter'] == '1'){
 			$main['delimiter'] = 'と';
 		}elseif($main['delimiter'] == '2'){
@@ -837,7 +837,7 @@ class ImportTermController extends BaseController {
 		}
 
 		if($sub['delimiter'] == '0'){
-			$sub['delimiter'] = '';
+			$sub['delimiter'] = 'なし';
 		}elseif($sub['delimiter'] == '1'){
 			$sub['delimiter'] = 'と';
 		}elseif($sub['delimiter'] == '2'){
@@ -855,7 +855,7 @@ class ImportTermController extends BaseController {
 		}
 
 		if($sub['delimiter_kana'] == '0'){
-			$sub['delimiter_kana'] = '';
+			$sub['delimiter_kana'] = 'なし';
 		}elseif($sub['delimiter_kana'] == '1'){
 			$sub['delimiter_kana'] = 'と';
 		}elseif($sub['delimiter_kana'] == '2'){
@@ -928,7 +928,7 @@ class ImportTermController extends BaseController {
 		}
 
 		if($syn['delimiter'] == '0'){
-			$syn['delimiter'] = '';
+			$syn['delimiter'] = 'なし';
 		}elseif($syn['delimiter'] == '1'){
 			$syn['delimiter'] = '　';
 		}elseif($syn['delimiter'] == '2'){
