@@ -786,6 +786,12 @@ class YougoController extends BaseController {
 			return $response;
 		}
 
+		// 解説内用語ID存在チェック
+		if($this->checkExplainId($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
 		if($this->saveMainTerm($request,$ret) == false){
 			$response = new JsonResponse($ret);
 			return $response;
@@ -817,12 +823,6 @@ class YougoController extends BaseController {
 		}
 
 		if($this->saveExplainCenter($request,$ret) == false){
-			$response = new JsonResponse($ret);
-			return $response;
-		}
-
-		// 解説内用語ID存在チェック
-		if($this->checkExplainId($request,$ret) == false){
 			$response = new JsonResponse($ret);
 			return $response;
 		}
@@ -1279,26 +1279,68 @@ class YougoController extends BaseController {
 	}
 
 	private function checkExplainId($request,&$ret){
-		$return_flag = true;
 
 		$em = $this->get('doctrine.orm.entity_manager');
+		// 解説textarea内のタグで囲まれた用語とDB(ExplainIndex)を比較
 		$entity = $em->getRepository('CCKCommonBundle:ExplainIndex')->findBy(array(
 				'mainTermId' => $request->request->get('term_id'),
 				'deleteFlag' => FALSE
 		));
 
-		$arr_not_exist_index_term = [];
-		if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $request->request->get('term_explain'), $match_data, PREG_SET_ORDER)){
-			foreach($match_data as $main_explain_ele){
-				array_push($arr_not_exist_index_term,$main_explain_ele[1]);
-			}
+		$return_flag = $this->matchingExplainTerm($em, $entity, $request, $ret, $arr_not_exist_index_term);
+
+		if($return_flag){
+			return $return_flag;
 		}
+
+		// サブ画面で登録が行われたかチェックする
+		$entity = $em->getRepository('CCKCommonBundle:ExplainIndexTmp')->findBy(array(
+				'mainTermId' => $request->request->get('term_id'),
+				'deleteFlag' => FALSE
+		));
+
+		if(!$entity){
+			// Tmpテーブルにない(サブ画面で登録作業していない)場合
+			$ret = ['result'=>'explain_warn','error'=>$arr_not_exist_index_term];
+			return $return_flag;
+		}
+
+		// Tmpテーブルにある(サブ画面で登録作業している)場合
+		// 解説textarea内のタグで囲まれた用語とサブ画面で登録した解説内索引用語を比較
+		$return_flag = $this->matchingExplainTerm($em, $entity, $request, $ret, $arr_not_exist_index_term);
+
+		if(!$return_flag){
+			$ret = ['result'=>'explain_warn','error'=>$arr_not_exist_index_term];
+		}
+
+		return $return_flag;
+	}
+
+	private function matchingExplainTerm($em,$entity,$request,&$ret,&$arr_not_exist_index_term){
+		$return_flag = true;
 
 		$arr_exp_indexTerm = [];
 		foreach($entity as $entity_rec){
 			array_push($arr_exp_indexTerm, $entity_rec->getIndexTerm());
+		}
 
-			if(!in_array($entity_rec->getIndexTerm(),$arr_not_exist_index_term)){
+		$arr_not_exist_index_term = [];
+		$arr_explain_index_term = [];
+
+		// 解説textareaにあってDBにない用語があるか
+		if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $request->request->get('term_explain'), $match_data, PREG_SET_ORDER)){
+			foreach($match_data as $main_explain_ele){
+				if(!in_array($main_explain_ele[1], $arr_exp_indexTerm)){
+					array_push($arr_not_exist_index_term,$main_explain_ele[1]);
+					$return_flag = false;
+				}
+				array_push($arr_explain_index_term,$main_explain_ele[1]);
+			}
+		}
+
+		// DBにあって解説textareaにない用語があるか
+		foreach($entity as $entity_rec){
+			if(!in_array($entity_rec->getIndexTerm(), $arr_explain_index_term)){
 				// 解説textareaから削除したさくいん用語はDBからも削除
 				$em->getConnection()->beginTransaction();
 
@@ -1324,21 +1366,6 @@ class YougoController extends BaseController {
 				}
 			}
 		}
-
-		$arr_not_exist_index_term = [];
-		if(preg_match_all('/《c_SAK》(.*?)《\/c_SAK》/u', $request->request->get('term_explain'), $match_data, PREG_SET_ORDER)){
-			foreach($match_data as $main_explain_ele){
-				if(!in_array($main_explain_ele[1], $arr_exp_indexTerm)){
-					array_push($arr_not_exist_index_term,$main_explain_ele[1]);
-					$return_flag = false;
-				}
-			}
-		}
-
-		if(!$return_flag){
-			$ret = ['result'=>'explain_warn','error'=>$arr_not_exist_index_term];
-		}
-
 		return $return_flag;
 	}
 
