@@ -822,6 +822,21 @@ class YougoController extends BaseController {
 			return $response;
 		}
 
+		if($this->saveMainCenter($request,$ret) == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		if($this->saveSubCenter($request,$ret,"2") == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
+		if($this->saveSubCenter($request,$ret,"3") == false){
+			$response = new JsonResponse($ret);
+			return $response;
+		}
+
 		if($this->saveExplainCenter($request,$ret) == false){
 			$response = new JsonResponse($ret);
 			return $response;
@@ -1216,12 +1231,151 @@ class YougoController extends BaseController {
 		return $return_flag;
 	}
 
+	private function saveMainCenter($request,&$ret){
+		$return_flag = true;
+		// センター頻度を一時テーブルよりコピー
+		$em = $this->get('doctrine.orm.entity_manager');
+		$entityTmp = $em->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
+				'mainTermId' => $request->request->get('term_id'),
+				'yougoFlag' => '1'
+		));
+
+		foreach($entityTmp as $entity_rec){
+			$entityExp = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+					'termId' => $request->request->get('term_id'),
+					'deleteFlag' => FALSE
+			));
+
+			$entity = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+					'mainTermId' => $entity_rec->getMainTermId(),
+					'yougoFlag' => '1',
+					'year' => $entity_rec->getYear()
+			));
+
+			$update_mode = 'update';
+			if(!$entity){
+				$entity = new Center();
+				$update_mode = 'new';
+			}
+
+			$em->getConnection()->beginTransaction();
+
+			try{
+				$entity->setMainTermId($entity_rec->getMainTermId());
+				$entity->setSubTermId(0);
+				$entity->setYougoFlag('1');
+				$entity->setYear($entity_rec->getYear());
+				$entity->setMainExam($entity_rec->getMainExam());
+				$entity->setSubExam($entity_rec->getSubExam());
+				$entity->setDeleteDate($entity_rec->getDeleteDate());
+				$entity->setDeleteFlag($entity_rec->getDeleteFlag());
+
+				if($update_mode == 'new'){
+					$em->persist($entity);
+				}
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$ret = ['result'=>'ng','error'=>'CenterDB(Main) error id:'.$entity_rec->getIndexTerm()];
+				$return_flag = false;
+				return $return_flag;
+			}
+		}
+
+		return $return_flag;
+	}
+
+	private function saveSubCenter($request,&$ret,$yougo_flg){
+		$return_flag = true;
+		// センター頻度を一時テーブルよりコピー
+		$em = $this->get('doctrine.orm.entity_manager');
+
+		if($yougo_flg == "2"){
+			$tbl_name = "SubTerm";
+			$subterm = $request->request->get('subterm');
+			$label_name = "sub_term_id";
+		}else{
+			$tbl_name = "Synonym";
+			$subterm = $request->request->get('synterm');
+			$label_name = "syn_term_id";
+		}
+
+		foreach($subterm[$label_name] as $ele_subterm){
+			$entityTmp = $em->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
+					'mainTermId' => $request->request->get('term_id'),
+					'indexTerm' => $ele_subterm,
+					'yougoFlag' => $yougo_flg
+			));
+
+			foreach($entityTmp as $entity_rec){
+				$entityExp = $em->getRepository('CCKCommonBundle:'.$tbl_name)->findOneBy(array(
+						'mainTermId' => $request->request->get('term_id'),
+						'id' => (int)$entity_rec->getIndexTerm(),
+						'deleteFlag' => FALSE
+				));
+
+				$entity = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+						'mainTermId' => $entity_rec->getMainTermId(),
+						'subTermId' => $entityExp->getId(),
+						'yougoFlag' => $yougo_flg,
+						'year' => $entity_rec->getYear()
+				));
+
+				$update_mode = 'update';
+				if(!$entity){
+					$entity = new Center();
+					$update_mode = 'new';
+				}
+
+				$em->getConnection()->beginTransaction();
+
+				try{
+					$entity->setMainTermId($entity_rec->getMainTermId());
+					$entity->setSubTermId($entityExp->getId());
+					$entity->setYougoFlag($yougo_flg);
+					$entity->setYear($entity_rec->getYear());
+					$entity->setMainExam($entity_rec->getMainExam());
+					$entity->setSubExam($entity_rec->getSubExam());
+					$entity->setDeleteDate($entity_rec->getDeleteDate());
+					$entity->setDeleteFlag($entity_rec->getDeleteFlag());
+
+					if($update_mode == 'new'){
+						$em->persist($entity);
+					}
+					$em->flush();
+					$em->getConnection()->commit();
+				} catch (\Exception $e){
+					$em->getConnection()->rollback();
+					$em->close();
+
+					// log
+					$this->get('logger')->error($e->getMessage());
+					$this->get('logger')->error($e->getTraceAsString());
+
+					$ret = ['result'=>'ng','error'=>'CenterDB(Sub) error id:'.$entity_rec->getIndexTerm()];
+					$return_flag = false;
+					return $return_flag;
+				}
+			}
+		}
+
+		return $return_flag;
+	}
+
 	private function saveExplainCenter($request,&$ret){
 		$return_flag = true;
 		// センター頻度を一時テーブルよりコピー
 		$em = $this->get('doctrine.orm.entity_manager');
 		$entityTmp = $em->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
-				'mainTermId' => $request->request->get('term_id')
+				'mainTermId' => $request->request->get('term_id'),
+				'yougoFlag' => '4'
 		));
 
 		foreach($entityTmp as $entity_rec){
@@ -1428,7 +1582,7 @@ class YougoController extends BaseController {
 
 				try{
 					if($yougo_flag == '1'){
-						$entity = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
+						$entity = $em->getRepository('CCKCommonBundle:CenterTmp')->findOneBy(array(
 								'mainTermId' => $term_id,
 								'yougoFlag' => $yougo_flag,
 								'year' => $center_key,
@@ -1442,8 +1596,8 @@ class YougoController extends BaseController {
 								'deleteFlag' => FALSE
 						));
 					}else{
-						$entity = $em->getRepository('CCKCommonBundle:Center')->findOneBy(array(
-								'subTermId' => $term_id,
+						$entity = $em->getRepository('CCKCommonBundle:CenterTmp')->findOneBy(array(
+								'indexTerm' => $term_id,
 								'yougoFlag' => $yougo_flag,
 								'year' => $center_key,
 								'deleteFlag' => FALSE
@@ -1962,6 +2116,148 @@ class YougoController extends BaseController {
 
 		return $response;
 	}
+
+	/**
+	 * @Route("/yougo/center/tmpalpha/ajax", name="client.yougo.center.tmpalpha.ajax")
+	 */
+	public function getCenterTmpalphaAjaxAction(Request $request){
+		//if($request->request->has('index_term')){
+			$main_term_id = $request->request->get('main_term_id');
+
+			$yougo_flag = $request->request->get('yougo_flag');
+			$ver_id = $request->request->get('ver_id');
+
+			if($yougo_flag == '1'){
+				$main_term_id = (int)ltrim($main_term_id,'0');
+				$index_term = "";
+			}else{
+				$main_term_id = (int)ltrim(substr($main_term_id, 1),'0');
+				$index_term = $request->request->get('term_id');
+			}
+
+			$em = $this->get('doctrine.orm.entity_manager');
+			if($yougo_flag == '1'){
+				$entity = $em->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
+						'termId' => $main_term_id,
+						'deleteFlag' => FALSE
+				));
+			}elseif($yougo_flag == '2'){
+				$entity = $em->getRepository('CCKCommonBundle:SubTerm')->findOneBy(array(
+						'mainTermId' => $main_term_id,
+						'id' => $index_term,
+						'deleteFlag' => FALSE
+				));
+			}else{
+				$entity = $em->getRepository('CCKCommonBundle:Synonym')->findOneBy(array(
+						'mainTermId' => $main_term_id,
+						'id' => $index_term,
+						'deleteFlag' => FALSE
+				));
+			}
+
+			//センター頻度開始年の取得
+			$entityVersion = $em->getRepository('CCKCommonBundle:Version')->findOneBy(array(
+					'id' => $ver_id,
+					'deleteFlag' => FALSE
+			));
+
+			if(!$entityVersion){
+				$return_flag = false;
+				return $return_flag;
+			}
+
+			$year = $entityVersion->getYear();
+
+			$em->getConnection()->beginTransaction();
+
+			try{
+				$entityCenter = null;
+				if($entity){
+					$entityCenter = $em->getRepository('CCKCommonBundle:Center')->findBy(array(
+							'mainTermId' => $main_term_id,
+							'subTermId' => ($yougo_flag == "1") ? 0 : $index_term,
+							'yougoFlag' => $yougo_flag,
+							'deleteFlag' => FALSE
+					));
+				}
+
+				if($yougo_flag == '1'){
+					$entityCenterTmp = $em->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
+							'mainTermId' => $main_term_id,
+							'yougoFlag' => $yougo_flag,
+							'deleteFlag' => FALSE
+					));
+				}else{
+					$entityCenterTmp = $em->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
+							'mainTermId' => $main_term_id,
+							'indexTerm' => $index_term,
+							'yougoFlag' => $yougo_flag,
+							'deleteFlag' => FALSE
+					));
+				}
+
+				$tmp_exist = true;
+				if(!$entityCenterTmp){
+					$tmp_exist = false;
+				}
+
+				if($entityCenter){
+					// 用語が登録済のセンター頻度取得
+					foreach($entityCenter as $entityCenterRec){
+						if(!$tmp_exist){
+							$entityCenterTmp = new CenterTmp();
+							$entityCenterTmp->setMainTermId($entityCenterRec->getMainTermId());
+							$entityCenterTmp->setIndexTerm($index_term);
+							$entityCenterTmp->setYougoFlag($entityCenterRec->getYougoFlag());
+							$entityCenterTmp->setYear($entityCenterRec->getYear());
+							$entityCenterTmp->setMainExam($entityCenterRec->getMainExam());
+							$entityCenterTmp->setSubExam($entityCenterRec->getSubExam());
+
+							$em->persist($entityCenterTmp);
+						}
+					}
+
+				}else{
+					// 解説内索引用語が未登録の場合、初期値設定
+					for ($idx=0;$idx<10;$idx++){
+						if(!$tmp_exist){
+							$entityCenterTmp = new CenterTmp();
+							$entityCenterTmp->setMainTermId($main_term_id);
+							$entityCenterTmp->setIndexTerm($index_term);
+							$entityCenterTmp->setYougoFlag($yougo_flag);
+							$entityCenterTmp->setYear($year+$idx);
+							$entityCenterTmp->setMainExam(0);
+							$entityCenterTmp->setSubExam(0);
+
+							$em->persist($entityCenterTmp);
+
+						}
+					}
+				}
+
+				$em->flush();
+				$em->getConnection()->commit();
+			} catch (\Exception $e){
+				$em->getConnection()->rollback();
+				$em->close();
+
+				// log
+				$this->get('logger')->error($e->getMessage());
+				$this->get('logger')->error($e->getTraceAsString());
+
+				$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+			}
+
+			$center_point = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:CenterTmp')->getCenterPointsAlpha($index_term,$main_term_id,$yougo_flag);
+
+			$response = new JsonResponse($center_point);
+		//}else{
+		//	$response = new JsonResponse(array(), JsonResponse::HTTP_FORBIDDEN);
+		//}
+
+		return $response;
+	}
+
 
 	/**
 	 * @Route("/yougo/center/exist/ajax", name="client.yougo.center.exist.ajax")

@@ -31,4 +31,25 @@ class CenterTmpRepository extends EntityRepository
 		return $qb->getQuery()->getResult();
 	}
 
+	public function getCenterPointsAlpha($index_term,$main_term_id,$yougo_flag){
+
+		$qb = $this->createQueryBuilder('c')
+		->select('c.year')
+		->addSelect('c.mainExam')
+		->addSelect('c.subExam')
+		->where('c.deleteFlag = :deleteFlag')
+		->andWhere('c.mainTermId = :main_term_id')
+		->andWhere('c.indexTerm = :index_term')
+		->andWhere('c.yougoFlag = :yougo_flag')
+		->addOrderBy('c.year')
+		->setParameters(array(
+				'deleteFlag' => false,
+				'main_term_id' => $main_term_id,
+				'index_term' => $index_term,
+				'yougo_flag' => $yougo_flag
+		));
+
+		return $qb->getQuery()->getResult();
+	}
+
 }

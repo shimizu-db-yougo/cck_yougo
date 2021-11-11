@@ -1038,8 +1038,13 @@
 				'yougo_flag': yougo_flag,
 				'ver_id': ver_id
 			};
+
+			var wurl;
+			wurl = "{{ path('client.yougo.center.tmpalpha.ajax') }}";
+			//wurl = "{{ path('client.yougo.center.ajax') }}";
+
 			$.ajax({
-				url: "{{ path('client.yougo.center.ajax') }}",
+				url:  wurl,
 				data: data,
 				method: 'POST',
 				success: function(response){
