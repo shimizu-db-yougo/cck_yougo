@@ -1210,6 +1210,14 @@ class ImportTermController extends BaseController {
 					$line = str_replace("\r","",$line);
 					$line = str_replace("\r\n","",$line);
 
+					// ファイル形式チェック
+					if(strpos($line,"	") !== false){
+						fclose($filePointer);
+						$this->OutputLog("ERROR2", "import_term.log", "ファイル形式が違います。CSV形式のファイルを使用して下さい。");
+						$status = 201;
+						return $this->redirect($this->generateUrl('client.csv.import.term', array('status' => $status)));
+					}
+
 					// 項目ごとの"xxx"からダブルクォーテーション削除
 					$data = str_getcsv($line);
 
@@ -1672,7 +1680,7 @@ class ImportTermController extends BaseController {
 			if($data[329+$idx] != ""){
 				$entity = $this->getDoctrine()->getManager()->getRepository('CCKCommonBundle:MainTerm')->findOneBy(array(
 						'curriculumId' => $entityVersion->getId(),
-						'mainTerm' => $data[329+$idx],
+						'termId' => intval(substr($data[329+$idx], 1)),
 						'deleteFlag' => FALSE
 				));
 
@@ -2801,7 +2809,7 @@ class ImportTermController extends BaseController {
 					$em->flush();
 
 				}else{
-					$sql .= ",`index_add_letter` = '" . ($data[118] == "") ? "" : $exp['exp_term'][$elem] . "',`index_kana` = '" . $exp['exp_index_kana'][$elem] . "'";
+					$sql .= ",`index_term` = '" . $exp_term[$elem] . "',`index_add_letter` = '" . (($data[118] == "") ? "" : $exp['exp_term'][$elem]) . "',`index_kana` = '" . $exp['exp_index_kana'][$elem] . "'";
 				}
 				$this->get('logger')->error("***updateExpTerm:5***");
 			}
