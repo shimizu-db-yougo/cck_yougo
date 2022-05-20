@@ -614,8 +614,16 @@
 					'term_id': elem.find('#sub_term_id').val(),
 					'yougo_flag': '2'
 				};
+
+			var api_path = '';
+			if(elem.find('#append_flg').val() == 'true'){
+				api_path = "{{ path('client.yougo.centertmp.exist.ajax') }}";
+			}else{
+				api_path = "{{ path('client.yougo.center.exist.ajax') }}";
+			}
+
 				$.ajax({
-					url: "{{ path('client.yougo.center.exist.ajax') }}",
+					url: api_path,
 					data: data,
 					method: 'POST',
 					async: false,
@@ -670,8 +678,16 @@
 					'term_id': elem.find('#syn_term_id').val(),
 					'yougo_flag': '3'
 				};
-				$.ajax({
-					url: "{{ path('client.yougo.center.exist.ajax') }}",
+
+			var api_path = '';
+			if(elem.find('#append_flg').val() == 'true'){
+				api_path = "{{ path('client.yougo.centertmp.exist.ajax') }}";
+			}else{
+				api_path = "{{ path('client.yougo.center.exist.ajax') }}";
+			}
+
+			$.ajax({
+					url: api_path,
 					data: data,
 					method: 'POST',
 					async: false,
@@ -808,6 +824,7 @@
 			+'<label class="col-xs-1" id="nombre">{{ "' + (((record)&&(record.nombre)) ? record.nombre : '') + '" }}</label>'
 			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-sub-remove js-max-ver" term-id="' + ((record) ? record.id : '') + '"' + (("{{ is_latest_ver }}" == false) ? ' disabled' : '') + '>{{ "btn.remove.subterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="sub_term_id" name="sub_term_id" value="' + ((record) ? record.id : '') + '">'
+			+'<input type="hidden" class="form-control input-sm" id="append_flg" name="append_flg" value="' + append_flg + '">'
 			+'</div></div><hr></div>';
 			return html;
 		}
@@ -860,6 +877,7 @@
 			+'<label class="col-xs-1" id="nombre">{{ "' + (((record)&&(record.nombre)) ? record.nombre : '') + '" }}</label>'
 			+'<div class="col-xs-1"><button type="button" class="btn btn-primary btn-sm js-syn-remove js-max-ver" term-id="' + ((record) ? record.id : '') + '"' + (("{{ is_latest_ver }}" == false) ? ' disabled' : '') + '>{{ "btn.remove.synterm"|trans }}</button></div>'
 			+'<input type="hidden" class="form-control input-sm" id="syn_term_id" name="syn_term_id" value="' + ((record) ? record.id : '') + '">'
+			+'<input type="hidden" class="form-control input-sm" id="append_flg" name="append_flg" value="' + append_flg + '">'
 			+'</div></div><hr></div>';
 			return html;
 		}

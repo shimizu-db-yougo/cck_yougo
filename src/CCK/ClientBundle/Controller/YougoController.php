@@ -1307,6 +1307,10 @@ class YougoController extends BaseController {
 			$label_name = "syn_term_id";
 		}
 
+		if(is_null($subterm)){
+			return $return_flag;
+		}
+
 		foreach($subterm[$label_name] as $ele_subterm){
 			$entityTmp = $em->getRepository('CCKCommonBundle:CenterTmp')->findBy(array(
 					'mainTermId' => $request->request->get('term_id'),
